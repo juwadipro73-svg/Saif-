@@ -213,7 +213,6 @@ fun SaifAiApp(
     var autoApprove by remember { mutableStateOf(com.example.ui.components.SaifEngineSettings.isAutoApprove(context)) }
     var showExitConfirm by remember { mutableStateOf(false) }
     var showModelMenu by remember { mutableStateOf(false) }
-    var flowSetupBusy by remember { mutableStateOf(false) }
     val mainAgentMessages by viewModel.mainAgentMessages.collectAsState()
     val mainAgentSessionId by viewModel.mainAgentSessionId.collectAsState()
     val mainAgentApprovals by viewModel.mainAgentApprovals.collectAsState()
@@ -694,19 +693,6 @@ fun SaifAiApp(
                                                 showCustomApiFromHome = true
                                             }
                                         )
-                                        DropdownMenuItem(text = { Text(if (flowSetupBusy) "Connecting Flow…" else "Connect Google Flow") },
-                                            enabled = !flowSetupBusy && antigravityConnection.isReady, onClick = {
-                                                showModelMenu = false
-                                                flowSetupBusy = true
-                                                scope.launch {
-                                                    try {
-                                                        val message = viewModel.connectGoogleFlow(context)
-                                                        android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
-                                                    } catch (e: Exception) {
-                                                        android.widget.Toast.makeText(context, "Flow setup failed: ${e.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
-                                                    } finally { flowSetupBusy = false }
-                                                }
-                                            })
                                         antigravityModels.forEach { model ->
                                             DropdownMenuItem(text = { Text(model.displayName) }, onClick = {
                                                 viewModel.selectAntigravityModel(model.id); showModelMenu = false
@@ -798,10 +784,11 @@ fun SaifAiApp(
                             status = antigravityConnection.status,
                             isNetworkConnected = engineNetworkOk,
                             isAuthBusy = engineAuthBusy,
-                            onSignIn = { engineVm.loginToAgyHub(force = true) },
+                            onSignIn = { showAccountUpgrade = true; engineVm.refresh() },
                             onRetry = {
                                 engineVm.retryConnections()
                                 com.example.saif.data.local.LocalServerManager.restartServer(context.applicationContext)
+                                showCustomApiFromHome = true
                             },
                             modifier =
     Modifier.fillMaxSize()
@@ -1403,10 +1390,15 @@ fun SaifAiApp(
         }
 
         if (showConnectionDialog) {
-            SaifConnectionDialog(engineVm = engineVm, onDismiss = { showConnectionDialog = false })
+            val engineAccount by engineVm.accountInfo.collectAsState()
+            SaifConnectionDialog(
+                account = engineAccount,
+                connection = antigravityConnection,
+                onManageProviders = { showCustomApiFromHome = true },
+                onSignIn = { showAccountUpgrade = true; engineVm.refresh() },
+                onDismiss = { showConnectionDialog = false }
+            )
         }
-        
-        SaifEngineLoginDialogs(engineVm = engineVm)
     } // Close Box
 }
 

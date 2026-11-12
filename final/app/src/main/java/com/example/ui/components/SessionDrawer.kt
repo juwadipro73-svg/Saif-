@@ -102,7 +102,7 @@ fun SessionDrawerContent(
     onClearAll: () -> Unit,
     onOpenAdminDashboard: () -> Unit = {},
     /** Drawer pieces: folder, search, Settings and the account chip. */
-    engineAuthInfo: com.example.saif.data.remote.AgyHubClient.AgyAuthInfo? = null,
+    engineAuthInfo: com.example.saif.data.remote.SaifAccountInfo? = null,
     engineStatusColor: Color = Color(0xFF22C55E),
     onExitApp: () -> Unit = {},
     onOpenFileManager: () -> Unit = {},

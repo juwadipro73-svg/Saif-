@@ -157,7 +157,7 @@ fun SettingsSheet(
     onAutoApproveChange: (Boolean) -> Unit,
     scrollState: androidx.compose.foundation.ScrollState,
     /** The engine's separate OAuth account (shown in the profile card). */
-    engineAuthInfo: com.example.saif.data.remote.AgyHubClient.AgyAuthInfo? = null
+    engineAuthInfo: com.example.saif.data.remote.SaifAccountInfo? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = androidx.compose.ui.platform.LocalContext.current
