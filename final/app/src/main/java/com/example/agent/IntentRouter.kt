@@ -122,7 +122,7 @@ object IntentRouter {
                     return@withContext RouteDecision(destination, goal, control)
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Fast router LLM failed, using heuristic: ${e.message}")
         }
         null

@@ -291,7 +291,7 @@ CORE GUIDELINES:
 
                 } catch (e: RequestTooLargeException) {
                     throw e // Propagate RequestTooLargeException so AutonomousAppBuilder can split phases
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     val latency = System.currentTimeMillis() - start
                     val llmError = LlmError(attempt.provider, modelName, null, e.message ?: "Execution error", LlmErrorCategory.UNKNOWN)
                     report.addAttempt(AttemptRecord(attempt.provider, modelName, attempt.isUserKey, success = false, error = llmError, latencyMs = latency))
@@ -576,7 +576,7 @@ CORE GUIDELINES:
                         list.add(Pair(id, isFree))
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Error parsing models json for $targetProvider: ${e.message}")
             }
 

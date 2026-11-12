@@ -524,7 +524,7 @@ fun StudioExportDialog(
                                 } catch (e: kotlinx.coroutines.CancellationException) {
                                     cancelled = true
                                     throw e
-                                } catch (err: Exception) {
+                                } catch (e: Exception) {
                                     exportError = e.localizedMessage ?: "Video export failed"
                                 } finally {
                                     isExporting = false

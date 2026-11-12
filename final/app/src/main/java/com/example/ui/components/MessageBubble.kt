@@ -82,8 +82,7 @@ import java.util.Locale
 import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
-fun MessageBubble
-(
+fun MessageBubble(
     message: ChatMessageEntity,
     isLatestAiMessage: Boolean,
     onToggleBookmark: () -> Unit,

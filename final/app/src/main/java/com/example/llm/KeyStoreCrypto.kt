@@ -50,7 +50,7 @@ object KeyStoreCrypto {
                 keyGenerator.generateKey()
                 Log.i(TAG, "Initialized new Android KeyStore AES-256 master key for SAIF AI vault")
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed initializing KeyStore key: ${e.message}", e)
         }
     }
@@ -59,7 +59,7 @@ object KeyStoreCrypto {
         return try {
             val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
             (keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.SecretKeyEntry)?.secretKey
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed retrieving secret key: ${e.message}", e)
             null
         }
@@ -109,7 +109,7 @@ object KeyStoreCrypto {
             val spec = GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv)
             cipher.init(Cipher.DECRYPT_MODE, key, spec)
             String(cipher.doFinal(cipherBytes), Charsets.UTF_8).ifBlank { raw.trim() }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Decryption fallback to raw payload: ${e.message}")
             cipherPayload.removePrefix("ENC:").trim()
         }

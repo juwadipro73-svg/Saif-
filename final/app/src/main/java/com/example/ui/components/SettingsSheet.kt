@@ -157,7 +157,7 @@ fun SettingsSheet(
     onAutoApproveChange: (Boolean) -> Unit,
     scrollState: androidx.compose.foundation.ScrollState,
     /** The engine's separate OAuth account (shown in the profile card). */
-    engineAuthInfo: com.example.saif.data.remote.AgyHubClient.AgyAuthInfo? = null
+    engineAuthInfo: com.example.saif.data.remote.SaifAccountInfo? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -191,7 +191,7 @@ fun SettingsSheet(
                     selectedCropBitmap = bmp
                     showCropDialog = true
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(context, "Could not load selected photo", Toast.LENGTH_SHORT).show()
             }

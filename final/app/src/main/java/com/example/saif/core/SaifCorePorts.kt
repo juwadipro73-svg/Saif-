@@ -34,12 +34,11 @@ enum class ToolType
     MCP,
     ASK_CHOICE,
     MATH,
-    SYSTEM_NOTIFICATION = "system_notification",
+    SYSTEM_NOTIFICATION,
     UNKNOWN
 }
 
-data class ToolCall
-(
+data class ToolCall(
     val id: String =
         UUID.randomUUID().toString(),
     val name: String =
@@ -57,11 +56,13 @@ data class ToolCall
     val durationMs: Long? =
         null,
     val stepIndex: Int? =
+        null,
+    // Set when the tool call is waiting for a permission decision ("permission").
+    val interactionType: String? =
         null
 )
 
-data class ChatAttachment
-(
+data class ChatAttachment(
     val id: String =
         UUID.randomUUID().toString(),
     val name: String,
@@ -75,14 +76,27 @@ data class ChatAttachment
         false,
     val localUri: String? =
         null,
+    // Inline base64 payload for image/audio attachments sent to the model.
+    val base64: String? =
+        null,
     val size: Long =
         0L,
     val mimeType: String? =
         null
 )
 
-data class ChatMessage
-(
+data class TokenUsage(
+    val promptTokens: Int = 0,
+    val outputTokens: Int = 0,
+    val totalTokens: Int = 0,
+    val durationMs: Long? = null,
+    val model: String = ""
+) {
+    /** Alias kept for call sites that follow the OpenAI naming. */
+    val completionTokens: Int get() = outputTokens
+}
+
+data class ChatMessage(
     val id: String =
         UUID.randomUUID().toString(),
     val conversationId: String =
@@ -104,11 +118,12 @@ data class ChatMessage
     val createdAt: Long =
         System.currentTimeMillis(),
     val modelId: String? =
+        null,
+    val tokenUsage: TokenUsage? =
         null
 )
 
-data class PendingToolApproval
-(
+data class PendingToolApproval(
     val toolCall: ToolCall,
     val messageId:
         String
@@ -144,8 +159,7 @@ interface AccountBinding {
     fun checkAuthStatus(): Boolean
 }
 
-data class SkillItem
-(
+data class SkillItem(
     val name: String,
     val description:
         String,

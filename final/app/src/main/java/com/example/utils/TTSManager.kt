@@ -199,7 +199,7 @@ object TTSManager : TextToSpeech.OnInitListener {
                 try {
                     tts?.voice = selectedVoice
                     Log.d("TTSManager", "Applied voice: ${selectedVoice.name} (Hinglish: $isHinglish)")
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w("TTSManager", "Error setting voice: ${e.message}")
                 }
             }
@@ -306,7 +306,7 @@ object TTSManager : TextToSpeech.OnInitListener {
         previewFailures.clear()
         try {
             tts?.stop()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w("TTSManager", "Error stopping TTS: ${e.message}")
         }
     }

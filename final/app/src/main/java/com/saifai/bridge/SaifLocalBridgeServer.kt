@@ -14,8 +14,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 /**
- * 100% Original Cleanroom Local Download & Execution Bridge Server for SAIF AI.
- * Completely replaces legacy AndroidLocalBridgeServer.
+ * SAIF AI's local download and execution bridge.
+ *
+ * It only listens on the device loopback interface and hands out short-lived tokens for
+ * files the app itself produced.
  */
 class SaifLocalBridgeServer private constructor() {
 
@@ -72,9 +74,17 @@ class SaifLocalBridgeServer private constructor() {
                     }
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed starting SAIF AI Bridge Server", e)
         }
+    }
+
+    @Synchronized
+    fun stop() {
+        isRunning = false
+        runCatching { serverSocket?.close() }
+        serverSocket = null
+        registeredDownloads.clear()
     }
 
     fun registerDownloadFile(context: Context, file: File, desiredFileName: String? = null): String {
@@ -123,17 +133,11 @@ class SaifLocalBridgeServer private constructor() {
 
                     if (entry != null && entry.file.exists()) {
                         val length = entry.file.length()
-                        val header = "HTTP/1.1 200 OK
-" +
-                                "Content-Type: ${entry.mimeType}
-" +
-                                "Content-Length: $length
-" +
-                                "Content-Disposition: attachment; filename="${entry.fileName}"
-" +
-                                "Connection: close
-
-"
+                        val header = "HTTP/1.1 200 OK\r\n" +
+                                "Content-Type: ${entry.mimeType}\r\n" +
+                                "Content-Length: $length\r\n" +
+                                "Content-Disposition: attachment; filename=\"${entry.fileName}\"\r\n" +
+                                "Connection: close\r\n\r\n"
                         output.write(header.toByteArray(Charsets.UTF_8))
 
                         FileInputStream(entry.file).use { fis ->
@@ -150,11 +154,7 @@ class SaifLocalBridgeServer private constructor() {
                 }
 
                 // Default 404
-                val notFound = "HTTP/1.1 404 Not Found
-Content-Length: 0
-Connection: close
-
-"
+                val notFound = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
                 output.write(notFound.toByteArray(Charsets.UTF_8))
                 output.flush()
             }

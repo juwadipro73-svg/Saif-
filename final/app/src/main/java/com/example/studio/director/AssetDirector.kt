@@ -92,7 +92,7 @@ object AssetRequester {
             e.apply()
             Result.success(fresh.size)
         } catch (e: kotlinx.coroutines.CancellationException) { throw e
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(IllegalStateException("Could not reach Telegram (${e.javaClass.simpleName})."))
         }
     }

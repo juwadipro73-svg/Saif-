@@ -255,7 +255,7 @@ object WakeWordManager {
                     putExtra("INITIAL_PROMPT", spokenPrompt)
                 }
                 context.startActivity(intent)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Error starting AssistantOverlayActivity: ${e.message}")
             }
         }
@@ -277,7 +277,7 @@ object WakeWordManager {
                     vibrator?.vibrate(70)
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Vibration failed: ${e.message}")
         }
     }

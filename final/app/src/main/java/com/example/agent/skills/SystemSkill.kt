@@ -64,7 +64,7 @@ object SystemSkill : Skill {
                 try {
                     context.startActivity(intent)
                     SkillResult(true, "Alarm set for %02d:%02d".format(hour, minute))
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     SkillResult(false, "Could not set alarm: ${e.message}")
                 }
             }
@@ -81,7 +81,7 @@ object SystemSkill : Skill {
                 try {
                     context.startActivity(intent)
                     SkillResult(true, "Timer set for $seconds seconds")
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     SkillResult(false, "Could not set timer: ${e.message}")
                 }
             }
@@ -128,7 +128,7 @@ object SystemSkill : Skill {
             } else {
                 SkillResult(false, "Flashlight control requires Android M+")
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error toggling flashlight: ${e.message}")
             SkillResult(false, "Failed to control flashlight: ${e.message}")
         }

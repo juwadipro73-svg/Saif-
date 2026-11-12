@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.compose.ui.platform.ComposeView
+import kotlinx.coroutines.cancelChildren
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
@@ -97,7 +98,7 @@ class LiveVoiceService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
                 if (it.isAttachedToWindow) {
                     windowManager.removeView(it)
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 android.util.Log.e("LiveVoiceService", "Error removing overlay", e)
             }
         }
@@ -145,7 +146,7 @@ class LiveVoiceService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
                         layoutParams.y += dy.toInt()
                         try {
                             windowManager.updateViewLayout(composeView, layoutParams)
-                        } catch (err: Exception) {
+                        } catch (e: Exception) {
                             android.util.Log.e("LiveVoiceService", "Error updating layout", e)
                         }
                     }
@@ -155,7 +156,7 @@ class LiveVoiceService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
         
         try {
             windowManager.addView(composeView, layoutParams)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             android.util.Log.e("LiveVoiceService", "Failed to add overlay window", e)
             composeView = null
         }
@@ -187,7 +188,7 @@ class LiveVoiceService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
                 if (it.isAttachedToWindow) {
                     windowManager.removeView(it)
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 android.util.Log.e("LiveVoiceService", "Error removing view in onDestroy", e)
             }
         }

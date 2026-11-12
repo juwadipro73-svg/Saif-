@@ -26,7 +26,6 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
-  alias(libs.plugins.wire)
   alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.google.services)
 }
@@ -61,20 +60,15 @@ android {
     }
 
     signingConfigs {
-        // Fixed debug key kept in the repo: GitHub runners otherwise generate a NEW random debug key on every
-        // build, so Android refuses to install a new APK over the old one ("App not installed") and the phone
-        // silently keeps showing the old version.
-        getByName("debug") {
-            storeFile = file("saif-debug.jks")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-        }
+        // Release signing material comes from the build environment; no keystore or password is committed.
         create("release") {
-            storeFile = file("release.jks")
-            storePassword = "123456"
-            keyAlias = "saif"
-            keyPassword = "123456"
+            val storePath = System.getenv("SAIF_RELEASE_STORE_FILE").orEmpty()
+            if (storePath.isNotBlank() && file(storePath).exists()) {
+                storeFile = file(storePath)
+                storePassword = System.getenv("SAIF_RELEASE_STORE_PASSWORD")
+                keyAlias = System.getenv("SAIF_RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("SAIF_RELEASE_KEY_PASSWORD")
+            }
         }
     }
 
@@ -245,8 +239,6 @@ dependencies {
   androidTestImplementation(libs.androidx.test.espresso.core)
 
   // Wire Protobuf & gRPC runtime
-  implementation(libs.wire.runtime)
-  implementation(libs.wire.grpc.client)
 
   // Navigation
   implementation(libs.androidx.navigation3.ui)
@@ -275,16 +267,6 @@ configurations.all {
   resolutionStrategy {
     force("com.squareup.okhttp3:okhttp:4.12.0")
     force("com.squareup.okhttp3:okhttp-android:4.12.0")
-  }
-}
-
-wire {
-  sourcePath {
-    srcDir("src/main/proto")
-  }
-  kotlin {
-    rpcRole = "client"
-    rpcCallStyle = "suspending"
   }
 }
 

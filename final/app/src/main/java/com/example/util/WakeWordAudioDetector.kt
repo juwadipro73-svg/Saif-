@@ -149,7 +149,7 @@ object WakeWordAudioDetector {
 
                         delay(10)
                     }
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.e(TAG, "Error in wake word audio loop: ${e.message}")
                 } finally {
                     try {
@@ -193,7 +193,7 @@ object WakeWordAudioDetector {
                     WakeWordManager.triggerAssistant(context, extractedQuery)
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error processing potential wake word: ${e.message}")
         }
     }

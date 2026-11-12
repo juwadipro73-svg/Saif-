@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.model.SaifChatMessage
 import com.example.saif.domain.model.ChatMessage
 
 val LocalQuestionPanelActive = compositionLocalOf { false }
@@ -40,7 +39,7 @@ fun UserMessageBubble(message: ChatMessage, modifier: Modifier =
     Modifier.widthIn(max = 320.dp)
         ) {
             Text(
-                text = message.textContent,
+                text = message.content,
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.15.sp),
                 modifier =
@@ -62,7 +61,7 @@ fun MessageBubble(message: ChatMessage, modelId: String, modifier: Modifier =
     ) {
         SelectionContainer(modifier = Modifier) {
             Text(
-                text = message.textContent,
+                text = message.content,
                 style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = 0.15.sp),
                 modifier =
     Modifier.padding(12.dp)
@@ -72,8 +71,7 @@ fun MessageBubble(message: ChatMessage, modelId: String, modifier: Modifier =
 }
 
 @Composable
-fun ThinkingAccordion
-(
+fun ThinkingAccordion(
     thoughtText:
     String,
     durationMs: Long? = null,
@@ -108,7 +106,7 @@ fun ThinkingAccordion
                     color = MaterialTheme.colorScheme.primary
                 )
                 Icon(
-                    imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                     contentDescription =
     null,
                     modifier =

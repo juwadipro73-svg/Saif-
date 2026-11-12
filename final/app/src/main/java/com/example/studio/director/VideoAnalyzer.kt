@@ -15,7 +15,7 @@ import org.json.JSONObject
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-data class TimeRange(val startMs: Long, val endMs: Long) { val length get() = endMs - startMs }
+data class TimeRange(val startMs: Long, val endMs: Long) { val length: Long get() = endMs - startMs }
 
 data class VideoAnalysis(
     val uri: String, val durationMs: Long, val width: Int, val height: Int, val rotation: Int, val fps: Float,
@@ -137,7 +137,7 @@ object VideoAnalyzer {
                 }
             }
             return out
-        } catch (err: Exception) { out.delete(); throw e }
+        } catch (e: Exception) { out.delete(); throw e }
     }
 
     suspend fun analyze(context: Context, uri: Uri, onStep: (String) -> Unit = {}): Result<VideoAnalysis> = withContext(Dispatchers.IO) {
@@ -201,7 +201,7 @@ object VideoAnalyzer {
             Result.success(VideoAnalysis(original.toString(), dur, w, h, rot, fps, hasAudio, silences, changes, speech))
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             val why = e.message?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName
             android.util.Log.w("VideoAnalyzer", "analyze failed while $stage: ${e.javaClass.simpleName}")
             Result.failure(IllegalStateException("Could not analyze video while $stage: $why"))

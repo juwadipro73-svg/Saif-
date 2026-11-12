@@ -549,7 +549,7 @@ fun AiProviderSettingsInline() {
                                     allowFallbackToOtherProviders = allowFallbackToOtherProviders
                                 ))
                             }
-                        } catch (err: Exception) {
+                        } catch (e: Exception) {
                             fetchError = "❌ ${e.message ?: "Connection failed"}"
                             fetchSuccessMessage = null
                             val fallbackList = ProviderProfile.getById(providerName).defaultFallbackModels.map { Pair(it, true) }

@@ -38,7 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.saif.data.remote.AgyHubClient
+import com.example.saif.data.remote.SaifAccountInfo
 import com.example.ui.theme.SaifTheme
 
 /**
@@ -195,7 +195,7 @@ fun SaifModelChip(
 /** The engine's Google account chip (avatar with a status dot and the account name), used in SAIF's history drawer. */
 @Composable
 fun SaifEngineAccountChip(
-    authInfo: AgyHubClient.AgyAuthInfo,
+    authInfo: SaifAccountInfo,
     statusColor: Color,
     onClick: () -> Unit,
     modifier: Modifier =

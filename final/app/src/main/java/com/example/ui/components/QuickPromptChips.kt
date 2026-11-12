@@ -141,7 +141,7 @@ fun QuickPromptChips(
                             )
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
+                            imageVector = Icons.Outlined.AutoAwesome,
                             contentDescription = "SAIF Assistant",
                             tint = accent,
                             modifier =
@@ -172,7 +172,7 @@ fun QuickPromptChips(
                     fontSize =
     14.sp,
                     color = SaifTheme.colors.textSecondary,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                     lineHeight = 21.2.sp,
                     modifier =
     Modifier.padding(horizontal = 16.dp)

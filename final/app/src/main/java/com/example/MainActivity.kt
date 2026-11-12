@@ -86,7 +86,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AuthManager.init(applicationContext)
-        com.example.saif.data.remote.AntigravityAppBinding.init(applicationContext)
+        com.example.agyext.AntigravityCustomApiManager.init(applicationContext)
         if (com.saifai.app.BuildConfig.SAIF_CLOUD_API_BASE_URL.isNotBlank()) {
             runCatching {
                 com.google.firebase.appcheck.FirebaseAppCheck.getInstance().installAppCheckProviderFactory(

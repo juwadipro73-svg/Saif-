@@ -875,7 +875,7 @@ fun ProjectEditorScreen(
                                             val fullText = result.getOrDefault("")
                                             val extracted = extractCodeFromMarkdown(fullText)
                                             aiResponseCode = extracted.ifBlank { fullText }
-                                        } catch (err: Exception) {
+                                        } catch (e: Exception) {
                                             Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                                         } finally {
                                             isAiLoading = false

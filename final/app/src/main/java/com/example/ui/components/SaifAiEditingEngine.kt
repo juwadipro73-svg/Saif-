@@ -164,7 +164,7 @@ object SaifAiEditingEngine {
                     } else {
                         Log.w(TAG, "LlmGateway call returned error: ${response.exceptionOrNull()?.message}")
                     }
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "LLM online call fallback to algorithmic planner: ${e.message}")
                 }
             }
@@ -189,7 +189,7 @@ object SaifAiEditingEngine {
                             }
                         }
                     }
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "AIApiUtility executeWithFallback exception: ${e.message}")
                 }
             }
@@ -211,7 +211,7 @@ object SaifAiEditingEngine {
 
             onProgressPhase("Plan Finalized & Ready to Execute", 1.0f)
             Result.success(parsedPlan)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in planAndStreamEdit", e)
             Result.failure(e)
         }
@@ -525,7 +525,7 @@ object SaifAiEditingEngine {
             }
 
             Result.failure(Exception("Script generation failed: please verify your AI Provider in Settings."))
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "generateScript error", e)
             Result.failure(e)
         }
@@ -625,7 +625,7 @@ Output strictly valid JSON with keys:
                     val rawText = aiResult.getOrNull() ?: ""
                     edlPlan = TelegramAssetManager.parseEdlJson(rawText)
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Autonomous AI Director execution exception: ${e.message}")
             }
 
@@ -685,7 +685,7 @@ Output strictly valid JSON with keys:
 
             onStepUpdate("✅ Master Director Video Ready!", 1.0f)
             Result.success(Pair(finalEdl, projectData))
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "generateAutonomousDirectorEdl error", e)
             Result.failure(e)
         }
@@ -2037,7 +2037,7 @@ $opsJson
                 captions = captions,
                 why = why
             )
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "parseAndSanitizePlan fallback", e)
             synthesizeFallbackPlan(project, userPrompt)
         }

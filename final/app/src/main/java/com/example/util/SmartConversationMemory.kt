@@ -467,7 +467,7 @@ PERSONALIZATION & MEMORY INSTRUCTIONS (LIKE CHATGPT & GEMINI):
                 fos.write(jsonString.toByteArray(Charsets.UTF_8))
             }
             exportFile
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to export data: ${e.message}", e)
             null
         }
@@ -485,7 +485,7 @@ PERSONALIZATION & MEMORY INSTRUCTIONS (LIKE CHATGPT & GEMINI):
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(Intent.createChooser(intent, "Download / Share SAIF AI Data"))
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Could not launch share chooser: ${e.message}")
         }
     }

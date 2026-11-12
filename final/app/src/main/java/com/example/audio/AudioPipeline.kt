@@ -125,7 +125,7 @@ class AudioPipeline(
             }
 
             audioRecord?.startRecording()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed starting AudioRecord: ${e.message}")
             release()
             return false
@@ -222,7 +222,7 @@ class AudioPipeline(
         if (!isRunning.getAndSet(false)) return
         try {
             audioRecord?.stop()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "AudioRecord stop error: ${e.message}")
         }
         try {

@@ -55,7 +55,7 @@ class SaifBridgeEngine private constructor() {
                     }
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(LOG_TAG, "Bridge Daemon launch failed", e)
         }
     }

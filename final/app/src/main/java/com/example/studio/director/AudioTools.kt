@@ -171,7 +171,7 @@ object Transcriber {
             else Result.success(Transcript(clean, lang, profile.displayName))
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             kotlinx.coroutines.currentCoroutineContext().ensureActive()
             Result.failure(IllegalStateException("Transcription failed: ${e.javaClass.simpleName}"))
         }

@@ -336,7 +336,7 @@ object ScreenObserver {
         for (root in rootsToVisit) {
             try {
                 processNode(root, -1)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Error visiting window root: ${e.message}")
             }
         }

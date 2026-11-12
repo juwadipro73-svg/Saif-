@@ -38,7 +38,7 @@ object ModelResolver {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val cachedJson = prefs.getString(KEY_CACHED_MODELS, null)
             val timestamp = prefs.getLong(KEY_CACHE_TIME, 0L)
-            val nowMsMs = System.currentTimeMillis()
+            val nowMs = System.currentTimeMillis()
 
             if (!cachedJson.isNullOrBlank() && nowMs - timestamp < CACHE_TTL_MS) {
                 val array = org.json.JSONArray(cachedJson)
@@ -49,14 +49,14 @@ object ModelResolver {
                 lastFetchTime = timestamp
                 Log.d(TAG, "Loaded ${availableModels.size} cached models from storage")
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to load model cache: ${e.message}")
         }
     }
 
     suspend fun refreshCatalog(apiKey: String, context: Context? = null) {
         if (apiKey.isBlank()) return
-        val nowMsMs = System.currentTimeMillis()
+        val nowMs = System.currentTimeMillis()
         if (availableModels.isNotEmpty() && nowMs - lastFetchTime < CACHE_TTL_MS) {
             return
         }
@@ -94,7 +94,7 @@ object ModelResolver {
                 } else {
                     Log.w(TAG, "Models list request returned HTTP ${response.code}: $bodyString")
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Error refreshing model catalog: ${e.message}")
             }
         }

@@ -86,7 +86,7 @@ fun SaifSkillsManagerDialog(
     Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.AutoAwesome,
+                        imageVector = Icons.Outlined.AutoAwesome,
                         contentDescription =
     null,
                         tint = accentCol,
@@ -199,11 +199,11 @@ fun SaifSkillsManagerDialog(
                                     errorMsg = null
                                     successMsg = null
                                     try {
-                                        val imported = SavedAiSkills.importFromGitHub(githubUrl, skillName)
-                                        successMsg = "Saved /${imported.name} — type /${imported.name} in chat!"
+                                        SavedAiSkills.importFromGitHub(githubUrl, skillName)
+                                        successMsg = "Saved /${skillName} — type /${skillName} in chat!"
                                         githubUrl = ""
                                         skillName = ""
-                                    } catch (err: Exception) {
+                                    } catch (e: Exception) {
                                         errorMsg = e.localizedMessage ?: "Failed to import GitHub skill"
                                     } finally {
                                         isImporting = false
@@ -306,7 +306,7 @@ fun SaifSkillsManagerDialog(
     TextOverflow.Ellipsis
                                         )
                                         Text(
-                                            text = skill.sourceUrl,
+                                            text = skill.githubUrl,
                                             fontSize =
     10.sp,
                                             color = SaifTheme.colors.textSecondary,

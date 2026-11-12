@@ -213,7 +213,7 @@ fun BuildAIScreen(
                 val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile)
                 tempCameraUri = uri
                 cameraLauncher.launch(uri)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Toast.makeText(context, "Camera open karne me samasya: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } else {
@@ -882,7 +882,7 @@ fun BuildAIScreen(
                                 val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile)
                                 tempCameraUri = uri
                                 cameraLauncher.launch(uri)
-                            } catch (err: Exception) {
+                            } catch (e: Exception) {
                                 Toast.makeText(context, "Camera open karne me samasya: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                         } else {

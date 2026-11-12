@@ -175,7 +175,7 @@ fun LibraryManagerScreen(
                 withContext(context = Dispatchers.Main) {
                     editorViewModel.refreshTree(context)
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -216,7 +216,7 @@ fun LibraryManagerScreen(
                     ) {
                         IconButton(onClick = onBack) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Navigate back from Library",
                                 tint = textLight,
                                 modifier =

@@ -459,7 +459,7 @@ class AntigravityCustomApiAgentEngine(
                 "build_android_apk" -> buildAndroidApkTool(args)
                 else -> Triple(false, "Unknown tool: $name", 1)
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Triple(false, "Tool error: ${e.localizedMessage ?: e.javaClass.simpleName}", 1)
         }
     }
