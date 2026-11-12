@@ -32,3 +32,9 @@ __pycache__/
 # Legacy quarantine
 legacy_readonly/
 /outside_repo/
+
+# Signing material and provider config never belong in the repository.
+*.jks
+*.keystore
+release.jks
+local.properties
