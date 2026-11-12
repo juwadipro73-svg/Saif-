@@ -38,8 +38,7 @@ enum class ToolType
     UNKNOWN
 }
 
-data class ToolCall
-(
+data class ToolCall(
     val id: String =
         UUID.randomUUID().toString(),
     val name: String =
@@ -58,13 +57,12 @@ data class ToolCall
         null,
     val stepIndex: Int? =
         null,
-    /** Set when the tool call is waiting for a permission decision ("permission"). */
+    // Set when the tool call is waiting for a permission decision ("permission").
     val interactionType: String? =
         null
 )
 
-data class ChatAttachment
-(
+data class ChatAttachment(
     val id: String =
         UUID.randomUUID().toString(),
     val name: String,
@@ -78,7 +76,7 @@ data class ChatAttachment
         false,
     val localUri: String? =
         null,
-    /** Inline base64 payload for image/audio attachments sent to the model. */
+    // Inline base64 payload for image/audio attachments sent to the model.
     val base64: String? =
         null,
     val size: Long =
@@ -98,8 +96,7 @@ data class TokenUsage(
     val completionTokens: Int get() = outputTokens
 }
 
-data class ChatMessage
-(
+data class ChatMessage(
     val id: String =
         UUID.randomUUID().toString(),
     val conversationId: String =
@@ -126,8 +123,7 @@ data class ChatMessage
         null
 )
 
-data class PendingToolApproval
-(
+data class PendingToolApproval(
     val toolCall: ToolCall,
     val messageId:
         String
@@ -163,8 +159,7 @@ interface AccountBinding {
     fun checkAuthStatus(): Boolean
 }
 
-data class SkillItem
-(
+data class SkillItem(
     val name: String,
     val description:
         String,

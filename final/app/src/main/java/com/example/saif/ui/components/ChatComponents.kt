@@ -71,8 +71,7 @@ fun MessageBubble(message: ChatMessage, modelId: String, modifier: Modifier =
 }
 
 @Composable
-fun ThinkingAccordion
-(
+fun ThinkingAccordion(
     thoughtText:
     String,
     durationMs: Long? = null,
