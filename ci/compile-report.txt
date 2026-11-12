@@ -1,127 +1,39 @@
 # CI compile report
 
-run: 43227247437  commit: c16b0857a2f85d1c80aa9beebcd4feddf4fd919f  exit: 1
+run: 43229126848  commit: 661f94e220906250a227cafc678bd1876b6cc914  exit: 1
 
 ## errors by file (unique)
-final/app/src/main/java/com/example/AssistantOverlayActivity.kt:15:27 Unresolved reference 'enableEdgeToEdge'.
-final/app/src/main/java/com/example/LiveVoiceService.kt:181:39 Unresolved reference 'cancelChildren'.
-final/app/src/main/java/com/example/MainActivity.kt:149:72 Unresolved reference 'onSignedOut'.
-final/app/src/main/java/com/example/MainActivity.kt:89:38 Unresolved reference 'AntigravityAppBinding'.
-final/app/src/main/java/com/example/agents/SaifAgentsManagerDialog.kt:170:71 Argument type mismatch: actual type is 'String', but 'Set<AgentKind>' was expected.
-final/app/src/main/java/com/example/agents/SaifAgentsManagerDialog.kt:178:71 Argument type mismatch: actual type is 'String', but 'Set<AgentKind>' was expected.
-final/app/src/main/java/com/example/agents/SaifAgentsManagerDialog.kt:43:27 Property delegate must have a 'getValue(Nothing?, KProperty0<??? (Unknown type for type parameter T)>)' method. None of the following functions is applicable:
-final/app/src/main/java/com/example/agents/SaifAgentsManagerDialog.kt:43:30 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/agents/SaifAgentsManagerDialog.kt:43:41 Unresolved reference 'enabled'.
-final/app/src/main/java/com/example/agents/SaifAgentsManagerDialog.kt:43:49 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:256:25 No parameter with name 'tokenUsage' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:258:29 No parameter with name 'outputTokens' found.
+final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:259:29 No parameter with name 'totalTokens' found.
 final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:260:29 No parameter with name 'durationMs' found.
 final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No parameter with name 'model' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:314:21 No parameter with name 'interactionType' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:348:66 No parameter with name 'interactionType' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:481:17 No parameter with name 'timeoutSeconds' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:482:17 No parameter with name 'onOutputLine' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:482:34 Cannot infer type for value parameter 'line'. Specify it explicitly.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:27 Unresolved reference 'output'.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:34 Cannot infer type for type parameter 'C'. Specify it explicitly.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:34 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:62 Unresolved reference 'exitCode'.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:488:31 Unresolved reference 'exitCode'.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:488:55 Unresolved reference 'exitCode'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:105:81 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:116 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:13 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:23 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:23 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:152:37 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:154:37 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:193:85 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:214:81 Unresolved reference 'errorMsg'.
-final/app/src/main/java/com/example/data/local/AuthManager.kt:775:38 Unresolved reference 'AntigravityAppBinding'.
-final/app/src/main/java/com/example/data/remote/ModelResolver.kt:43:48 Unresolved reference 'nowMs'.
-final/app/src/main/java/com/example/data/remote/ModelResolver.kt:43:66 'operator' modifier is required on 'fun <T> Comparable<T>.compareTo(other: T): Int'.
-final/app/src/main/java/com/example/data/remote/ModelResolver.kt:60:45 Unresolved reference 'nowMs'.
-final/app/src/main/java/com/example/data/remote/ModelResolver.kt:60:67 'operator' modifier is required on 'fun <T> Comparable<T>.compareTo(other: T): Int'.
-final/app/src/main/java/com/example/data/remote/ModelResolver.kt:84:41 Unresolved reference 'nowMs'.
-final/app/src/main/java/com/example/data/remote/ModelResolver.kt:89:58 Unresolved reference 'nowMs'.
+final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'completionTokens'.
+final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'get'.
 final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:586:9 Cannot infer type for type parameter 'T'. Specify it explicitly.
 final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
 final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:9 Cannot infer type for type parameter 'R'. Specify it explicitly.
 final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:654:13 Cannot infer type for type parameter 'R'. Specify it explicitly.
 final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:655:30 Unresolved reference 'setConfig'.
-final/app/src/main/java/com/example/llm/GeminiModelCatalog.kt:28:110 Syntax error: Expecting ','.
-final/app/src/main/java/com/example/llm/LlmClient.kt:489:70 Unresolved reference 'e'.
-final/app/src/main/java/com/example/llm/LlmClient.kt:516:75 Unresolved reference 'e'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:334:49 Unresolved reference 'retryBackgroundInstall'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:341:60 Unresolved reference 'installerState'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:344:49 Unresolved reference 'bytesDownloaded'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:345:51 Unresolved reference 'totalBytes'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:349:62 Unresolved reference 'progressFraction'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:350:116 Unresolved reference 'speedText'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:350:67 Unresolved reference 'currentPackageName'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:359:62 Unresolved reference 'progressFraction'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:360:80 Unresolved reference 'extractedFilesCount'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:370:52 Unresolved reference 'stepDescription'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:380:83 Unresolved reference 'testName'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:386:74 Unresolved reference 'errorMessage'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:480:33 Unresolved reference 'cancelBackgroundInstall'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:978:37 Unresolved reference 'installerState'.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:978:62 Cannot infer type for value parameter 'inst'. Specify it explicitly.
-final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:983:42 Suspension functions can only be called within coroutine body.
-final/app/src/main/java/com/example/saif/data/local/LocalServerManager.kt:24:54 Unresolved reference 'stop'.
-final/app/src/main/java/com/example/saif/data/local/LocalServerManager.kt:24:9 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/saif/ui/SaifChatEngine.kt:117:32 Unresolved reference 'line'.
-final/app/src/main/java/com/example/saif/ui/SaifChatEngine.kt:186:56 Unresolved reference 'line'.
-final/app/src/main/java/com/example/saif/ui/SaifChatEngine.kt:62:31 Unresolved reference 'Dispatchers'.
-final/app/src/main/java/com/example/saif/ui/components/ChatComponents.kt:110:64 Unresolved reference 'KeyboardArrowUp'.
-final/app/src/main/java/com/example/saif/ui/components/ChatComponents.kt:110:98 Unresolved reference 'KeyboardArrowDown'.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:30 Syntax error: Expecting comma or ')'.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 An explicit type is required on a value parameter.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 Primary constructor of data class must only have property ('val' / 'var') parameters.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:34 Syntax error: Parameters must have type annotation.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:37 Syntax error: Expecting a top level declaration.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:39 Syntax error: Expecting a top level declaration.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:51 Syntax error: Expecting a top level declaration.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:94:29 Syntax error: Property getter or setter expected.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:95:33 Syntax error: Property getter or setter expected.
+final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:97:1 Syntax error: Expecting a top level declaration.
 final/app/src/main/java/com/example/slash/SaifSlashCommandRegistry.kt:155:34 Argument type mismatch: actual type is 'Context!', but 'Application' was expected.
-final/app/src/main/java/com/example/stt/SttRouter.kt:206:37 Unresolved reference 'e'.
-final/app/src/main/java/com/example/stt/SttRouter.kt:327:19 Unresolved reference 'TAG'.
-final/app/src/main/java/com/example/stt/SttRouter.kt:364:24 Unresolved reference 'httpClient'.
-final/app/src/main/java/com/example/stt/SttRouter.kt:369:19 Unresolved reference 'TAG'.
-final/app/src/main/java/com/example/stt/SttRouter.kt:436:24 Unresolved reference 'httpClient'.
-final/app/src/main/java/com/example/stt/SttRouter.kt:441:19 Unresolved reference 'TAG'.
-final/app/src/main/java/com/example/ui/ChatViewModel.kt:318:17 Unresolved reference '_activeAgentIsCustomApi'.
-final/app/src/main/java/com/example/ui/ChatViewModel.kt:488:80 Unresolved reference 'ensureLinuxCliReady'.
-final/app/src/main/java/com/example/ui/ChatViewModel.kt:517:21 Unresolved reference '_activeAgentIsCustomApi'.
-final/app/src/main/java/com/example/ui/HomeAgentFeed.kt:142:39 Argument type mismatch: actual type is 'FileLinkHandler', but '(String) -> Unit' was expected.
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:135:27 Property delegate must have a 'getValue(Nothing?, KProperty0<*>)' method. None of the following functions is applicable:
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:135:58 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:135:58 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:669:85 Unresolved reference 'it'.
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:43 Unresolved reference 'remainingFraction'.
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:62 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:62 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:66 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/components/AISettingsDialog.kt:47:22 None of the following candidates is applicable:
-final/app/src/main/java/com/example/ui/components/AISettingsDialog.kt:47:41 No parameter with name 'all' found.
-final/app/src/main/java/com/example/ui/components/QuickPromptChips.kt:144:56 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:198:15 Unresolved reference 'AgyHubClient'.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:25 Unresolved reference 'displayName'.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:37 Cannot infer type for type parameter 'C'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:37 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:56 Unresolved reference 'fullName'.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:67 Cannot infer type for type parameter 'C'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:67 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:86 Unresolved reference 'email'.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:206:122 Unresolved reference 'profilePictureUrl'.
-final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:206:41 Unresolved reference 'profilePictureUrl'.
-final/app/src/main/java/com/example/ui/components/SaifInputBar.kt:280:31 Argument type mismatch: actual type is 'List<SlashCommandItem>?', but 'List<SlashCommandItem>' was expected.
-final/app/src/main/java/com/example/ui/components/SaifLiveVoiceCleanroom.kt:22:21 Unresolved reference 'initialize'.
-final/app/src/main/java/com/example/ui/components/SaifLiveVoiceCleanroom.kt:23:21 Unresolved reference 'speak'.
-final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:203:73 Unresolved reference 'name'.
-final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:203:98 Unresolved reference 'name'.
-final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:309:58 Unresolved reference 'sourceUrl'.
-final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:89:52 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-final/app/src/main/java/com/example/ui/components/SettingsSheet.kt:309:62 Unresolved reference 'profilePictureUrl'.
-final/app/src/main/java/com/example/ui/components/SettingsSheet.kt:310:84 Unresolved reference 'profilePictureUrl'.
-final/app/src/main/java/com/example/ui/components/SettingsSheet.kt:860:66 Unresolved reference 'subtitle'.
-final/app/src/main/java/com/example/ui/components/UpgradeDialog.kt:116:56 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
 
 ## javac / aapt errors
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/llm/GeminiModelCatalog.kt:28:110 Syntax error: Expecting ','.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:30 Syntax error: Expecting comma or ')'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:34 Syntax error: Parameters must have type annotation.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:37 Syntax error: Expecting a top level declaration.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:39 Syntax error: Expecting a top level declaration.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:51 Syntax error: Expecting a top level declaration.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:94:29 Syntax error: Property getter or setter expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:95:33 Syntax error: Property getter or setter expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:97:1 Syntax error: Expecting a top level declaration.
 
 ## failed tasks, causes, resolution problems
 * What went wrong:
@@ -130,136 +42,136 @@ Execution failed for task ':app:compileStandardDebugKotlin'.
 FAILURE: Build failed with an exception.
 
 ## tail
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:482:17 No parameter with name 'onOutputLine' found.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:482:34 Cannot infer type for value parameter 'line'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:27 Unresolved reference 'output'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:34 Cannot infer type for type parameter 'C'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:34 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:487:62 Unresolved reference 'exitCode'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:488:31 Unresolved reference 'exitCode'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:488:55 Unresolved reference 'exitCode'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:105:81 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:13 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:23 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:23 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:107:116 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:152:37 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:154:37 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:193:85 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/cloud/CloudBuildStatusCard.kt:214:81 Unresolved reference 'errorMsg'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/AuthManager.kt:775:38 Unresolved reference 'AntigravityAppBinding'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/ModelResolver.kt:43:48 Unresolved reference 'nowMs'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/ModelResolver.kt:43:66 'operator' modifier is required on 'fun <T> Comparable<T>.compareTo(other: T): Int'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/ModelResolver.kt:60:45 Unresolved reference 'nowMs'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/ModelResolver.kt:60:67 'operator' modifier is required on 'fun <T> Comparable<T>.compareTo(other: T): Int'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/ModelResolver.kt:84:41 Unresolved reference 'nowMs'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/ModelResolver.kt:89:58 Unresolved reference 'nowMs'.
+> Task :apprunner:generateDebugResources
+> Task :apprunner:packageDebugResources
+> Task :apprunner:processDebugNavigationResources
+> Task :apprunner:javaPreCompileDebug
+> Task :apprunner:generateDebugAssets UP-TO-DATE
+> Task :apprunner:mergeDebugAssets
+> Task :apprunner:parseDebugLocalResources
+> Task :apprunner:compressDebugAssets
+> Task :apprunner:desugarDebugFileDependencies
+> Task :apprunner:checkDebugAarMetadata
+> Task :apprunner:generateDebugRFile
+> Task :apprunner:compileDebugNavigationResources
+> Task :apprunner:compileDebugKotlin NO-SOURCE
+
+> Task :apprunner:compileDebugJavaWithJavac
+Note: /home/runner/work/Saif-/Saif-/final/apprunner/src/main/java/com/saif/apprunner/MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :apprunner:mapDebugSourceSetPaths
+> Task :apprunner:createDebugCompatibleScreenManifests
+> Task :apprunner:extractDeepLinksDebug
+> Task :apprunner:processDebugMainManifest
+> Task :apprunner:mergeDebugResources
+> Task :apprunner:processDebugManifest
+> Task :apprunner:processDebugJavaRes NO-SOURCE
+> Task :apprunner:processDebugManifestForPackage
+> Task :apprunner:processDebugResources
+> Task :apprunner:mergeDebugJavaResource
+> Task :apprunner:dexBuilderDebug
+> Task :apprunner:checkDebugDuplicateClasses
+> Task :apprunner:mergeDebugGlobalSynthetics
+> Task :apprunner:mergeLibDexDebug
+> Task :apprunner:mergeProjectDexDebug
+> Task :apprunner:mergeDebugJniLibFolders
+> Task :apprunner:mergeDebugNativeLibs NO-SOURCE
+> Task :apprunner:stripDebugDebugSymbols NO-SOURCE
+> Task :apprunner:mergeExtDexDebug
+> Task :apprunner:validateSigningDebug
+> Task :apprunner:writeDebugAppMetadata
+> Task :apprunner:writeDebugSigningConfigVersions
+> Task :app:bundleBrowserExtensions
+> Task :app:bundleExtensionDocs
+> Task :app:copyScriptsToAssets
+> Task :app:generateStandardDebugProtos
+> Task :app:processStandardDebugGoogleServices
+> Task :apprunner:packageDebug
+> Task :apprunner:createDebugApkListingFileRedirect
+> Task :apprunner:assembleDebug
+> Task :app:bundleBaseRunnerApk
+> Task :app:preBuild
+> Task :app:preStandardDebugBuild
+> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateStandardDebugBuildConfig
+> Task :app:generateStandardDebugResources
+> Task :app:packageStandardDebugResources
+> Task :app:processStandardDebugNavigationResources
+> Task :app:parseStandardDebugLocalResources
+> Task :app:generateStandardDebugRFile
+> Task :app:javaPreCompileStandardDebug
+> Task :app:generateStandardDebugAssets
+> Task :app:mergeStandardDebugAssets
+> Task :app:compressStandardDebugAssets
+> Task :app:checkStandardDebugDuplicateClasses
+> Task :app:desugarStandardDebugFileDependencies
+> Task :app:kspStandardDebugKotlin
+> Task :app:mergeExtDexStandardDebug
+> Task :app:mergeLibDexStandardDebug
+> Task :app:checkStandardDebugAarMetadata
+> Task :app:compileStandardDebugNavigationResources FROM-CACHE
+> Task :app:mapStandardDebugSourceSetPaths
+> Task :app:mergeStandardDebugResources
+> Task :app:createStandardDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksStandardDebug
+
+> Task :app:processStandardDebugMainManifest
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:25:5-102 Warning:
+	uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE was tagged at AndroidManifest.xml:25 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:26:5-97 Warning:
+	uses-permission#android.permission.QUERY_ALL_PACKAGES was tagged at AndroidManifest.xml:26 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:27:5-98 Warning:
+	uses-permission#android.permission.SYSTEM_ALERT_WINDOW was tagged at AndroidManifest.xml:27 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:28:5-103 Warning:
+	uses-permission#android.permission.REQUEST_INSTALL_PACKAGES was tagged at AndroidManifest.xml:28 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:29:5-102 Warning:
+	uses-permission#android.permission.REQUEST_DELETE_PACKAGES was tagged at AndroidManifest.xml:29 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:30:5-89 Warning:
+	uses-permission#android.permission.CALL_PHONE was tagged at AndroidManifest.xml:30 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:31:5-92 Warning:
+	uses-permission#android.permission.READ_CONTACTS was tagged at AndroidManifest.xml:31 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:32:5-93 Warning:
+	uses-permission#android.permission.WRITE_SETTINGS was tagged at AndroidManifest.xml:32 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:33:5-87 Warning:
+	uses-permission#android.permission.READ_SMS was tagged at AndroidManifest.xml:33 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:34:5-90 Warning:
+	uses-permission#android.permission.RECEIVE_SMS was tagged at AndroidManifest.xml:34 to remove other declarations but no other declaration present
+
+> Task :app:processStandardDebugManifest
+> Task :app:processStandardDebugManifestForPackage
+> Task :app:processStandardDebugResources
+> Task :app:mergeStandardDebugJniLibFolders
+> Task :app:mergeStandardDebugNativeLibs
+
+> Task :app:stripStandardDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so, libtermux.so. Run with --info option to learn more.
+
+> Task :app:validateSigningStandardDebug
+> Task :app:writeStandardDebugAppMetadata
+> Task :app:writeStandardDebugSigningConfigVersions
+> Task :app:compileStandardDebugKotlin
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:259:29 No parameter with name 'totalTokens' found.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:260:29 No parameter with name 'durationMs' found.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No parameter with name 'model' found.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'completionTokens'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'get'.
 e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:586:9 Cannot infer type for type parameter 'T'. Specify it explicitly.
 e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:9 Cannot infer type for type parameter 'R'. Specify it explicitly.
 e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
 e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:654:13 Cannot infer type for type parameter 'R'. Specify it explicitly.
 e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:655:30 Unresolved reference 'setConfig'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/llm/GeminiModelCatalog.kt:28:110 Syntax error: Expecting ','.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/llm/LlmClient.kt:489:70 Unresolved reference 'e'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/llm/LlmClient.kt:516:75 Unresolved reference 'e'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:334:49 Unresolved reference 'retryBackgroundInstall'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:341:60 Unresolved reference 'installerState'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:344:49 Unresolved reference 'bytesDownloaded'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:345:51 Unresolved reference 'totalBytes'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:349:62 Unresolved reference 'progressFraction'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:350:67 Unresolved reference 'currentPackageName'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:350:116 Unresolved reference 'speedText'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:359:62 Unresolved reference 'progressFraction'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:360:80 Unresolved reference 'extractedFilesCount'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:370:52 Unresolved reference 'stepDescription'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:380:83 Unresolved reference 'testName'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:386:74 Unresolved reference 'errorMessage'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:480:33 Unresolved reference 'cancelBackgroundInstall'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:978:37 Unresolved reference 'installerState'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:978:62 Cannot infer type for value parameter 'inst'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProviderManager.kt:983:42 Suspension functions can only be called within coroutine body.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/data/local/LocalServerManager.kt:24:9 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/data/local/LocalServerManager.kt:24:54 Unresolved reference 'stop'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/SaifChatEngine.kt:62:31 Unresolved reference 'Dispatchers'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/SaifChatEngine.kt:117:32 Unresolved reference 'line'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/SaifChatEngine.kt:186:56 Unresolved reference 'line'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/components/ChatComponents.kt:110:64 Unresolved reference 'KeyboardArrowUp'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/components/ChatComponents.kt:110:98 Unresolved reference 'KeyboardArrowDown'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:30 Syntax error: Expecting comma or ')'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 Primary constructor of data class must only have property ('val' / 'var') parameters.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 An explicit type is required on a value parameter.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:34 Syntax error: Parameters must have type annotation.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:37 Syntax error: Expecting a top level declaration.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:39 Syntax error: Expecting a top level declaration.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:51 Syntax error: Expecting a top level declaration.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:94:29 Syntax error: Property getter or setter expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:95:33 Syntax error: Property getter or setter expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:97:1 Syntax error: Expecting a top level declaration.
 e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/slash/SaifSlashCommandRegistry.kt:155:34 Argument type mismatch: actual type is 'Context!', but 'Application' was expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/stt/SttRouter.kt:206:37 Unresolved reference 'e'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/stt/SttRouter.kt:327:19 Unresolved reference 'TAG'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/stt/SttRouter.kt:364:24 Unresolved reference 'httpClient'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/stt/SttRouter.kt:369:19 Unresolved reference 'TAG'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/stt/SttRouter.kt:436:24 Unresolved reference 'httpClient'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/stt/SttRouter.kt:441:19 Unresolved reference 'TAG'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/ChatViewModel.kt:318:17 Unresolved reference '_activeAgentIsCustomApi'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/ChatViewModel.kt:488:80 Unresolved reference 'ensureLinuxCliReady'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/ChatViewModel.kt:517:21 Unresolved reference '_activeAgentIsCustomApi'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/HomeAgentFeed.kt:142:39 Argument type mismatch: actual type is 'FileLinkHandler', but '(String) -> Unit' was expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:135:27 Property delegate must have a 'getValue(Nothing?, KProperty0<*>)' method. None of the following functions is applicable:
-fun FloatState.getValue(thisObj: Any?, property: KProperty<*>): Float
-fun DoubleState.getValue(thisObj: Any?, property: KProperty<*>): Double
-fun IntState.getValue(thisObj: Any?, property: KProperty<*>): Int
-fun LongState.getValue(thisObj: Any?, property: KProperty<*>): Long
-fun <T> State<T>.getValue(thisObj: Any?, property: KProperty<*>): T
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:135:58 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:135:58 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun <T> StateFlow<T>.collectAsState(context: CoroutineContext = ...): State<T>
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:669:85 Unresolved reference 'it'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:43 Unresolved reference 'remainingFraction'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:62 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:62 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:670:66 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AISettingsDialog.kt:47:22 None of the following candidates is applicable:
-
-constructor(topStart: CornerSize, topEnd: CornerSize, bottomEnd: CornerSize, bottomStart: CornerSize): RoundedCornerShape:
-  No value passed for parameter 'topStart'.
-  No value passed for parameter 'topEnd'.
-  No value passed for parameter 'bottomEnd'.
-  No value passed for parameter 'bottomStart'.
-
-fun RoundedCornerShape(corner: CornerSize): RoundedCornerShape:
-  No value passed for parameter 'corner'.
-
-fun RoundedCornerShape(size: Dp): RoundedCornerShape:
-  No value passed for parameter 'size'.
-
-fun RoundedCornerShape(size: Float): RoundedCornerShape:
-  No value passed for parameter 'size'.
-
-fun RoundedCornerShape(percent: Int): RoundedCornerShape:
-  No value passed for parameter 'percent'.
-
-fun RoundedCornerShape(topStart: Dp = ..., topEnd: Dp = ..., bottomEnd: Dp = ..., bottomStart: Dp = ...): RoundedCornerShape
-fun RoundedCornerShape(topStart: Float = ..., topEnd: Float = ..., bottomEnd: Float = ..., bottomStart: Float = ...): RoundedCornerShape
-fun RoundedCornerShape(topStartPercent: Int = ..., topEndPercent: Int = ..., bottomEndPercent: Int = ..., bottomStartPercent: Int = ...): RoundedCornerShape
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AISettingsDialog.kt:47:41 No parameter with name 'all' found.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/QuickPromptChips.kt:144:56 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Icons.Outlined.AutoAwesome: ImageVector
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:198:15 Unresolved reference 'AgyHubClient'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:25 Unresolved reference 'displayName'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:37 Cannot infer type for type parameter 'C'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:37 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:56 Unresolved reference 'fullName'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:67 Cannot infer type for type parameter 'C'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:67 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:205:86 Unresolved reference 'email'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:206:41 Unresolved reference 'profilePictureUrl'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineUi.kt:206:122 Unresolved reference 'profilePictureUrl'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifInputBar.kt:280:31 Argument type mismatch: actual type is 'List<SlashCommandItem>?', but 'List<SlashCommandItem>' was expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifLiveVoiceCleanroom.kt:22:21 Unresolved reference 'initialize'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifLiveVoiceCleanroom.kt:23:21 Unresolved reference 'speak'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:89:52 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Icons.Outlined.AutoAwesome: ImageVector
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:203:73 Unresolved reference 'name'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:203:98 Unresolved reference 'name'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifSkillsManagerDialog.kt:309:58 Unresolved reference 'sourceUrl'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SettingsSheet.kt:309:62 Unresolved reference 'profilePictureUrl'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SettingsSheet.kt:310:84 Unresolved reference 'profilePictureUrl'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SettingsSheet.kt:860:66 Unresolved reference 'subtitle'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/UpgradeDialog.kt:116:56 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-val Icons.Outlined.AutoAwesome: ImageVector
 
 > Task :app:compileStandardDebugKotlin FAILED
 
@@ -278,5 +190,5 @@ Execution failed for task ':app:compileStandardDebugKotlin'.
 > Run with --scan to generate a Build Scan (Powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 5m 16s
+BUILD FAILED in 5m 45s
 70 actionable tasks: 69 executed, 1 from cache
