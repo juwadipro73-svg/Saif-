@@ -120,7 +120,7 @@ object AdminConfigManager {
     val isLoadingUsers: StateFlow<Boolean> = _isLoadingUsers.asStateFlow()
 
     fun init(context: Context) {
-        appContext = context.applicationContext
+        appContext = context.applicationContext,
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         // Load cached config
@@ -168,7 +168,7 @@ object AdminConfigManager {
                     updatedAt = json.optLong("updatedAt", System.currentTimeMillis()),
                     updatedBy = json.optString("updatedBy", "")
                 )
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Error loading cached config", e)
             }
         } else {
@@ -298,7 +298,7 @@ object AdminConfigManager {
                         saveLocalCache(newConfig)
                     }
                 }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Firestore sync initialization note: ${e.message}")
         }
     }
@@ -334,7 +334,7 @@ object AdminConfigManager {
                 // Sync to system_config/api_settings and app_config/global_settings for full coverage
                 try {
                     firestore.collection("system_config").document("api_settings").set(data, SetOptions.merge()).await()
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "Note: system_config save skipped: ${e.message}")
                 }
                 try {
@@ -342,7 +342,7 @@ object AdminConfigManager {
                 } catch (ignored: Exception) {}
             }
             Result.success(Unit)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to save global config to Firestore", e)
             Result.failure(e)
         }
@@ -404,7 +404,7 @@ object AdminConfigManager {
                             .update("totalGlobalApiCalls", com.google.firebase.firestore.FieldValue.increment(1))
                     } catch (ignored: Exception) {}
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Failed to sync api usage: ${e.message}")
             }
         }
@@ -507,7 +507,7 @@ object AdminConfigManager {
                         ),
                         SetOptions.merge()
                     ).await()
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "Firestore broadcast sync note: ${e.message}")
                 }
             }
@@ -542,7 +542,7 @@ object AdminConfigManager {
                     )
                     userMap[mu.email.lowercase()] = mu
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Error fetching from Room database", e)
             }
 
@@ -567,7 +567,7 @@ object AdminConfigManager {
                             userMap[key] = u
                         }
                     }
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "Error fetching from 'users' collection", e)
                 }
 
@@ -590,7 +590,7 @@ object AdminConfigManager {
                             userMap[key] = u
                         }
                     }
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "Error fetching from 'Users' collection", e)
                 }
             }
@@ -599,7 +599,7 @@ object AdminConfigManager {
             _managedUsers.value = resultList
             _isLoadingUsers.value = false
             Result.success(resultList)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             _isLoadingUsers.value = false
             Log.w(TAG, "Failed to fetch all users", e)
             Result.failure(e)
@@ -651,7 +651,7 @@ object AdminConfigManager {
             try {
                 val db = SaifDatabase.getDatabase(appContext)
                 db.userAccountDao().updateUserStatus(targetUser.email, newActiveState, !newActiveState)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Failed to update Room status", e)
             }
 
@@ -686,7 +686,7 @@ object AdminConfigManager {
             }
 
             Result.success(Unit)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to update user status", e)
             Result.failure(e)
         }
@@ -700,7 +700,7 @@ object AdminConfigManager {
             try {
                 val db = SaifDatabase.getDatabase(appContext)
                 db.userAccountDao().updateUserRole(targetUser.email, cleanRole)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Failed to update Room role", e)
             }
 
@@ -732,7 +732,7 @@ object AdminConfigManager {
             }
 
             Result.success(Unit)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to update user role", e)
             Result.failure(e)
         }
@@ -744,7 +744,7 @@ object AdminConfigManager {
             try {
                 val db = SaifDatabase.getDatabase(appContext)
                 db.userAccountDao().updateApiUsage(targetUser.email, 0)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Failed to reset Room quota", e)
             }
 
@@ -776,7 +776,7 @@ object AdminConfigManager {
             }
 
             Result.success(Unit)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to reset quota", e)
             Result.failure(e)
         }
@@ -787,7 +787,7 @@ object AdminConfigManager {
             try {
                 val db = SaifDatabase.getDatabase(appContext)
                 db.userAccountDao().deleteUser(targetUser.email)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Failed to delete from Room", e)
             }
 
@@ -803,7 +803,7 @@ object AdminConfigManager {
 
             _managedUsers.value = _managedUsers.value.filter { it.email != targetUser.email && it.uid != targetUser.uid }
             Result.success(Unit)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -848,7 +848,7 @@ object AdminConfigManager {
             }
             _managedUsers.value = updatedList
             Result.success(Unit)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to update custom limits", e)
             Result.failure(e)
         }
@@ -1137,7 +1137,7 @@ object AdminConfigManager {
             } else {
                 Result.failure(IllegalStateException("Provider returned status $code: ${body.take(120)}"))
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -1167,7 +1167,7 @@ object AdminConfigManager {
                     registrations.add(m)
                 }
             } catch (ignored: Exception) {}
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed to fetch events/registrations: ${e.message}")
         }
 

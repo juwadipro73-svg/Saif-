@@ -55,7 +55,7 @@ object ExportAudio {
                 ?: return Result.failure(IllegalStateException("Audio export cancelled"))
             muxTogether(videoOnly, encoded.first, encoded.second, out)
             return Result.success(out)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             return Result.failure(IllegalStateException("Audio mixing failed: ${e.javaClass.simpleName}"))
         } finally { tmp.forEach { it.delete() } }
     }

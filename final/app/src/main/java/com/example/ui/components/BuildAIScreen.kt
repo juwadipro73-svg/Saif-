@@ -213,7 +213,7 @@ fun BuildAIScreen(
                 val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile)
                 tempCameraUri = uri
                 cameraLauncher.launch(uri)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Toast.makeText(context, "Camera open karne me samasya: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } else {
@@ -271,7 +271,7 @@ fun BuildAIScreen(
             }
 
             val decodeOptions = android.graphics.BitmapFactory.Options().apply {
-                inSampleSize = sampleSize
+                inSampleSize = sampleSize,
                 inPreferredConfig = android.graphics.Bitmap.Config.RGB_565
             }
             val bmp = ctx.contentResolver.openInputStream(uri)?.use { stream ->
@@ -882,7 +882,7 @@ fun BuildAIScreen(
                                 val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", photoFile)
                                 tempCameraUri = uri
                                 cameraLauncher.launch(uri)
-                            } catch (err: Exception) {
+                            } catch (e: Exception) {
                                 Toast.makeText(context, "Camera open karne me samasya: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                         } else {
@@ -1006,7 +1006,7 @@ fun BuildAIScreen(
             project = project,
             isDarkTheme = true,
             onBuildApk = {
-                showAppRunnerDialog = false
+                showAppRunnerDialog = false,
                 showBuildProgress = true
             },
             onDismiss = { showAppRunnerDialog = false }

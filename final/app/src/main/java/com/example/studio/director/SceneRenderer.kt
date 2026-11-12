@@ -151,7 +151,7 @@ object SceneRenderer {
                 val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     this.color = color; this.alpha = (alpha * 255).toInt(); textSize = e.size * min(w, h) * 1.6f
                     textAlign = when (e.align) { "left" -> Paint.Align.LEFT; "right" -> Paint.Align.RIGHT; else -> Paint.Align.CENTER }
-                    typeface = SceneFx.typefaceFor(e.weight)
+                    typeface = SceneFx.typefaceFor(e.weight),
                     letterSpacing = e.letterSpacing
                     if (e.skew != 0f) textSkewX = -e.skew * 0.35f
                 }

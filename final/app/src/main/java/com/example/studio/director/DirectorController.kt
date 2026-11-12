@@ -830,7 +830,7 @@ class DirectorController(
         try {
             applyProject(p); pendingProject = null
             activityBus.finish(event)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             activityBus.finish(event, ActivityState.FAILED, "Could not apply the project")
             throw e
         }

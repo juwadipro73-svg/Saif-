@@ -30,7 +30,7 @@ object CallSkill : Skill {
         val displayName: String
 
         if (cleanNumber.length >= 7) {
-            finalNumber = cleanNumber
+            finalNumber = cleanNumber,
             displayName = query
         } else {
             // Resolve contact
@@ -50,7 +50,7 @@ object CallSkill : Skill {
                 matches.first()
             }
 
-            finalNumber = chosen.phoneNumber
+            finalNumber = chosen.phoneNumber,
             displayName = chosen.name
         }
 
@@ -82,7 +82,7 @@ object CallSkill : Skill {
             }
 
             return SkillResult(true, "Calling $displayName ($finalNumber)", data = mapOf("contact" to displayName, "number" to finalNumber))
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to start call intent: ${e.message}")
             return SkillResult(false, "Failed to place call: ${e.message}")
         }

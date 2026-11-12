@@ -94,7 +94,7 @@ fun SaifAiApp(
     var engineSettingsSection by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(openSettingsRequest) {
         if (openSettingsRequest) {
-            showEngineSettings = false
+            showEngineSettings = false,
             engineSettingsSection = null
             showSettings = true
             com.example.HostNavigation.openSettingsRequest.value = false
@@ -126,7 +126,7 @@ fun SaifAiApp(
         com.example.providers.TerminalProviderManager.bindUserAccount(context, nextUid, sourceUid)
         com.example.agents.SaifAgentRegistry.bindUserAccount(context, nextUid, sourceUid)
         com.example.studio.AdvancedEditingEnginePrefs.bindUserAccount(context, nextUid, sourceUid)
-        lastBoundAccountUid = nextUid
+        lastBoundAccountUid = nextUid,
         accountUpgradeSourceUid = null
     }
     val accountIssue = if (antigravityConnection.isReady) {
@@ -135,9 +135,9 @@ fun SaifAiApp(
     val antigravityQuotas by viewModel.antigravityQuotas.collectAsState()
     LaunchedEffect(accountIssue) {
         if (accountIssue != null) {
-            engineFeature = null
+            engineFeature = null,
             showEngineSettings = false
-            showSettings = false
+            showSettings = false,
             showVoiceDialog = false
         }
     }
@@ -167,7 +167,7 @@ fun SaifAiApp(
             "CONNECTION" -> showConnectionDialog = true
             "CUSTOM_API" -> showCustomApiFromHome = true
             else -> {
-                engineSettingsSection = section
+                engineSettingsSection = section,
                 showSettings = false
                 showEngineSettings = true
             }
@@ -260,7 +260,7 @@ fun SaifAiApp(
     val pendingOpenVideoProject by viewModel.pendingOpenVideoProject.collectAsStateWithLifecycle()
     LaunchedEffect(pendingOpenVideoProject) {
         pendingOpenVideoProject?.let { proj ->
-            activeVideoProjectData = proj
+            activeVideoProjectData = proj,
             showVideoStudio = true
             viewModel.consumePendingVideoProject()
         }
@@ -292,7 +292,7 @@ fun SaifAiApp(
             ),
             clips = clips
         )
-        activeVideoProjectData = videoProj
+        activeVideoProjectData = videoProj,
         showVideoStudio = true
         viewModel.createVideoProjectSession(videoProj, context)
         android.widget.Toast.makeText(
@@ -346,7 +346,7 @@ fun SaifAiApp(
     LaunchedEffect(isLightMode) {
         val newBg = if (isLightMode) lightBg else darkBg
         if (newBg != upcomingBg) {
-            displayedBg = upcomingBg
+            displayedBg = upcomingBg,
             upcomingBg = newBg
             revealProgress.snapTo(0f)
             revealProgress.animateTo(1f, animationSpec = tween(500, easing = FastOutSlowInEasing))
@@ -400,7 +400,7 @@ fun SaifAiApp(
                         if (isVideoProj) {
                             val savedVideo = com.example.util.ProjectDataManager.getVideoProject(context, target!!.title)
                                 ?: com.example.ui.components.VideoProjectData(projectName = target.title)
-                            activeVideoProjectData = savedVideo
+                            activeVideoProjectData = savedVideo,
                             showVideoStudio = true
                         } else if (isProj) {
                             val savedProj = com.example.util.ProjectDataManager.getProject(context, target!!.title)
@@ -413,7 +413,7 @@ fun SaifAiApp(
                                     language = "Java",
                                     iconBitmap = com.example.util.ProjectDataManager.loadProjectIcon(context, target.title)
                                 )
-                            activeProjectData = savedProj
+                            activeProjectData = savedProj,
                             showProjectEditor = true
                         }
                         scope.launch { drawerState.close() }
@@ -553,7 +553,7 @@ fun SaifAiApp(
                                     )
                                     tempCameraUri = uri
                                     cameraLauncher.launch(uri)
-                                } catch (err: Exception) {
+                                } catch (e: Exception) {
                                     android.widget.Toast.makeText(context, "Camera open karne me samasya: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                                 }
                             } else {
@@ -690,19 +690,19 @@ fun SaifAiApp(
                                                 )
                                             },
                                             onClick = {
-                                                showModelMenu = false
+                                                showModelMenu = false,
                                                 showCustomApiFromHome = true
                                             }
                                         )
                                         DropdownMenuItem(text = { Text(if (flowSetupBusy) "Connecting Flow…" else "Connect Google Flow") },
                                             enabled = !flowSetupBusy && antigravityConnection.isReady, onClick = {
-                                                showModelMenu = false
+                                                showModelMenu = false,
                                                 flowSetupBusy = true
                                                 scope.launch {
                                                     try {
                                                         val message = viewModel.connectGoogleFlow(context)
                                                         android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
-                                                    } catch (err: Exception) {
+                                                    } catch (e: Exception) {
                                                         android.widget.Toast.makeText(context, "Flow setup failed: ${e.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
                                                     } finally { flowSetupBusy = false }
                                                 }
@@ -718,7 +718,7 @@ fun SaifAiApp(
                             onStop = { viewModel.stopGeneration() },
                             onVoiceRecorded = { file -> viewModel.processAudioToText(context, file) },
                             onVoiceListeningStateChange = { listening, rms ->
-                                isVoiceListening = listening
+                                isVoiceListening = listening,
                                 voiceRms = rms
                             },
                             stopVoiceListeningTrigger = stopVoiceListeningTrigger,
@@ -758,7 +758,7 @@ fun SaifAiApp(
                                         )
                                         tempCameraUri = uri
                                         cameraLauncher.launch(uri)
-                                    } catch (err: Exception) {
+                                    } catch (e: Exception) {
                                         android.widget.Toast.makeText(context, "Camera open karne me samasya: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
                                     }
                                 } else {
@@ -921,7 +921,7 @@ fun SaifAiApp(
                         language = language,
                         iconBitmap = iconBitmap
                     )
-                    activeProjectData = projectData
+                    activeProjectData = projectData,
                     showProjectEditor = true
                     android.widget.Toast.makeText(
                         context,
@@ -946,7 +946,7 @@ fun SaifAiApp(
 
         if (showAccountUpgrade) {
             androidx.activity.compose.BackHandler(enabled = true) {
-                showAccountUpgrade = false
+                showAccountUpgrade = false,
                 accountUpgradeSourceUid = null
             }
             Box(Modifier.fillMaxSize().background(com.example.ui.theme.SaifTheme.colors.primaryBackground)) {
@@ -1055,7 +1055,7 @@ fun SaifAiApp(
                     val existing = com.example.util.ProjectDataManager.getVideoProject(context, name)
                         ?: com.example.ui.components.VideoProjectData(projectName = name)
                     com.example.ui.components.RecentProjects.touch(context, existing.projectName)
-                    activeVideoProjectData = existing
+                    activeVideoProjectData = existing,
                     showVideoStudio = true
                     viewModel.createVideoProjectSession(existing, context)
                 },
@@ -1077,7 +1077,7 @@ fun SaifAiApp(
                         )
                         com.example.studio.ui.StudioLaunch.pending = wf
                         com.example.ui.components.RecentProjects.touch(context, proj.projectName)
-                        activeVideoProjectData = proj
+                        activeVideoProjectData = proj,
                         showVideoStudio = true
                         viewModel.createVideoProjectSession(proj, context)
                     }
@@ -1092,7 +1092,7 @@ fun SaifAiApp(
                 onDismiss = { showVideoProjectDialog = false },
                 onSelectWithMedia = { projectName ->
                     if (!claimCreateTap()) return@VideoProjectCreateDialog
-                    showVideoProjectDialog = false
+                    showVideoProjectDialog = false,
                     pendingVideoProjectName = projectName
                     try {
                         videoProjectMediaPicker.launch(
@@ -1105,7 +1105,7 @@ fun SaifAiApp(
                         val fallbackProj = com.example.ui.components.VideoProjectData(
                             projectName = com.example.util.ProjectDataManager.uniqueVideoProjectName(context, projectName)
                         )
-                        activeVideoProjectData = fallbackProj
+                        activeVideoProjectData = fallbackProj,
                         showVideoStudio = true
                         viewModel.createVideoProjectSession(fallbackProj, context)
                     }
@@ -1117,7 +1117,7 @@ fun SaifAiApp(
                         projectName = com.example.util.ProjectDataManager.uniqueVideoProjectName(context, projectName),
                         clips = emptyList()
                     )
-                    activeVideoProjectData = blankProj
+                    activeVideoProjectData = blankProj,
                     showVideoStudio = true
                     viewModel.createVideoProjectSession(blankProj, context)
                     android.widget.Toast.makeText(
@@ -1130,7 +1130,7 @@ fun SaifAiApp(
                     showVideoProjectDialog = false
                     val existing = com.example.util.ProjectDataManager.getVideoProject(context, projectName)
                         ?: com.example.ui.components.VideoProjectData(projectName = projectName)
-                    activeVideoProjectData = existing
+                    activeVideoProjectData = existing,
                     showVideoStudio = true
                     viewModel.createVideoProjectSession(existing, context)
                 },
@@ -1144,7 +1144,7 @@ fun SaifAiApp(
                         textOverlay = cleanTitle.uppercase(),
                         clips = emptyList()
                     )
-                    activeVideoProjectData = initialProj
+                    activeVideoProjectData = initialProj,
                     showVideoStudio = true
                     viewModel.createVideoProjectSession(initialProj, context)
 
@@ -1334,7 +1334,7 @@ fun SaifAiApp(
                     com.example.ui.components.SaifEngineSettings.setAutoApprove(context, value)
                 },
                 onDismiss = {
-                    showEngineSettings = false
+                    showEngineSettings = false,
                     engineSettingsSection = null
                     showSettings = true
                 }

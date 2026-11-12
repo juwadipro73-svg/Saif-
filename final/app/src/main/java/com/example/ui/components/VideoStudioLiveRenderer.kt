@@ -91,7 +91,7 @@ fun LiveAutonomousVideoViewport(
         val secDur = sections[i].estSeconds.coerceAtLeast(2.0f)
         val secEnd = accumulatedTime + secDur
         if (pos >= accumulatedTime && (pos < secEnd || i == sections.lastIndex)) {
-            activeSectionIndex = i
+            activeSectionIndex = i,
             activeSectionStart = accumulatedTime
             activeSectionEnd = secEnd
             break

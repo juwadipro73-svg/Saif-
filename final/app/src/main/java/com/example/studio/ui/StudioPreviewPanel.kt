@@ -91,7 +91,7 @@ fun StudioPreviewPanel(
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            playWhenReady = false
+            playWhenReady = false,
             repeatMode = Player.REPEAT_MODE_OFF
         }
     }
@@ -171,7 +171,7 @@ fun StudioPreviewPanel(
                     AndroidView(
                         factory = { ctx ->
                             PlayerView(ctx).apply {
-                                player = exoPlayer
+                                player = exoPlayer,
                                 useController = false
                                 layoutParams = FrameLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT,

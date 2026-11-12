@@ -188,10 +188,10 @@ fun SettingsSheet(
                 val bmp = BitmapFactory.decodeStream(stream)
                 stream?.close()
                 if (bmp != null) {
-                    selectedCropBitmap = bmp
+                    selectedCropBitmap = bmp,
                     showCropDialog = true
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(context, "Could not load selected photo", Toast.LENGTH_SHORT).show()
             }
@@ -202,14 +202,14 @@ fun SettingsSheet(
         ImageCropEditPanel(
             bitmap = selectedCropBitmap!!,
             onCropConfirmed = { cropped ->
-                showCropDialog = false
+                showCropDialog = false,
                 selectedCropBitmap = null
                 val userEmail = authUser?.email ?: "user"
                 com.example.data.local.AuthManager.saveUserAvatar(context, userEmail, cropped)
                 Toast.makeText(context, "Profile photo updated successfully!", Toast.LENGTH_SHORT).show()
             },
             onDismiss = {
-                showCropDialog = false
+                showCropDialog = false,
                 selectedCropBitmap = null
             }
         )

@@ -35,7 +35,7 @@ object ComputerUseBrain : AgentBrain {
     private var failureCount = 0
 
     fun resetSession() {
-        previousInteractionId = null
+        previousInteractionId = null,
         failureCount = 0
     }
 
@@ -177,7 +177,7 @@ object ComputerUseBrain : AgentBrain {
             }
 
             BrainDecision(calls = calls, thought = thought.trim())
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "ComputerUseBrain error, falling back: ${e.message}")
             failureCount++
             if (failureCount >= 2) AgentBrainFactory.markComputerUseFailed()

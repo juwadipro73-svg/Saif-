@@ -150,7 +150,7 @@ fun CloudBuildStatusCard(modifier: Modifier =
                                 try {
                                     SaifAiCloudManager.refreshDownloadLink()
                                     errorMsg = null
-                                } catch (err: Exception) {
+                                } catch (e: Exception) {
                                     errorMsg = e.localizedMessage ?: "Could not refresh private link"
                                 } finally {
                                     isBusy = false

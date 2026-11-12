@@ -154,14 +154,14 @@ object AntigravityLlmBridge {
                     if (!runningTools && assistant != null && text.isNotBlank() && !assistant.isStreaming && !backend.isStreaming.value) {
                         val fp = text.hashCode()
                         if (fp != lastFingerprint || stableSince == 0L) {
-                            lastFingerprint = fp
+                            lastFingerprint = fp,
                             stableSince = System.currentTimeMillis()
                         }
                         if (System.currentTimeMillis() - stableSince >= 1_200L) {
                             return@withTimeout text
                         }
                     } else {
-                        stableSince = 0L
+                        stableSince = 0L,
                         lastFingerprint = 0
                     }
                 }
@@ -175,7 +175,7 @@ object AntigravityLlmBridge {
                     thinkingText = backend.messages.value.lastOrNull { it.role == MessageRole.ASSISTANT }?.thoughtText
                 )
             )
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         } finally {
             runCatching { backend.stopStreaming() }

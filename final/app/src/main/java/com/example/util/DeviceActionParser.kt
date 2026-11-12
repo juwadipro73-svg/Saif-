@@ -38,7 +38,7 @@ object DeviceActionParser {
                         actions.add(action)
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Error parsing AI actions JSON: ${e.message}")
             }
         }
@@ -58,7 +58,7 @@ object DeviceActionParser {
                         actions.add(action)
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Error parsing codeblock actions JSON: ${e.message}")
             }
         }
@@ -205,7 +205,7 @@ object DeviceActionParser {
                 }
                 else -> null
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in parseActionJson: ${e.message}")
             null
         }

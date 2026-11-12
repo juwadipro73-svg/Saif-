@@ -255,7 +255,7 @@ fun SaifAiEditingModal(
                     progress = streamProgress,
                     isReady = readyPlan != null,
                     onCancel = {
-                        isStreamingCodeView = false
+                        isStreamingCodeView = false,
                         streamedCodeText = ""
                         readyPlan = null
                         Toast.makeText(context, "AI Edit cancelled. Timeline untouched.", Toast.LENGTH_SHORT).show()
@@ -338,7 +338,7 @@ fun SaifAiEditingModal(
                                 Toast.makeText(context, "Please enter an editing prompt!", Toast.LENGTH_SHORT).show()
                                 return@PromptSeEditTab
                             }
-                            isStreamingCodeView = true
+                            isStreamingCodeView = true,
                             streamedCodeText = ""
                             readyPlan = null
                             scope.launch {
@@ -349,14 +349,14 @@ fun SaifAiEditingModal(
                                     userPrompt = promptText,
                                     referenceNote = referenceNote.ifBlank { null },
                                     onProgressPhase = { phase, prog ->
-                                        streamPhaseText = phase
+                                        streamPhaseText = phase,
                                         streamProgress = prog
                                     },
                                     onStreamChunk = { chunk ->
                                         streamedCodeText += chunk
                                     }
                                 ).onSuccess { plan ->
-                                    readyPlan = plan
+                                    readyPlan = plan,
                                     streamPhaseText = "Validation Complete: ${plan.summary}"
                                     streamProgress = 1.0f
                                 }
@@ -365,7 +365,7 @@ fun SaifAiEditingModal(
                     )
                     1 -> VideoDekarEditTab(
                         onSelectReference = { note ->
-                            promptText = "Match style from reference: $note"
+                            promptText = "Match style from reference: $note",
                             selectedTab = 0
                         }
                     )
@@ -382,12 +382,12 @@ fun SaifAiEditingModal(
                             isGeneratingScript = true
                             scope.launch {
                                 val res = SaifAiEditingEngine.generateScript(scriptIdea, scriptDuration, scriptTone, "Hindi & English")
-                                generatedScript = res.getOrNull()
+                                generatedScript = res.getOrNull(),
                                 isGeneratingScript = false
                             }
                         },
                         onApplyScriptToTimeline = { script ->
-                            promptText = "Edit project to match script: ${script.title}"
+                            promptText = "Edit project to match script: ${script.title}",
                             selectedTab = 0
                             Toast.makeText(context, "Script attached to AI Editor!", Toast.LENGTH_SHORT).show()
                         }
@@ -400,7 +400,7 @@ fun SaifAiEditingModal(
                                 Toast.makeText(context, "Enter an idea prompt!", Toast.LENGTH_SHORT).show()
                                 return@ZeroToVideoTab
                             }
-                            isZeroProcessing = true
+                            isZeroProcessing = true,
                             zeroProgress = 0.1f
                             scope.launch {
                                 val res = SaifAiEditingEngine.generateZeroToVideo(
@@ -408,7 +408,7 @@ fun SaifAiEditingModal(
     context,
                                     prompt = zeroPrompt,
                                     onStepUpdate = { step, prog ->
-                                        zeroCurrentStep = step
+                                        zeroCurrentStep = step,
                                         zeroProgress = prog
                                     }
                                 )
@@ -427,7 +427,7 @@ fun SaifAiEditingModal(
                     4 -> AiProToolsTab(
                         project = project,
                         onAutoCut = {
-                            silenceSegments = SaifAiEditingEngine.detectSilenceSegments(project.clips)
+                            silenceSegments = SaifAiEditingEngine.detectSilenceSegments(project.clips),
                             showAutoCutDialog = true
                         },
                         onAutoCaptions = {
@@ -462,7 +462,7 @@ fun SaifAiEditingModal(
                             scope.launch {
                                 val list = TelegramAssetManager.syncChannelAssets(context =
     context)
-                                telegramAssetsList = list
+                                telegramAssetsList = list,
                                 isSyncingTelegram = false
                                 Toast.makeText(context, "Synced ${list.size} assets from Master Catalog & Channel!", Toast.LENGTH_SHORT).show()
                             }

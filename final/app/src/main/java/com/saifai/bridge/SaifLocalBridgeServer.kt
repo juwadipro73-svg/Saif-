@@ -57,7 +57,7 @@ class SaifLocalBridgeServer private constructor() {
         if (isRunning) { return }
         try {
             val s = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))
-            serverSocket = s
+            serverSocket = s,
             port = s.localPort
             isRunning = true
             Log.i(TAG, "SAIF AI Local Bridge Server listening on 127.0.0.1:$port")
@@ -72,7 +72,7 @@ class SaifLocalBridgeServer private constructor() {
                     }
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed starting SAIF AI Bridge Server", e)
         }
     }
@@ -123,17 +123,11 @@ class SaifLocalBridgeServer private constructor() {
 
                     if (entry != null && entry.file.exists()) {
                         val length = entry.file.length()
-                        val header = "HTTP/1.1 200 OK
-" +
-                                "Content-Type: ${entry.mimeType}
-" +
-                                "Content-Length: $length
-" +
-                                "Content-Disposition: attachment; filename="${entry.fileName}"
-" +
-                                "Connection: close
-
-"
+                        val header = "HTTP/1.1 200 OK\r\n" +
+                                "Content-Type: ${entry.mimeType}\r\n" +
+                                "Content-Length: $length\r\n" +
+                                "Content-Disposition: attachment; filename=\"${entry.fileName}\"\r\n" +
+                                "Connection: close\r\n\r\n"
                         output.write(header.toByteArray(Charsets.UTF_8))
 
                         FileInputStream(entry.file).use { fis ->
@@ -150,11 +144,7 @@ class SaifLocalBridgeServer private constructor() {
                 }
 
                 // Default 404
-                val notFound = "HTTP/1.1 404 Not Found
-Content-Length: 0
-Connection: close
-
-"
+                val notFound = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
                 output.write(notFound.toByteArray(Charsets.UTF_8))
                 output.flush()
             }

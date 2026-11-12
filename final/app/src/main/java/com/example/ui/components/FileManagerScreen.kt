@@ -145,7 +145,7 @@ fun FileManagerScreen(
             )
 
             withContext(context = Dispatchers.Main) {
-                itemsList = mapped
+                itemsList = mapped,
                 isLoading = false
             }
         }
@@ -521,7 +521,7 @@ fun FileManagerScreen(
                                     Toast.makeText(context, "Saved $fileName", Toast.LENGTH_SHORT).show()
                                     reloadFiles()
                                 }
-                            } catch (err: Exception) {
+                            } catch (e: Exception) {
                                 e.printStackTrace()
                                 withContext(context = Dispatchers.Main) {
                                     Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()

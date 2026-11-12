@@ -54,7 +54,7 @@ object ProjectDataManager {
 
             // Ensure physical starter layout, activity, and manifest exist immediately
             ensureProjectScaffolded(context, project)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -194,7 +194,7 @@ public class MainActivity extends Activity {
 </resources>""".trimIndent()
                 )
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
@@ -237,7 +237,7 @@ public class MainActivity extends Activity {
                 val parsed = parseProjectJson(content)
                 if (parsed != null) return parsed.copy(iconBitmap = icon ?: parsed.iconBitmap)
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -278,7 +278,7 @@ public class MainActivity extends Activity {
             if (oldDir.exists() && oldDir.absolutePath != newDir.absolutePath) {
                 oldDir.renameTo(newDir)
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -299,7 +299,7 @@ public class MainActivity extends Activity {
             if (projectDir.exists()) {
                 projectDir.deleteRecursively()
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

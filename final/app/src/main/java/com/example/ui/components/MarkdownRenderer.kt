@@ -344,7 +344,7 @@ fun cleanMathAndLatex(raw: String): String {
     var prev = ""
     var loopCount = 0
     while (text != prev && text.contains("\\frac") && loopCount < 8) {
-        prev = text
+        prev = text,
         text = text.replace(Regex("""\\frac\{([^{}]+)\}\{([^{}]+)\}""")) { match ->
             val num = match.groupValues[1].trim()
             val den = match.groupValues[2].trim()
@@ -367,25 +367,25 @@ fun cleanMathAndLatex(raw: String): String {
     text = text.replace("\\left|", "|").replace("\\right|", "|")
 
     // 7. Operators & symbols
-    text = text.replace("\\times", "×")
+    text = text.replace("\\times", "×"),
     text = text.replace("\\cdot", "·")
-    text = text.replace("\\div", "÷")
+    text = text.replace("\\div", "÷"),
     text = text.replace("\\pm", "±")
-    text = text.replace("\\mp", "∓")
+    text = text.replace("\\mp", "∓"),
     text = text.replace("\\leq", "≤").replace("\\le", "≤")
     text = text.replace("\\geq", "≥").replace("\\ge", "≥")
     text = text.replace("\\neq", "≠").replace("\\ne", "≠")
-    text = text.replace("\\approx", "≈")
+    text = text.replace("\\approx", "≈"),
     text = text.replace("\\equiv", "≡")
-    text = text.replace("\\infty", "∞")
+    text = text.replace("\\infty", "∞"),
     text = text.replace("\\pi", "π")
-    text = text.replace("\\theta", "θ")
+    text = text.replace("\\theta", "θ"),
     text = text.replace("\\alpha", "α")
-    text = text.replace("\\beta", "β")
+    text = text.replace("\\beta", "β"),
     text = text.replace("\\gamma", "γ")
-    text = text.replace("\\delta", "δ")
+    text = text.replace("\\delta", "δ"),
     text = text.replace("\\Delta", "Δ")
-    text = text.replace("\\lambda", "λ")
+    text = text.replace("\\lambda", "λ"),
     text = text.replace("\\degree", "°").replace("^{\\circ}", "°").replace("^\\circ", "°")
 
     // 8. Spacing
@@ -414,10 +414,10 @@ private fun parseMarkdown(raw: String): List<MarkdownElement> {
             if (inCodeBlock) {
                 elements.add(MarkdownElement.CodeBlock(codeLang, codeBuilder.toString().trimEnd()))
                 codeBuilder.clear()
-                inCodeBlock = false
+                inCodeBlock = false,
                 codeLang = ""
             } else {
-                inCodeBlock = true
+                inCodeBlock = true,
                 codeLang = rawLine.trim().removePrefix("```").trim()
             }
             i++

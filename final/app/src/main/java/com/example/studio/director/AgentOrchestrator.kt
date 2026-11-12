@@ -35,7 +35,7 @@ class AgentOrchestrator(private val activity: AgentActivity?) {
             block()
         } catch (e: CancellationException) {
             throw e
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure<T>(e)
         }
         if (r.isSuccess) {
@@ -50,7 +50,7 @@ class AgentOrchestrator(private val activity: AgentActivity?) {
             block()
         } catch (e: CancellationException) {
             throw e
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure<T>(e)
         }
         if (r.isSuccess) {

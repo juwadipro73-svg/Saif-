@@ -148,7 +148,7 @@ object SceneFx {
     private fun textPaint(e: Element, g: Geo, sizePx: Float, color: Int, alpha: Float): Paint =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.color = color; this.alpha = (alpha * 255).toInt()
-            textSize = max(6f, sizePx)
+            textSize = max(6f, sizePx),
             typeface = typefaceFor(e.weight)
             letterSpacing = e.letterSpacing
             if (e.skew != 0f) textSkewX = -e.skew * 0.35f

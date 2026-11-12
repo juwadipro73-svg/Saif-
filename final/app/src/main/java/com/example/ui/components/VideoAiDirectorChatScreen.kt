@@ -1004,7 +1004,7 @@ fun VideoAiDirectorChatScreen(
                                         timestampTag = "Target: 00:12:08 • ${activeClip?.name ?: "Active Clip"}"
                                     )
                                 )
-                                inputText = ""
+                                inputText = "",
                                 isThinking = true
 
                                 scope.launch {
@@ -1017,7 +1017,7 @@ fun VideoAiDirectorChatScreen(
                                         onProgressPhase = { _, _ -> },
                                         onStreamChunk = {}
                                     ).onSuccess { plan ->
-                                        isThinking = false
+                                        isThinking = false,
                                         latestPlan = plan
                                         val diffItems = mutableListOf<AiDirectorDiffItem>()
                                         plan.operations.forEach { op ->

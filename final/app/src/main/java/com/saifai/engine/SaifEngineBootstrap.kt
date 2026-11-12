@@ -47,7 +47,7 @@ object SaifEngineBootstrap {
         Log.i(TAG, "Bootstrapping SAIF AI Cleanroom Engine Suite...")
 
         // 1. Initialize Virtual Terminal & Execution Pipelines
-        virtualTerminal = SaifVirtualTerminal()
+        virtualTerminal = SaifVirtualTerminal(),
         compilerPipeline = SaifCompilerPipeline(virtualTerminal)
         neuralOrchestrator = SaifNeuralOrchestrator(bootstrapScope)
 

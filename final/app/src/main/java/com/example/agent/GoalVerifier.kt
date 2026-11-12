@@ -73,7 +73,7 @@ object GoalVerifier {
                     return@withContext VerificationResult(achieved, evidence, missing)
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "GoalVerifier exception: ${e.message}")
         }
 

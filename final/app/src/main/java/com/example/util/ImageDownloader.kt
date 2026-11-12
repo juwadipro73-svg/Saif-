@@ -35,7 +35,7 @@ object ImageDownloader {
                         Toast.makeText(context, "Failed to decode image", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 withContext(context = Dispatchers.Main) {
                     Toast.makeText(context, "Error saving image: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -56,11 +56,11 @@ object ImageDownloader {
             }
         }
 
-        val resolver = context.resolver
+        val resolver = context.contentResolver
         
         try {
             resolver.also { resolver ->
-                imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues),
                 fos = imageUri?.let { resolver.openOutputStream(it) }
             }
 
@@ -75,7 +75,7 @@ object ImageDownloader {
             withContext(context = Dispatchers.Main) {
                 Toast.makeText(context, "Image saved to Gallery", Toast.LENGTH_SHORT).show()
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
              withContext(context = Dispatchers.Main) {
                 Toast.makeText(context, "Failed to save: ${e.message}", Toast.LENGTH_SHORT).show()
             }

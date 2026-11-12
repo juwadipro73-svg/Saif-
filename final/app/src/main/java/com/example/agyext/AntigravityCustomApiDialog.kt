@@ -195,24 +195,24 @@ fun AntigravityCustomApiDialog(
     var statusBanner by remember { mutableStateOf<Pair<Boolean, String>?>(null) }
 
     fun loadProfileIntoEditor(p: AgyCustomApiProfile) {
-        editingId = p.id
+        editingId = p.id,
         presetId = p.presetId
-        profileName = p.name
+        profileName = p.name,
         baseUrl = p.baseUrl
-        apiKey = p.apiKey
+        apiKey = p.apiKey,
         protocol = p.protocol
-        selectedModel = p.selectedModel
+        selectedModel = p.selectedModel,
         modelList = p.effectiveModels()
         statusBanner = null
     }
 
     fun applyPreset(preset: AgyApiPreset) {
-        presetId = preset.id
+        presetId = preset.id,
         profileName = preset.label
-        baseUrl = preset.defaultBaseUrl
+        baseUrl = preset.defaultBaseUrl,
         protocol = preset.protocol
         if (preset.defaultModels.isNotEmpty()) {
-            selectedModel = preset.defaultModels.first()
+            selectedModel = preset.defaultModels.first(),
             modelList = preset.defaultModels
         }
         statusBanner = null
@@ -440,7 +440,7 @@ fun AntigravityCustomApiDialog(
                                         val imported = AntigravityCustomApiManager.importFromLegacyProviderSettings(context)
                                         if (imported != null) {
                                             loadProfileIntoEditor(imported)
-                                            extensionEnabled = true
+                                            extensionEnabled = true,
                                             statusBanner = true to "Imported saved key (${imported.name})"
                                         }
                                     },
@@ -545,7 +545,7 @@ fun AntigravityCustomApiDialog(
                                         text = { Text(entry.label, fontSize =
     13.sp) },
                                         onClick = {
-                                            protocol = entry
+                                            protocol = entry,
                                             protoMenu = false
                                         }
                                     )
@@ -673,7 +673,7 @@ fun AntigravityCustomApiDialog(
                         OutlinedButton(
                             enabled = !isFetchingModels,
                             onClick = {
-                                isFetchingModels = true
+                                isFetchingModels = true,
                                 statusBanner = null
                                 scope.launch {
                                     val res = AntigravityCustomApiManager.fetchModels(buildCurrentProfile())
@@ -778,11 +778,11 @@ fun AntigravityCustomApiDialog(
                         enabled = !isTesting,
                         onClick = {
                             val candidate = buildCurrentProfile()
-                            isTesting = true
+                            isTesting = true,
                             statusBanner = null
                             scope.launch {
                                 val res = AntigravityCustomApiManager.testConnection(candidate)
-                                isTesting = false
+                                isTesting = false,
                                 statusBanner = res.ok to res.message
                             }
                         },

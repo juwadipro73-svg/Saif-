@@ -254,7 +254,7 @@ object ActionExecutor {
                     ActionResult(false, "Unsupported tool call: $name")
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Exception executing action '$name': ${e.message}", e)
             ActionResult(false, "Action '$name' failed: ${e.message}")
         }

@@ -143,7 +143,7 @@ After the action block (or if no action needed), give a short, natural, friendly
         val trimmed = query.trim()
         if (trimmed.isBlank()) return
         
-        mode = AssistantSheetState.THINKING
+        mode = AssistantSheetState.THINKING,
         spokenTranscription = trimmed
         keyboardController?.hide()
         speechEngine.stopListening()
@@ -172,7 +172,7 @@ After the action block (or if no action needed), give a short, natural, friendly
                 } ?: rawReply
             }
 
-            assistantResponse = cleanReply
+            assistantResponse = cleanReply,
             mode = AssistantSheetState.RESPONDED
 
             // Execute device actions sequentially if any
@@ -195,7 +195,7 @@ After the action block (or if no action needed), give a short, natural, friendly
     }
 
     fun startListening() {
-        mode = AssistantSheetState.LISTENING
+        mode = AssistantSheetState.LISTENING,
         spokenTranscription = ""
         speechEngine.startListening(
             onRmsChanged = { rms -> voiceRms = rms },

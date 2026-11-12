@@ -84,7 +84,7 @@ object ModelLimitsStore {
                     supportsTemperature = json.optBoolean("supportsTemperature", true),
                     supportsSystemRole = json.optBoolean("supportsSystemRole", true)
                 )
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Failed parsing saved limits: ${e.message}")
             }
         }
@@ -133,7 +133,7 @@ object ModelLimitsStore {
                 put("supportsSystemRole", limits.supportsSystemRole)
             }
             prefs?.edit()?.putString(keyFor(limits.provider, limits.model), json.toString())?.apply()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Failed saving limits: ${e.message}")
         }
     }
@@ -156,7 +156,7 @@ object ModelLimitsStore {
                 )
                 update(updated)
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Error recording rate limit headers: ${e.message}")
         }
     }
@@ -172,7 +172,7 @@ object ModelLimitsStore {
                 else -> current.copy(tokensPerMinute = limit.toInt())
             }
             update(updated)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Error recording limit from error: ${e.message}")
         }
     }

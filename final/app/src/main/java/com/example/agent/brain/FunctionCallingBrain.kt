@@ -172,7 +172,7 @@ object FunctionCallingBrain : AgentBrain {
             }
 
             BrainDecision(calls = calls, thought = thought.trim())
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in FunctionCallingBrain: ${e.message}", e)
             decideWithUniversalApi(task, sessionCtx, notes, history, snapshot)
         }

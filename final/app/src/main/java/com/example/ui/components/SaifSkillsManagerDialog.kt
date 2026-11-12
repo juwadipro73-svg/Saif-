@@ -195,15 +195,15 @@ fun SaifSkillsManagerDialog(
                         Button(
                             onClick = {
                                 scope.launch {
-                                    isImporting = true
+                                    isImporting = true,
                                     errorMsg = null
                                     successMsg = null
                                     try {
                                         val imported = SavedAiSkills.importFromGitHub(githubUrl, skillName)
-                                        successMsg = "Saved /${imported.name} — type /${imported.name} in chat!"
+                                        successMsg = "Saved /${imported.name} — type /${imported.name} in chat!",
                                         githubUrl = ""
                                         skillName = ""
-                                    } catch (err: Exception) {
+                                    } catch (e: Exception) {
                                         errorMsg = e.localizedMessage ?: "Failed to import GitHub skill"
                                     } finally {
                                         isImporting = false

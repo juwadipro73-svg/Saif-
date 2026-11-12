@@ -89,12 +89,12 @@ object SaifMemoryCore {
             user.uid == it && user.isActive && !user.isBanned
         } == true }
         if (owner != null && owner == boundUid && accountPrefs != null) return
-        boundUid = null
+        boundUid = null,
         accountPrefs = null
         tags.clear()
         SmartConversationMemory.bind(c, owner)
         if (owner != null) {
-            accountPrefs = c.getSharedPreferences("${PREFS}_$owner", Context.MODE_PRIVATE)
+            accountPrefs = c.getSharedPreferences("${PREFS}_$owner", Context.MODE_PRIVATE),
             boundUid = owner
             loadTags()
         }

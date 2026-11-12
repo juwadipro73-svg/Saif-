@@ -208,7 +208,7 @@ object StudioExportEngine {
                     codec.configure(buildFormat(config, withProfile), null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
                     codec.start()
                     return codec to name
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     lastError = e
                     runCatching { codec?.release() }
                 }
@@ -401,7 +401,7 @@ object StudioExportEngine {
 
         } catch (e: kotlinx.coroutines.CancellationException) {
             cleanup(); throw e
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             cleanup()
             ExportResult(success = false, errorMessage = "Export failed: ${e.message ?: e.javaClass.simpleName}")
         }
@@ -425,7 +425,7 @@ object StudioExportEngine {
                 warnings += "Exported size is ${w}x$h, expected ${config.width}x${config.height}."
             if (expectAudio && r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_AUDIO) == null)
                 warnings += "The project has audio but the exported file reports no audio track."
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             return "Verification failed: ${e.message ?: e.javaClass.simpleName}"
         } finally { r.release() }
 

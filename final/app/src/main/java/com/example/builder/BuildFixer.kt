@@ -89,7 +89,7 @@ CRITICAL INSTRUCTIONS:
             val sandboxReport = SandboxRunner.evaluate(context, guardReport.sanitizedHtml)
             val combinedErrors = (guardErrors + sandboxReport.errors).distinct()
 
-            currentHtml = guardReport.sanitizedHtml
+            currentHtml = guardReport.sanitizedHtml,
             currentErrors = combinedErrors
 
             if (combinedErrors.isEmpty()) {

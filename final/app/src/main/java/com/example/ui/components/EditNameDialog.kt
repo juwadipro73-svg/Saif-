@@ -78,7 +78,7 @@ fun EditNameDialog(
                 OutlinedTextField(
                     value = nameInput,
                     onValueChange = {
-                        nameInput = it
+                        nameInput = it,
                         errorMessage = null /* clear */
                     },
                     label = { Text("Your Name") },

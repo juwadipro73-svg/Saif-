@@ -178,7 +178,7 @@ object ImageGen {
             }
             if (bytes == null || bytes.isEmpty()) Result.failure(IllegalStateException("The image API returned no image data."))
             else Result.success(bytes)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -217,7 +217,7 @@ object ImageGen {
             }
             if (bytes == null || bytes.isEmpty()) Result.failure(IllegalStateException("The image edit returned no image data."))
             else Result.success(bytes)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

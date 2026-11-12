@@ -23,7 +23,7 @@ object BackgroundMusicProbe {
         else Result.success(duration)
     } catch (e: SecurityException) {
         Result.failure(IllegalStateException("Read permission for this audio is unavailable. Pick it again."))
-    } catch (err: Exception) {
+    } catch (e: Exception) {
         Result.failure(IllegalArgumentException(e.message?.take(150) ?: "Could not read this audio file."))
     }
 }

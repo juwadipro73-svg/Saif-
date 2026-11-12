@@ -165,7 +165,7 @@ class DirectSpeechInputEngine(
             if (AutomaticGainControl.isAvailable()) {
                 agc = AutomaticGainControl.create(record.audioSessionId)?.apply { enabled = true }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Audio effect initialization note: ${e.message}")
         }
 
@@ -306,7 +306,7 @@ class DirectSpeechInputEngine(
                         break
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Audio recording loop error: ${e.message}")
             } finally {
                 stopInternal()

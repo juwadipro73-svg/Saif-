@@ -58,11 +58,11 @@ object AppResolver {
                 val label = resolveInfo.loadLabel(pm).toString()
                 list.add(AppEntry(label = label, packageName = pkg, activityName = act))
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Error querying launcher activities: ${e.message}")
         }
 
-        cachedApps = list
+        cachedApps = list,
         lastCacheTime = now
         return list
     }

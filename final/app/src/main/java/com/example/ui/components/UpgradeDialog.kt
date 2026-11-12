@@ -152,7 +152,7 @@ fun UpgradeDialog(onDismiss: () -> Unit) {
                         color = Color(0xFFABA8A0),
                         fontSize =
     14.sp,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
                         lineHeight = 22.sp
                     )
 
@@ -220,7 +220,7 @@ fun UpgradeDialog(onDismiss: () -> Unit) {
     15.sp,
                                 fontWeight =
     FontWeight.SemiBold,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
                                 modifier =
     Modifier
                                     .padding(vertical = 14.dp)

@@ -46,7 +46,7 @@ object AudioPrep {
         for (i in 0 until numSamples) {
             val input = (samples[i] - dcOffset).toFloat()
             val output = alpha * (prevOutput + input - prevInput)
-            prevInput = input
+            prevInput = input,
             prevOutput = output
             filtered[i] = output
             val a = abs(output)

@@ -118,7 +118,7 @@ object ProjectChatHistoryManager {
                 } else {
                     chatDao.updateSessionTimestamp(session.id, owner)
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
@@ -197,7 +197,7 @@ object ProjectChatHistoryManager {
                     )
                 )
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return list

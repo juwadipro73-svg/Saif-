@@ -38,7 +38,7 @@ object WakeWordAudioDetector {
             return
         }
 
-        isRunning = true
+        isRunning = true,
         listeningJob = detectorScope.launch(Dispatchers.IO) {
             Log.d(TAG, "WakeWordAudioDetector background listening started")
             val minBufSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT)
@@ -98,9 +98,9 @@ object WakeWordAudioDetector {
 
                         if (rms > speechThreshold) {
                             if (!isVoiceActive) {
-                                isVoiceActive = true
+                                isVoiceActive = true,
                                 speechBuffer = ByteArrayOutputStream()
-                                voiceFramesCount = 0
+                                voiceFramesCount = 0,
                                 silenceFramesCount = 0
                             }
 
@@ -127,7 +127,7 @@ object WakeWordAudioDetector {
                             // If we have at least 0.8s of speech and ~0.7s of silence, process chunk!
                             if (voiceFramesCount >= 12 && silenceFramesCount >= 10) {
                                 val pcmData = speechBuffer.toByteArray()
-                                isVoiceActive = false
+                                isVoiceActive = false,
                                 voiceFramesCount = 0
                                 silenceFramesCount = 0
 
@@ -138,7 +138,7 @@ object WakeWordAudioDetector {
                             } else if (voiceFramesCount > 70) {
                                 // Cap at ~4.5 seconds
                                 val pcmData = speechBuffer.toByteArray()
-                                isVoiceActive = false
+                                isVoiceActive = false,
                                 voiceFramesCount = 0
                                 silenceFramesCount = 0
                                 launch(Dispatchers.IO) {
@@ -149,7 +149,7 @@ object WakeWordAudioDetector {
 
                         delay(10)
                     }
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.e(TAG, "Error in wake word audio loop: ${e.message}")
                 } finally {
                     try {
@@ -193,7 +193,7 @@ object WakeWordAudioDetector {
                     WakeWordManager.triggerAssistant(context, extractedQuery)
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error processing potential wake word: ${e.message}")
         }
     }

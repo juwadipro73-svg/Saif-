@@ -43,7 +43,7 @@ object GeminiKeyPool {
                     keys.add(clean)
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w(TAG, "Error loading provider keys: ${e.message}")
         }
 

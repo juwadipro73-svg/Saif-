@@ -457,7 +457,7 @@ object TerminalProviderManager {
                     isPreparing = false,
                     canRetry = true
                 )
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 val safeMsg = KeyStoreCrypto.redact(e.message ?: "Unexpected setup error")
                 setPendingSetupProvider(app, null)
                 appendHistory(app, provider, "FAILED", safeMsg)

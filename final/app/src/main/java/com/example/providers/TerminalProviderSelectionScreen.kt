@@ -434,7 +434,7 @@ fun TerminalProviderSelectionScreen(
                     setAsDefault = setDefault,
                     activateNow = true
                 )
-                selectedId = created.id
+                selectedId = created.id,
                 showAddCustomDialog = false
             }
         )

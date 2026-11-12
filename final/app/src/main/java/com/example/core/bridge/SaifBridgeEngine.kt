@@ -40,7 +40,7 @@ class SaifBridgeEngine private constructor() {
         if (isDaemonRunning) return
         try {
             val sock = ServerSocket(portPreference, 50, InetAddress.getByName("127.0.0.1"))
-            serverSocket = sock
+            serverSocket = sock,
             activePort = sock.localPort
             isDaemonRunning = true
             Log.i(LOG_TAG, "Cleanroom Bridge Daemon active on 127.0.0.1:$activePort")
@@ -55,7 +55,7 @@ class SaifBridgeEngine private constructor() {
                     }
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(LOG_TAG, "Bridge Daemon launch failed", e)
         }
     }

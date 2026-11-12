@@ -87,7 +87,7 @@ class SaifAccessibilityService : AccessibilityService() {
     Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 context.startActivity(intent)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Failed to open accessibility settings: ${e.message}")
             }
         }
@@ -245,7 +245,7 @@ class SaifAccessibilityService : AccessibilityService() {
             val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(40L))
             val gesture = GestureDescription.Builder().addStroke(stroke).build()
             dispatchGestureAwait(gesture)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in performHumanTapAwait: ${e.message}")
             false
         }
@@ -261,7 +261,7 @@ class SaifAccessibilityService : AccessibilityService() {
             val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(40L))
             val gesture = GestureDescription.Builder().addStroke(stroke).build()
             dispatchGesture(gesture, null, null)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in performHumanTap: ${e.message}")
             false
         }
@@ -288,7 +288,7 @@ class SaifAccessibilityService : AccessibilityService() {
             val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(100L))
             val gesture = GestureDescription.Builder().addStroke(stroke).build()
             dispatchGestureAwait(gesture)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in performHumanSwipeAwait: ${e.message}")
             false
         }
@@ -313,7 +313,7 @@ class SaifAccessibilityService : AccessibilityService() {
             val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(100L))
             val gesture = GestureDescription.Builder().addStroke(stroke).build()
             dispatchGesture(gesture, null, null)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in performHumanSwipe: ${e.message}")
             false
         }
@@ -1085,7 +1085,7 @@ class SaifAccessibilityService : AccessibilityService() {
 
                                 val base64 = Base64.encodeToString(jpegBytes, Base64.NO_WRAP)
                                 if (cont.isActive) cont.resume(ScreenshotCaptureResult(base64, false))
-                            } catch (err: Exception) {
+                            } catch (e: Exception) {
                                 Log.w(TAG, "Screenshot processing error: ${e.message}")
                                 if (cont.isActive) cont.resume(ScreenshotCaptureResult(null, false))
                             } finally {
@@ -1104,7 +1104,7 @@ class SaifAccessibilityService : AccessibilityService() {
                         }
                     }
                 )
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "takeScreenshot error: ${e.message}")
                 try { executor.shutdown() } catch (ignored: Exception) {}
                 if (cont.isActive) cont.resume(ScreenshotCaptureResult(null, false))
@@ -1124,7 +1124,7 @@ class SaifAccessibilityService : AccessibilityService() {
                     consecutiveStable++
                     if (consecutiveStable >= 2) return true
                 } else {
-                    consecutiveStable = 0
+                    consecutiveStable = 0,
                     lastDigest = currentText
                 }
             }
@@ -1212,7 +1212,7 @@ class SaifAccessibilityService : AccessibilityService() {
             val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(120L))
             val gesture = GestureDescription.Builder().addStroke(stroke).build()
             dispatchGestureAwait(gesture)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error in performHumanBézierSwipe: ${e.message}")
             false
         }

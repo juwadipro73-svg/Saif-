@@ -499,7 +499,7 @@ fun SessionDrawerContent(
     Modifier.size(16.dp))
                                             },
                                             onClick = {
-                                                showMenu = false
+                                                showMenu = false,
                                                 sessionToRename = session
                                                 renameInput = session.title
                                             }
@@ -513,7 +513,7 @@ fun SessionDrawerContent(
     Modifier.size(16.dp))
                                             },
                                             onClick = {
-                                                showMenu = false
+                                                showMenu = false,
                                                 sessionToDelete = session
                                             }
                                         )

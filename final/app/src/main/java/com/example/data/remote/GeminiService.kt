@@ -70,7 +70,7 @@ object GeminiService {
                 }
             }
             Result.failure(Exception("No transcription returned"))
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -111,7 +111,7 @@ object GeminiService {
             val data = json.optJSONArray("candidates")?.optJSONObject(0)?.optJSONObject("content")?.optJSONArray("parts")?.optJSONObject(0)?.optJSONObject("inlineData")?.optString("data")
             if (!data.isNullOrEmpty()) return@withContext Result.success(data)
             Result.failure(Exception("No audio data found in response"))
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
@@ -316,7 +316,7 @@ object GeminiService {
                                             }
                                         }
                                     }
-                                } catch (err: Exception) {
+                                } catch (e: Exception) {
                                     Log.e(TAG, "Failed parsing SSE chunk: ${e.message}")
                                 }
                             }
@@ -326,7 +326,7 @@ object GeminiService {
                         streamSucceeded = true
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException && e !is kotlinx.coroutines.TimeoutCancellationException) throw e
                 Log.w(TAG, "Streaming attempt failed: ${e.message}. Falling back to standard generateContent call...")
             }
@@ -379,7 +379,7 @@ object GeminiService {
             }
 
             throw Exception("The AI model returned no response. Please try again.")
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             if (fullResponse.isNotEmpty()) {
                 Log.w(TAG, "Exception encountered, but returning partial streamed response (${fullResponse.length} chars): ${e.message}")
                 return@withContext Result.success(fullResponse.toString())

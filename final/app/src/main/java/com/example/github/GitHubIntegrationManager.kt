@@ -190,7 +190,7 @@ object GitHubIntegrationManager {
                     statusMessage = "Connected as @${profile.login} & synced with Linux Git!"
                 )
                 Result.success(profile)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 val msg = e.localizedMessage ?: "Failed to connect to GitHub. Check your token and internet."
                 _state.value = _state.value.copy(isBusy = false, errorMessage = msg, statusMessage = null)
                 Result.failure(e)
@@ -210,7 +210,7 @@ object GitHubIntegrationManager {
                     clonedRepoPaths = discoverLocalWorkspaceClones(context.applicationContext)
                 )
                 Result.success(repos)
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 _state.value = _state.value.copy(isBusy = false, errorMessage = e.localizedMessage ?: "Could not load repositories")
                 Result.failure(e)
             }
@@ -257,7 +257,7 @@ object GitHubIntegrationManager {
                 statusMessage = "Created ${created.fullName}!"
             )
             Result.success(created)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             _state.value = _state.value.copy(isBusy = false, errorMessage = e.localizedMessage ?: "Repository creation failed")
             Result.failure(e)
         }
@@ -349,7 +349,7 @@ object GitHubIntegrationManager {
                 statusMessage = "Cloned ${repo.fullName} to $linuxPath"
             )
             Result.success(linuxPath)
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             _state.value = _state.value.copy(
                 isBusy = false,
                 errorMessage = e.localizedMessage ?: "Failed to clone ${repo.fullName}"
@@ -391,7 +391,7 @@ object GitHubIntegrationManager {
                         )
                     )
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Result.failure(e)
             }
         }
@@ -426,7 +426,7 @@ object GitHubIntegrationManager {
                     else -> Result.failure(IllegalStateException(json.optString("error_description").ifBlank { err.ifBlank { "Authorization failed" } }))
                 }
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

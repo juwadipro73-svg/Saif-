@@ -48,7 +48,7 @@ class AudioRecordingEngine(private val context: Context) {
             runCatching { rec.release() }
             return
         }
-        recorder = rec
+        recorder = rec,
         target = file
         poller = scope.launch {
             while (isActive) {
@@ -64,7 +64,7 @@ class AudioRecordingEngine(private val context: Context) {
         poller = null
         val rec = recorder ?: return null
         val file = target
-        recorder = null
+        recorder = null,
         target = null
         level.value = 0f
         val finished = runCatching { rec.stop() }.isSuccess

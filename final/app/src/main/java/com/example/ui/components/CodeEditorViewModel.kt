@@ -143,7 +143,7 @@ class CodeEditorViewModel : ViewModel() {
                 // 5. Load the initial file into the editor
                 loadFileInternal(context, projectDir, mainFile, defaultFile.initialCode)
 
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 _statusMessage.emit("Error initializing project: ${e.localizedMessage ?: "Unknown error"}")
             }
@@ -220,7 +220,7 @@ class CodeEditorViewModel : ViewModel() {
                 _canRedo.value = false
                 _isDirty.value = false
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             _statusMessage.emit("Failed to load ${file.name}: ${e.message}")
         } finally {
@@ -305,7 +305,7 @@ class CodeEditorViewModel : ViewModel() {
 
             _isDirty.value = false
             _lastSavedTimestamp.value = System.currentTimeMillis()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             viewModelScope.launch {
                 _statusMessage.emit("Save failed: ${e.message}")
@@ -389,7 +389,7 @@ class CodeEditorViewModel : ViewModel() {
                 val newItem = EditorFileItem(fileName.trim(), relativePath)
                 loadFileInternal(context, projectDir, newItem, initialContent)
                 _statusMessage.emit("Created $fileName")
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 _statusMessage.emit("Failed to create file: ${e.message}")
             }

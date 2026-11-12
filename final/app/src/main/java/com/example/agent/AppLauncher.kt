@@ -61,7 +61,7 @@ object AppLauncher {
                     Log.i(TAG, "Rung 1 (Accessibility Context) launched '$targetPackage' successfully.")
                     return LaunchResult(true, targetPackage, "App opened successfully: $targetPackage")
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Rung 1 launch failed: ${e.message}")
             }
         }
@@ -75,7 +75,7 @@ object AppLauncher {
                     Log.i(TAG, "Rung 2 (Application Context) launched '$targetPackage' successfully.")
                     return LaunchResult(true, targetPackage, "App opened successfully: $targetPackage")
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Rung 2 launch failed: ${e.message}")
             }
         }
@@ -103,7 +103,7 @@ object AppLauncher {
                     Log.i(TAG, "Rung 3 (PendingIntent) launched '$targetPackage' successfully.")
                     return LaunchResult(true, targetPackage, "App opened successfully: $targetPackage")
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Rung 3 launch failed: ${e.message}")
             }
         }
@@ -123,7 +123,7 @@ object AppLauncher {
                         return LaunchResult(true, targetPackage, "App opened successfully via Home: $targetPackage")
                     }
                 }
-            } catch (err: Exception) {
+            } catch (e: Exception) {
                 Log.w(TAG, "Rung 4 UI fallback failed: ${e.message}")
             }
         }

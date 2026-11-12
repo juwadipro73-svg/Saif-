@@ -331,7 +331,7 @@ fun AuthScreen(
                 modifier =
     Modifier
                     .graphicsLayer {
-                        alpha = cardAppear.value
+                        alpha = cardAppear.value,
                         translationY = (1f - cardAppear.value) * 48f
                     }
                     .fillMaxWidth()
@@ -597,7 +597,7 @@ fun AuthScreen(
                                             interactionSource = remember { MutableInteractionSource() },
                                             indication = null
                                         ) {
-                                            resetEmailInput = emailInput.trim()
+                                            resetEmailInput = emailInput.trim(),
                                             showForgotPasswordDialog = true
                                         }
                                         .padding(vertical = 4.dp, horizontal = 6.dp)
@@ -805,7 +805,7 @@ fun AuthScreen(
                                             isResetLoading = false
                                             res.fold(
                                                 onSuccess = { msg ->
-                                                    statusMessage = msg
+                                                    statusMessage = msg,
                                                     showForgotPasswordDialog = false
                                                 },
                                                 onFailure = { err ->
@@ -832,7 +832,7 @@ fun AuthScreen(
                                 isResetLoading = false
                                 res.fold(
                                     onSuccess = { msg ->
-                                        statusMessage = msg
+                                        statusMessage = msg,
                                         showForgotPasswordDialog = false
                                     },
                                     onFailure = { err ->

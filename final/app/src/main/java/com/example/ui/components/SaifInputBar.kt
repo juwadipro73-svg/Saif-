@@ -137,7 +137,7 @@ fun SaifInputBar(
     val stopListeningNow = {
         if (isListening) {
             directSpeechEngine.stopListening()
-            isListening = false
+            isListening = false,
             rmsValue = 0f
             onVoiceListeningStateChange(false, 0f)
         }

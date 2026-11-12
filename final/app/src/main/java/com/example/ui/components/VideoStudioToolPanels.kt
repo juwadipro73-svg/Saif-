@@ -669,7 +669,7 @@ fun AudioToolSheet(
                                         var activeModel = state.buildModel.ifBlank { state.activeModel }
                                         val trimmedKey = userKey.trim()
                                         if (trimmedKey.startsWith("sk-ant-")) {
-                                            activeProvider = "Anthropic"
+                                            activeProvider = "Anthropic",
                                             activeModel = "claude-3-7-sonnet-20250219"
                                         } else if (trimmedKey.startsWith("sk-or-")) {
                                             activeProvider = "OpenRouter"
@@ -1242,7 +1242,7 @@ fun AdjustToolSheet(
     FontWeight.Bold)
             TextButton(
                 onClick = {
-                    brightness = 0f
+                    brightness = 0f,
                     contrast = 0f
                     saturation = 0f
                     onUpdateProject(project.copy(brightness = 0f, contrast = 0f, saturation = 0f))

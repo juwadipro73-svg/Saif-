@@ -60,7 +60,7 @@ internal fun HomeAgentFeed(
                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).setDataAndType(uri, type)
                         .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(android.content.Intent.createChooser(intent, "Open ${file.name}"))
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     android.widget.Toast.makeText(context, "Cannot open file: ${e.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
                 }
             }
@@ -70,7 +70,7 @@ internal fun HomeAgentFeed(
         object : androidx.compose.ui.platform.UriHandler {
             override fun openUri(uri: String) {
                 if (uri.startsWith("file://", true) || uri.startsWith("/")) fileHandler.onOpenFile(uri)
-                else try { externalUris.openUri(uri) } catch (err: Exception) {
+                else try { externalUris.openUri(uri) } catch (e: Exception) {
                     android.widget.Toast.makeText(context, "Cannot open link: ${e.localizedMessage}", android.widget.Toast.LENGTH_SHORT).show()
                 }
             }

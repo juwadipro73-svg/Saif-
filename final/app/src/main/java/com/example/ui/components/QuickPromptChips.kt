@@ -172,7 +172,7 @@ fun QuickPromptChips(
                     fontSize =
     14.sp,
                     color = SaifTheme.colors.textSecondary,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                     lineHeight = 21.2.sp,
                     modifier =
     Modifier.padding(horizontal = 16.dp)

@@ -267,31 +267,31 @@ object LlmClient {
                     if (code == 400 || code == 422) {
                         var healed = false
                         if (bodyStr.contains("max_completion_tokens", true) || bodyStr.contains("completion_tokens", true)) {
-                            useCompletionTokensParam = true
+                            useCompletionTokensParam = true,
                             currentLimits = currentLimits.copy(requiresCompletionTokensParam = true)
                             ModelLimitsStore.update(currentLimits)
                             healed = true
                         } else if (bodyStr.contains("max_tokens", true) && useCompletionTokensParam) {
-                            useCompletionTokensParam = false
+                            useCompletionTokensParam = false,
                             currentLimits = currentLimits.copy(requiresCompletionTokensParam = false)
                             ModelLimitsStore.update(currentLimits)
                             healed = true
                         }
                         val clampedLimit = extractTokenLimit(bodyStr)
                         if (clampedLimit != null && clampedLimit > 0 && clampedLimit < maxTokensToUse) {
-                            maxTokensToUse = clampedLimit.toInt()
+                            maxTokensToUse = clampedLimit.toInt(),
                             currentLimits = currentLimits.copy(maxOutputTokens = maxTokensToUse)
                             ModelLimitsStore.update(currentLimits)
                             healed = true
                         }
                         if (bodyStr.contains("temperature", true) && sendTemperature) {
-                            sendTemperature = false
+                            sendTemperature = false,
                             currentLimits = currentLimits.copy(supportsTemperature = false)
                             ModelLimitsStore.update(currentLimits)
                             healed = true
                         }
                         if (bodyStr.contains("system", true) && !mergeSystemIntoUser) {
-                            mergeSystemIntoUser = true
+                            mergeSystemIntoUser = true,
                             currentLimits = currentLimits.copy(supportsSystemRole = false)
                             ModelLimitsStore.update(currentLimits)
                             healed = true
@@ -341,7 +341,7 @@ object LlmClient {
                         if (isQuotaExhausted) {
                             if (profile.id.contains("Ashna", true) && !cleanModel.equals("ashna-x1", true) && attemptCount < maxAttempts) {
                                 Log.i(TAG, "Quota limit on Ashna model $cleanModel. Self-healing with ashna-x1...")
-                                cleanModel = "ashna-x1"
+                                cleanModel = "ashna-x1",
                                 maxTokensToUse = 800
                                 delay(600L)
                                 continue
@@ -357,7 +357,7 @@ object LlmClient {
                                 maxTokensToUse = min(maxTokensToUse, 1024)
                             }
                             if (profile.id.contains("Ashna", true) && !cleanModel.equals("ashna-x1", true)) {
-                                cleanModel = "ashna-x1"
+                                cleanModel = "ashna-x1",
                                 maxTokensToUse = 800
                             }
                             Log.w(TAG, "Rate-limited by ${profile.displayName}. Waiting ${cappedWait}s before retry (attempt $attemptCount)...")
@@ -484,7 +484,7 @@ object LlmClient {
                         }
                     } catch (e: CancellationException) {
                         throw e
-                    } catch (err: Exception) {
+                    } catch (e: Exception) {
                         currentCoroutineContext().ensureActive()
                         Log.w(TAG, "Non-streaming fallback failed: ${e.message}")
                     }
@@ -924,7 +924,7 @@ object LlmClient {
 
             val usage = json.optJSONObject("usage")
             if (usage != null) {
-                promptTokens = usage.optInt("prompt_tokens")
+                promptTokens = usage.optInt("prompt_tokens"),
                 completionTokens = usage.optInt("completion_tokens")
             }
 
@@ -1282,4 +1282,3 @@ object LlmClient {
             ?: Regex("""([0-9]+)\s+max_tokens""", RegexOption.IGNORE_CASE).find(body)
         return match?.groupValues?.get(1)?.toLongOrNull()
     }
-}

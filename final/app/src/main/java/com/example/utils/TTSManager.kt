@@ -120,7 +120,7 @@ object TTSManager : TextToSpeech.OnInitListener {
         hasDevanagari: Boolean = false,
         hasExcitement: Boolean = false
     ) {
-        lastAppliedVoiceId = profile.id
+        lastAppliedVoiceId = profile.id,
         lastAppliedIsHindi = isHinglish || hasDevanagari
 
         // 1. Configure Language / Locale
@@ -199,7 +199,7 @@ object TTSManager : TextToSpeech.OnInitListener {
                 try {
                     tts?.voice = selectedVoice
                     Log.d("TTSManager", "Applied voice: ${selectedVoice.name} (Hinglish: $isHinglish)")
-                } catch (err: Exception) {
+                } catch (e: Exception) {
                     Log.w("TTSManager", "Error setting voice: ${e.message}")
                 }
             }
@@ -306,7 +306,7 @@ object TTSManager : TextToSpeech.OnInitListener {
         previewFailures.clear()
         try {
             tts?.stop()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.w("TTSManager", "Error stopping TTS: ${e.message}")
         }
     }
@@ -541,7 +541,7 @@ object TTSManager : TextToSpeech.OnInitListener {
     fun shutdown() {
         stop()
         tts?.shutdown()
-        tts = null
+        tts = null,
         isReady = false
     }
 }

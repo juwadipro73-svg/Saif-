@@ -84,7 +84,7 @@ object SandboxRunner {
 
                             @JavascriptInterface
                             fun reportMetrics(overflow: Boolean, smallTargets: Int, blank: Boolean) {
-                                horizontalOverflow = overflow
+                                horizontalOverflow = overflow,
                                 smallTouchTargets = smallTargets
                                 isBlankScreen = blank
                             }

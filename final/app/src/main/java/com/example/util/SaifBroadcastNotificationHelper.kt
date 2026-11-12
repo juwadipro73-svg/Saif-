@@ -32,8 +32,8 @@ object SaifBroadcastNotificationHelper {
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
                 description = "Critical system announcements, model updates, and notifications from SAIF AI Admin"
-                enableVibration(value = true)
-                enableLights(value = true)
+                enableVibration(true)
+                enableLights(true)
                 setShowBadge(true)
             }
             val notificationManager =
@@ -98,7 +98,7 @@ object SaifBroadcastNotificationHelper {
                 Log.w(TAG, "Cannot post notification: missing POST_NOTIFICATIONS permission")
                 false
             }
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to post broadcast notification", e)
             false
         }

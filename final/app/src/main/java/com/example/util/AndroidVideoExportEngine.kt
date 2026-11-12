@@ -123,7 +123,7 @@ object AndroidVideoExportEngine {
                 val inputSurface = encoder.createInputSurface()
                 encoder.start()
 
-                muxer = MediaMuxer(tempOutputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+                muxer = MediaMuxer(tempOutputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4),
                 canUseHardwareCodec = true
 
                 // Render frames to surface
@@ -217,7 +217,7 @@ object AndroidVideoExportEngine {
             }
 
             bitmap.recycle()
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Video Export exception: ${e.message}", e)
             failureReason = e.message
         }
@@ -532,7 +532,7 @@ object AndroidVideoExportEngine {
             }
 
             return itemUri
-        } catch (err: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error saving media to MediaStore: ${e.message}", e)
             return null
         }
