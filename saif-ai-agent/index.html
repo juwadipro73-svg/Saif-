@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SAIF AI - Autonomous Agent & Code Assistant</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+  <!-- Top App Bar -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="app-title-group">
+        <h1 class="app-title">SAIF AI</h1>
+        <span class="app-subtitle">Autonomous Code Engine</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="model-badge" id="activeModelBadge">Claude 3.7</div>
+      <button class="icon-btn" id="voiceToggleBtn" title="Toggle Voice Responses">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="headerSettingsBtn" title="Open Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Viewports -->
+  <main class="app-content">
+
+    <!-- TAB 1: AGENT CHAT -->
+    <section class="tab-pane active" id="tabChat">
+      <!-- Session Bar -->
+      <div class="session-bar">
+        <div class="session-info">
+          <span class="status-dot online"></span>
+          <span class="session-name" id="sessionTitleDisplay">Workspace Agent #1</span>
+        </div>
+        <div class="session-actions">
+          <button class="pill-btn-small" id="newChatBtn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New
+          </button>
+          <button class="pill-btn-small" id="clearChatBtn">Clear</button>
+        </div>
+      </div>
+
+      <!-- Quick prompts scroll -->
+      <div class="quick-prompts-container">
+        <button class="quick-pill" data-prompt="Analyze the current workspace files, find potential bugs, and suggest optimizations.">🔍 Code Audit</button>
+        <button class="quick-pill" data-prompt="Create a REST API client in Python with authentication and error handling.">🐍 Python API</button>
+        <button class="quick-pill" data-prompt="Create an interactive HTML5/Canvas game with physics in the workspace.">🎮 HTML5 Game</button>
+        <button class="quick-pill" data-prompt="Diagnose system tools and test workspace file read/write operations.">⚡ Run Diagnostics</button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="messages-container" id="messagesContainer">
+        <!-- Initial Welcome Card -->
+        <div class="message-card assistant welcome-card">
+          <div class="msg-avatar">
+            <div class="pulse-ring"></div>
+            <span>SAIF</span>
+          </div>
+          <div class="msg-body">
+            <div class="msg-author">SAIF AI Core Engine</div>
+            <div class="msg-text">
+              Welcome to <strong>SAIF AI</strong>, your autonomous agent and developer environment for Android.
+              <br><br>
+              <strong>Autonomous Capabilities:</strong>
+              <ul>
+                <li>📁 <strong>File Operations:</strong> Read, write, edit, and patch code files in your workspace.</li>
+                <li>⚡ <strong>Terminal & Execution:</strong> Run Python, JavaScript, and shell commands in a live virtual sandbox.</li>
+                <li>🛠️ <strong>Autonomous Tool Engine:</strong> Breaks goals into tasks, runs diagnostics, and audits code.</li>
+                <li>🧩 <strong>Multi-LLM & MCP:</strong> Supports Claude, OpenAI, Gemini, DeepSeek, and custom MCP tools.</li>
+              </ul>
+              Select a quick prompt above or type your instruction below to start!
+            </div>
+            <div class="msg-meta">Ready • Local Workspace Active</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="chat-input-area">
+        <!-- Plan / Tool progress banner -->
+        <div class="agent-activity-banner" id="agentActivityBanner" style="display:none;">
+          <div class="activity-spinner"></div>
+          <span class="activity-text" id="activityBannerText">SAIF Agent executing plan...</span>
+        </div>
+
+        <div class="input-box-wrapper">
+          <button class="input-tool-btn" id="micBtn" title="Voice Input (Speech-to-Text)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+
+          <textarea id="promptInput" rows="1" placeholder="Instruct SAIF AI agent (e.g. 'Build a modern todo app with tests')..."></textarea>
+
+          <button class="send-btn" id="sendBtn" title="Send Instruction">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: WORKSPACE & CODE EDITOR -->
+    <section class="tab-pane" id="tabEditor">
+      <div class="editor-header">
+        <div class="editor-tabs" id="editorTabs">
+          <div class="file-tab active" data-filename="main.py">
+            <span>main.py</span>
+            <button class="close-tab-btn">&times;</button>
+          </div>
+        </div>
+        <div class="editor-actions">
+          <button class="editor-action-btn" id="newFileBtn" title="New File">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            New
+          </button>
+          <button class="editor-action-btn run-btn" id="runFileBtn" title="Run in Terminal">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run
+          </button>
+          <button class="editor-action-btn" id="saveFileBtn" title="Save File">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-container">
+        <!-- Sidebar file list -->
+        <div class="workspace-sidebar" id="workspaceSidebar">
+          <div class="sidebar-title">
+            <span>FILES</span>
+            <span class="file-count-badge" id="fileCountBadge">3</span>
+          </div>
+          <div class="file-tree" id="fileTree">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Code Area -->
+        <div class="code-editor-wrapper">
+          <div class="line-numbers" id="lineNumbers">1</div>
+          <textarea id="codeEditorArea" spellcheck="false" placeholder="# Write your code here..."></textarea>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <span id="editorStatus">Lines: 1 | UTF-8 | Python</span>
+        <button class="pill-btn-small" id="agentFixCodeBtn">✨ Agent Polish / Fix</button>
+      </div>
+    </section>
+
+    <!-- TAB 3: TERMINAL & TOOLS BENCH -->
+    <section class="tab-pane" id="tabTerminal">
+      <div class="terminal-header">
+        <div class="terminal-title">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="title-text">SAIF Virtual Terminal & Diagnostics</span>
+        </div>
+        <div class="terminal-actions">
+          <button class="pill-btn-small" id="clearTerminalBtn">Clear</button>
+          <button class="pill-btn-small" id="diagRunBtn">⚡ Full Diagnostics</button>
+        </div>
+      </div>
+
+      <div class="terminal-body" id="terminalOutput">
+        <div class="term-line welcome">SAIF AI Terminal v2.4 (Virtual Linux / Android Environment)</div>
+        <div class="term-line welcome">Type 'help' for available tools and commands.</div>
+        <div class="term-line info">Ready. Workspace mounted at: /root/workspace/project</div>
+      </div>
+
+      <div class="terminal-input-bar">
+        <span class="term-prompt">saif@ai:~$</span>
+        <input type="text" id="terminalInput" placeholder="run main.py, ls, cat, diagnose, fetch..." autocomplete="off" autocapitalize="none">
+        <button class="pill-btn-small" id="terminalSendBtn">Exec</button>
+      </div>
+    </section>
+
+    <!-- TAB 4: SKILLS & MCP -->
+    <section class="tab-pane" id="tabSkills">
+      <div class="skills-page">
+        <h2 class="section-title">Agent Personas & Skills</h2>
+        <p class="section-desc">Equip the SAIF AI agent with specialized capability bundles and custom prompt strategies.</p>
+
+        <div class="skills-grid" id="skillsGrid">
+          <!-- Skill Cards -->
+          <div class="skill-card active" data-skill="developer">
+            <div class="skill-icon">⚡</div>
+            <div class="skill-info">
+              <div class="skill-name">Full-Stack Architect</div>
+              <div class="skill-desc">Generates clean modular code, architectural patterns, and end-to-end applications.</div>
+            </div>
+            <input type="radio" name="activeSkill" checked>
+          </div>
+
+          <div class="skill-card" data-skill="auditor">
+            <div class="skill-icon">🛡️</div>
+            <div class="skill-info">
+              <div class="skill-name">Code Auditor & Bug Hunter</div>
+              <div class="skill-desc">Scrutinizes code for performance bottlenecks, edge-case crashes, and security vulnerabilities.</div>
+            </div>
+            <input type="radio" name="activeSkill">
+          </div>
+
+          <div class="skill-card" data-skill="qa">
+            <div class="skill-icon">🧪</div>
+            <div class="skill-info">
+              <div class="skill-name">Automation & QA Specialist</div>
+              <div class="skill-desc">Generates unit tests, mock suites, benchmarks, and regression validations.</div>
+            </div>
+            <input type="radio" name="activeSkill">
+          </div>
+
+          <div class="skill-card" data-skill="devops">
+            <div class="skill-icon">🚀</div>
+            <div class="skill-info">
+              <div class="skill-name">DevOps & Cloud Engineer</div>
+              <div class="skill-desc">Designs CI/CD pipelines, Docker containers, environment setups, and automation scripts.</div>
+            </div>
+            <input type="radio" name="activeSkill">
+          </div>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 24px;">MCP (Model Context Protocol) Server Registry</h2>
+        <p class="section-desc">Connect external tool servers conforming to the Model Context Protocol.</p>
+
+        <div class="mcp-server-list" id="mcpServerList">
+          <div class="mcp-item">
+            <div class="mcp-info">
+              <span class="mcp-name">Local Virtual Filesystem Tool</span>
+              <span class="mcp-status active">Built-in • Active</span>
+            </div>
+            <span class="mcp-tools-count">6 Tools</span>
+          </div>
+
+          <div class="mcp-item">
+            <div class="mcp-info">
+              <span class="mcp-name">Virtual Python/JS Runner</span>
+              <span class="mcp-status active">Built-in • Active</span>
+            </div>
+            <span class="mcp-tools-count">3 Tools</span>
+          </div>
+
+          <div class="mcp-item">
+            <div class="mcp-info">
+              <span class="mcp-name">HTTP Network Fetcher Tool</span>
+              <span class="mcp-status active">Built-in • Active</span>
+            </div>
+            <span class="mcp-tools-count">2 Tools</span>
+          </div>
+        </div>
+
+        <button class="pill-btn full-width" id="addMcpBtn">+ Add Custom MCP Server Endpoint</button>
+      </div>
+    </section>
+
+    <!-- TAB 5: SETTINGS -->
+    <section class="tab-pane" id="tabSettings">
+      <div class="settings-page">
+        <h2 class="section-title">Model & Engine Settings</h2>
+        
+        <div class="setting-group">
+          <label class="setting-label">LLM Provider</label>
+          <select id="providerSelect" class="setting-select">
+            <option value="anthropic">Anthropic (Claude 3.7 / 3.5)</option>
+            <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+            <option value="gemini">Google Gemini (Gemini 2.0 Flash / Pro)</option>
+            <option value="deepseek">DeepSeek (V3, R1)</option>
+            <option value="groq">Groq (Llama 3.3 70B Fast)</option>
+            <option value="openrouter">OpenRouter (Unified)</option>
+            <option value="ollama">Ollama (Local / On-device)</option>
+            <option value="builtin" selected>SAIF AI Built-in Autonomous Engine</option>
+          </select>
+        </div>
+
+        <div class="setting-group" id="apiKeyGroup">
+          <label class="setting-label">API Key</label>
+          <input type="password" id="apiKeyInput" class="setting-input" placeholder="sk-ant-... or sk-...">
+          <small class="setting-help">Stored locally in your secure device sandbox.</small>
+        </div>
+
+        <div class="setting-group">
+          <label class="setting-label">Model Identifier</label>
+          <input type="text" id="modelNameInput" class="setting-input" value="claude-3-7-sonnet-20250219">
+        </div>
+
+        <div class="setting-group">
+          <label class="setting-label">Autonomous Tool Execution</label>
+          <div class="toggle-row">
+            <span>Auto-execute file & shell tools</span>
+            <input type="checkbox" id="autoExecuteTools" checked>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label class="setting-label">Voice Synthesis & Audio</label>
+          <div class="toggle-row">
+            <span>Speech Output (TTS)</span>
+            <input type="checkbox" id="ttsToggle" checked>
+          </div>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 24px;">Workspace Backup & Sync</h2>
+        <div class="setting-actions">
+          <button class="pill-btn full-width" id="exportWorkspaceBtn">📦 Export Workspace & Chats (JSON)</button>
+          <button class="pill-btn full-width secondary" id="resetWorkspaceBtn">🗑️ Reset to Default Project</button>
+        </div>
+
+        <div class="app-version-footer">
+          <span>SAIF AI Autonomous Agent Studio</span>
+          <br>
+          <small>Version 1.0.0 • Mobile Developer Suite</small>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-tab="tabChat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>Agent</span>
+    </button>
+    <button class="nav-tab" data-tab="tabEditor">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <span>Files</span>
+    </button>
+    <button class="nav-tab" data-tab="tabTerminal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="4 17 10 11 4 5"/>
+        <line x1="12" y1="19" x2="20" y2="19"/>
+      </svg>
+      <span>Terminal</span>
+    </button>
+    <button class="nav-tab" data-tab="tabSkills">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+      <span>Skills</span>
+    </button>
+    <button class="nav-tab" data-tab="tabSettings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <!-- Modular Scripts -->
+  <script src="workspace-fs.js"></script>
+  <script src="tools.js"></script>
+  <script src="agent-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
