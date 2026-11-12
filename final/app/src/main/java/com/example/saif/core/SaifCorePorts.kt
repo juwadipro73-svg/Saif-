@@ -90,11 +90,13 @@ data class ChatAttachment
 data class TokenUsage(
     val promptTokens: Int = 0,
     val outputTokens: Int = 0,
-    val completionTokens: Int get() = outputTokens,
     val totalTokens: Int = 0,
     val durationMs: Long? = null,
     val model: String = ""
-)
+) {
+    /** Alias kept for call sites that follow the OpenAI naming. */
+    val completionTokens: Int get() = outputTokens
+}
 
 data class ChatMessage
 (

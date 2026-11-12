@@ -152,8 +152,9 @@ object SaifSlashCommandRegistry {
     /** Ensures custom commands, saved skills, and specialist agents are initialized. */
     fun init(context: Context) {
         val app = context.applicationContext
-        CustomSlashCommands.init(app)
-        SaifAgentRegistry.ensureLoaded(app as android.app.Application)
+        val application = app as? android.app.Application ?: return
+        CustomSlashCommands.init(application)
+        SaifAgentRegistry.ensureLoaded(application)
     }
 
     /**
