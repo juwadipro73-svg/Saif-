@@ -57,6 +57,9 @@ data class ToolCall
     val durationMs: Long? =
         null,
     val stepIndex: Int? =
+        null,
+    /** Set when the tool call is waiting for a permission decision ("permission"). */
+    val interactionType: String? =
         null
 )
 
@@ -84,6 +87,15 @@ data class ChatAttachment
         null
 )
 
+data class TokenUsage(
+    val promptTokens: Int = 0,
+    val outputTokens: Int = 0,
+    val completionTokens: Int get() = outputTokens,
+    val totalTokens: Int = 0,
+    val durationMs: Long? = null,
+    val model: String = ""
+)
+
 data class ChatMessage
 (
     val id: String =
@@ -107,6 +119,8 @@ data class ChatMessage
     val createdAt: Long =
         System.currentTimeMillis(),
     val modelId: String? =
+        null,
+    val tokenUsage: TokenUsage? =
         null
 )
 

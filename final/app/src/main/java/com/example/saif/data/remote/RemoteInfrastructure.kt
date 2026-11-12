@@ -72,7 +72,8 @@ data class SaifAccountInfo(
     val fullName: String = "",
     val displayName: String = "",
     val email: String = "",
-    val planName: String = ""
+    val planName: String = "",
+    val profilePictureUrl: String? = null
 ) {
     val initials: String
         get() = (displayName.ifBlank { fullName }.ifBlank { email }).trim().take(2).uppercase().ifBlank { "SA" }
@@ -87,13 +88,27 @@ object GoogleAccountBinding {
     }
 }
 
-/** Local bridge hosted inside the app process. */
+/** Local bridge hosted inside the app process. Loopback only; never exposed to the network. */
 object AndroidLocalBridgeServer {
     val instance: SaifLocalBridgeServer get() = SaifLocalBridgeServer.instance
 
     fun start(context: Context) {
         runCatching { instance.start(context.applicationContext) }
     }
+
+    fun stop() {
+        runCatching { instance.stop() }
+    }
+
+    /** Starts the bridge and makes sure the workspace directories exist before a turn runs. */
+    fun ensureLinuxCliReady(context: Context) {
+        start(context)
+        com.example.saif.data.local.LocalEnvironmentManager.ensureInstalledInBackground(context.applicationContext)
+    }
+
+    /** Publishes a finished file (APK, ZIP, export) and returns the loopback download URL. */
+    fun registerDownloadFile(context: Context, file: java.io.File, desiredFileName: String? = null): String =
+        instance.registerDownloadFile(context.applicationContext, file, desiredFileName)
 }
 
 data class SkillItemModel(

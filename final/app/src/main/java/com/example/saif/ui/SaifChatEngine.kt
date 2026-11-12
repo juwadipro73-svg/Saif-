@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import kotlinx.coroutines.Dispatchers
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -114,7 +115,7 @@ fun SaifMarkdown(
             }
 
             if (inCodeBlock) {
-                codeBuffer.add(line)
+                codeBuffer.add(rawLine)
                 continue
             }
 
@@ -183,7 +184,7 @@ fun SaifMarkdown(
                 trimmed.isNotBlank() -> {
                     SelectionContainer(modifier = Modifier) {
                         Text(
-                            text = parseInlineMarkdown(line),
+                            text = parseInlineMarkdown(rawLine),
                             style = MaterialTheme.typography.bodyMedium,
                             color = textColor
                         )

@@ -29,6 +29,9 @@ class AgentPreferences(private val context: Context) {
             _enabledFlow.value.joinToString(",") { it.name.lowercase() }
     }
 
+    /** Enabled engines for this screen. */
+    val enabled: StateFlow<Set<AgentKind>> get() = enabledAgents
+
     fun isAgentEnabled(kind: AgentKind): Boolean = kind in _enabledFlow.value
 
     fun setEnabled(set: Set<AgentKind>) {

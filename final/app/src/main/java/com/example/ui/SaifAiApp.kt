@@ -132,7 +132,6 @@ fun SaifAiApp(
     val accountIssue = if (antigravityConnection.isReady) {
         com.example.saif.data.remote.GoogleAccountBinding.denialReason(appUser, antigravityAuthInfo)
     } else null
-    val antigravityQuotas by viewModel.antigravityQuotas.collectAsState()
     LaunchedEffect(accountIssue) {
         if (accountIssue != null) {
             engineFeature = null
@@ -666,8 +665,8 @@ fun SaifAiApp(
                                 Box {
                                     val chipLabel = antigravityModels.firstOrNull { it.id == selectedAntigravityModel }?.displayName
                                         ?: "Model"
-                                    val chipQuota = antigravityQuotas.firstOrNull { it.modelId == selectedAntigravityModel }
-                                        ?.remainingFraction?.let { (it * 100f).toInt().coerceIn(0, 100) }
+                                    // SAIF AI does not meter provider quotas, so the chip shows no percentage.
+                                    val chipQuota: Int? = null
                                     com.example.ui.components.SaifModelChip(
                                         label = chipLabel,
                                         quotaPercent = chipQuota,

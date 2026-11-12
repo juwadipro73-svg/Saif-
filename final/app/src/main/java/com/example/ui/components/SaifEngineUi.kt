@@ -195,7 +195,7 @@ fun SaifModelChip(
 /** The engine's Google account chip (avatar with a status dot and the account name), used in SAIF's history drawer. */
 @Composable
 fun SaifEngineAccountChip(
-    authInfo: AgyHubClient.AgyAuthInfo,
+    authInfo: SaifAccountInfo,
     statusColor: Color,
     onClick: () -> Unit,
     modifier: Modifier =

@@ -772,7 +772,6 @@ object AuthManager {
             com.example.saif.data.remote.SavedAiSkills.bind(appContext, null)
         }
         com.example.cloud.SaifAiCloudManager.onSignedOut()
-        com.example.saif.data.remote.AntigravityAppBinding.clear()
     }
 
     private fun saveSession(user: AuthUser) {

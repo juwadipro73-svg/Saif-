@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.compose.ui.platform.ComposeView
+import kotlinx.coroutines.cancelChildren
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner

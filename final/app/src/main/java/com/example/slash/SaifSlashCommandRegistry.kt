@@ -153,7 +153,7 @@ object SaifSlashCommandRegistry {
     fun init(context: Context) {
         val app = context.applicationContext
         CustomSlashCommands.init(app)
-        SaifAgentRegistry.ensureLoaded(app)
+        SaifAgentRegistry.ensureLoaded(app as android.app.Application)
     }
 
     /**

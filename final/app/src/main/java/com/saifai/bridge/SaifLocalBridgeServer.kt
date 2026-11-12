@@ -14,8 +14,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 /**
- * 100% Original Cleanroom Local Download & Execution Bridge Server for SAIF AI.
- * Completely replaces legacy AndroidLocalBridgeServer.
+ * SAIF AI's local download and execution bridge.
+ *
+ * It only listens on the device loopback interface and hands out short-lived tokens for
+ * files the app itself produced.
  */
 class SaifLocalBridgeServer private constructor() {
 
@@ -75,6 +77,14 @@ class SaifLocalBridgeServer private constructor() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed starting SAIF AI Bridge Server", e)
         }
+    }
+
+    @Synchronized
+    fun stop() {
+        isRunning = false
+        runCatching { serverSocket?.close() }
+        serverSocket = null
+        registeredDownloads.clear()
     }
 
     fun registerDownloadFile(context: Context, file: File, desiredFileName: String? = null): String {

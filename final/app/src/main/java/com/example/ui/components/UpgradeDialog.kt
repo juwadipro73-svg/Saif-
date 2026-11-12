@@ -113,7 +113,7 @@ fun UpgradeDialog(onDismiss: () -> Unit) {
     Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
+                            imageVector = Icons.Outlined.AutoAwesome,
                             contentDescription =
     null,
                             tint = Color(0xFF9B82EC), // Light Purple

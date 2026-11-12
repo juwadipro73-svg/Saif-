@@ -141,7 +141,7 @@ fun QuickPromptChips(
                             )
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
+                            imageVector = Icons.Outlined.AutoAwesome,
                             contentDescription = "SAIF Assistant",
                             tint = accent,
                             modifier =

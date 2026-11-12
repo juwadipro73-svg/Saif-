@@ -212,7 +212,8 @@ class SaifSharedChatViewModel(private val app: Application) : ViewModel() {
             email = AuthManager.currentUser.value?.email.orEmpty(),
             fullName = AuthManager.currentUser.value?.name.orEmpty(),
             displayName = AuthManager.currentUser.value?.name.orEmpty(),
-            planName = apiState.activeProfile?.name.orEmpty()
+            planName = apiState.activeProfile?.name.orEmpty(),
+            profilePictureUrl = AuthManager.currentUser.value?.profilePicturePath
         )
         _isNetworkConnected.value = currentNetworkAvailable()
     }

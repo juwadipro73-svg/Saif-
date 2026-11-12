@@ -139,7 +139,7 @@ internal fun HomeAgentFeed(
 
     CompositionLocalProvider(
         LocalQuestionPanelActive provides true,
-        LocalFileLinkHandler provides fileHandler,
+        LocalFileLinkHandler provides { uri -> fileHandler.handle(uri) },
         LocalUriHandler provides safeUris
     ) {
         LazyColumn(

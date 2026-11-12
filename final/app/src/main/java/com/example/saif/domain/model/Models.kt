@@ -24,11 +24,8 @@ enum class AgentKind {
     CUSTOM
 }
 
-data class TokenUsage(
-    val promptTokens: Int = 0,
-    val completionTokens: Int = 0,
-    val totalTokens: Int = 0
-)
+/** Token bookkeeping for one turn; owned by the core model layer. */
+typealias TokenUsage = com.example.saif.core.TokenUsage
 
 /**
  * A model the user can pick from the composer. Always derived from the provider profiles

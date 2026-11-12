@@ -277,7 +277,7 @@ fun SaifInputBar(
                 context =
     context,
                 rawQueryWithoutSlash = activeSlashToken.queryWithoutLeadingSlash,
-                hubCommands = com.example.saif.data.remote.SlashCommandsCache.getCachedSync()
+                hubCommands = com.example.saif.data.remote.SlashCommandsCache.getCachedSync() ?: emptyList()
             )
         }
         Column(Modifier.fillMaxWidth()) {

@@ -86,7 +86,7 @@ fun SaifSkillsManagerDialog(
     Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.AutoAwesome,
+                        imageVector = Icons.Outlined.AutoAwesome,
                         contentDescription =
     null,
                         tint = accentCol,
@@ -199,8 +199,8 @@ fun SaifSkillsManagerDialog(
                                     errorMsg = null
                                     successMsg = null
                                     try {
-                                        val imported = SavedAiSkills.importFromGitHub(githubUrl, skillName)
-                                        successMsg = "Saved /${imported.name} — type /${imported.name} in chat!"
+                                        SavedAiSkills.importFromGitHub(githubUrl, skillName)
+                                        successMsg = "Saved /${skillName} — type /${skillName} in chat!"
                                         githubUrl = ""
                                         skillName = ""
                                     } catch (e: Exception) {
@@ -306,7 +306,7 @@ fun SaifSkillsManagerDialog(
     TextOverflow.Ellipsis
                                         )
                                         Text(
-                                            text = skill.sourceUrl,
+                                            text = skill.githubUrl,
                                             fontSize =
     10.sp,
                                             color = SaifTheme.colors.textSecondary,

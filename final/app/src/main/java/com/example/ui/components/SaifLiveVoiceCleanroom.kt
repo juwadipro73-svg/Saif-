@@ -4,11 +4,10 @@ package com.example.ui.components
 
 import android.content.Context
 import android.widget.Toast
-import com.saifai.core.SaifVoiceEngine
+import com.example.utils.TTSManager
 
 /**
- * 100% Cleanroom SAIF AI Live Voice session stub and session holder.
- * Replaces legacy automation session without any third-party dependencies.
+ * SAIF AI live voice session holder, backed by the app's own text-to-speech engine.
  */
 object SaifLiveSession {
     @Volatile var pendingScreenShare: Boolean = false
@@ -19,7 +18,7 @@ object SaifLiveSession {
  */
 fun startNormal(context: Context, isLightMode: Boolean = false, onStarted: () -> Unit = {}) {
     Toast.makeText(context, "SAIF AI Kabir Voice Active", Toast.LENGTH_SHORT).show()
-    SaifVoiceEngine.initialize(context)
-    SaifVoiceEngine.speak("SAIF AI ready.")
+    TTSManager.init(context)
+    TTSManager.speak("SAIF AI ready.", context)
     onStarted()
 }

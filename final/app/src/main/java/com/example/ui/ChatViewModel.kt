@@ -96,6 +96,9 @@ class ChatViewModel(
         com.example.agyext.AntigravityCustomApiManager.selectModelFromComposer(application, id)
     }
 
+    private val _activeAgentIsCustomApi = MutableStateFlow(true)
+    val activeAgentIsCustomApi: StateFlow<Boolean> = _activeAgentIsCustomApi.asStateFlow()
+
     val mainAgentMessages: StateFlow<List<com.example.saif.domain.model.ChatMessage>>
         get() = customApiStore.messages
 
@@ -485,7 +488,7 @@ class ChatViewModel(
             _isGenerating.value = true
             var sessionId: String? = null
             try {
-                com.example.saif.data.remote.AndroidLocalBridgeServer.instance.ensureLinuxCliReady(context)
+                com.example.saif.data.remote.AndroidLocalBridgeServer.ensureLinuxCliReady(context)
                 com.example.github.GitHubIntegrationManager.init(context)
 
                 sessionId = _activeSessionId.value
