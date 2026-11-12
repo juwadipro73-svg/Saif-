@@ -1,0 +1,185 @@
+# CI compile report
+
+run: 43223179972  commit: f9f07a3acac7aaa5de8318468986a3bc6631243b  exit: 1
+
+## errors by file (unique)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:16: Not sure how to convert the query result to this function's return type (kotlinx.coroutines.flow.Flow<kotlin.collections.List<com.example.`data`.local.ChatSessionEntity>>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:16: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:19: Not sure how to convert the query result to this function's return type (com.example.`data`.local.ChatSessionEntity?).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:19: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:22: Not sure how to convert the query result to this function's return type (com.example.`data`.local.ChatSessionEntity?).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:22: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:31: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:34: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:37: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:40: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:43: Not sure how to convert the query result to this function's return type (kotlinx.coroutines.flow.Flow<kotlin.collections.List<com.example.`data`.local.ChatMessageEntity>>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:43: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:46: Not sure how to convert the query result to this function's return type (kotlin.collections.List<com.example.`data`.local.ChatMessageEntity>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:46: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:52: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:55: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: isBookmarked)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:58: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:61: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:64: Not sure how to convert the query result to this function's return type (kotlinx.coroutines.flow.Flow<kotlin.collections.List<com.example.`data`.local.ChatMessageEntity>>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:64: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: chat_messages.isBookmarked)
+
+## javac / aapt errors
+
+## failed tasks, causes, resolution problems
+* What went wrong:
+> Task :app:kspStandardDebugKotlin FAILED
+Execution failed for task ':app:kspStandardDebugKotlin'.
+FAILURE: Build failed with an exception.
+
+## tail
+> Task :apprunner:preDebugBuild UP-TO-DATE
+> Task :apprunner:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :apprunner:generateDebugResources
+> Task :apprunner:packageDebugResources
+> Task :apprunner:processDebugNavigationResources
+> Task :apprunner:javaPreCompileDebug
+> Task :apprunner:generateDebugAssets UP-TO-DATE
+> Task :apprunner:mergeDebugAssets
+> Task :apprunner:parseDebugLocalResources
+> Task :apprunner:compressDebugAssets
+> Task :apprunner:desugarDebugFileDependencies
+> Task :apprunner:checkDebugAarMetadata
+> Task :apprunner:generateDebugRFile
+> Task :apprunner:compileDebugNavigationResources
+> Task :apprunner:compileDebugKotlin NO-SOURCE
+
+> Task :apprunner:compileDebugJavaWithJavac
+Note: /home/runner/work/Saif-/Saif-/final/apprunner/src/main/java/com/saif/apprunner/MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :apprunner:mapDebugSourceSetPaths
+> Task :apprunner:createDebugCompatibleScreenManifests
+> Task :apprunner:extractDeepLinksDebug
+> Task :apprunner:processDebugMainManifest
+> Task :apprunner:mergeDebugResources
+> Task :apprunner:processDebugManifest
+> Task :apprunner:processDebugJavaRes NO-SOURCE
+> Task :apprunner:processDebugManifestForPackage
+> Task :apprunner:mergeDebugJavaResource
+> Task :apprunner:processDebugResources
+> Task :apprunner:checkDebugDuplicateClasses
+> Task :apprunner:dexBuilderDebug
+> Task :apprunner:mergeDebugGlobalSynthetics
+> Task :apprunner:mergeLibDexDebug
+> Task :apprunner:mergeProjectDexDebug
+> Task :apprunner:mergeDebugJniLibFolders
+> Task :apprunner:mergeDebugNativeLibs NO-SOURCE
+> Task :apprunner:stripDebugDebugSymbols NO-SOURCE
+> Task :apprunner:mergeExtDexDebug
+> Task :apprunner:validateSigningDebug
+> Task :apprunner:writeDebugAppMetadata
+> Task :apprunner:writeDebugSigningConfigVersions
+> Task :app:bundleBrowserExtensions
+> Task :app:bundleExtensionDocs
+> Task :app:copyScriptsToAssets
+> Task :app:generateStandardDebugProtos
+> Task :app:processStandardDebugGoogleServices
+> Task :apprunner:packageDebug
+> Task :apprunner:createDebugApkListingFileRedirect
+> Task :apprunner:assembleDebug
+> Task :app:bundleBaseRunnerApk
+> Task :app:preBuild
+> Task :app:preStandardDebugBuild
+> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateStandardDebugBuildConfig
+> Task :app:generateStandardDebugResources
+> Task :app:packageStandardDebugResources
+> Task :app:processStandardDebugNavigationResources
+> Task :app:parseStandardDebugLocalResources
+> Task :app:generateStandardDebugRFile
+> Task :app:javaPreCompileStandardDebug
+> Task :app:generateStandardDebugAssets
+> Task :app:mergeStandardDebugAssets
+> Task :app:compressStandardDebugAssets
+> Task :app:checkStandardDebugDuplicateClasses
+> Task :app:desugarStandardDebugFileDependencies
+> Task :app:kspStandardDebugKotlin
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:16: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:16: Not sure how to convert the query result to this function's return type (kotlinx.coroutines.flow.Flow<kotlin.collections.List<com.example.`data`.local.ChatSessionEntity>>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:19: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:19: Not sure how to convert the query result to this function's return type (com.example.`data`.local.ChatSessionEntity?).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:22: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:22: Not sure how to convert the query result to this function's return type (com.example.`data`.local.ChatSessionEntity?).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:31: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:34: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:37: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:40: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:43: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:43: Not sure how to convert the query result to this function's return type (kotlinx.coroutines.flow.Flow<kotlin.collections.List<com.example.`data`.local.ChatMessageEntity>>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:46: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:46: Not sure how to convert the query result to this function's return type (kotlin.collections.List<com.example.`data`.local.ChatMessageEntity>).
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:52: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:55: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: isBookmarked)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:58: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:61: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: ownerUid)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:64: There is a problem with the query: [SQLITE_ERROR] SQL error or missing database (no such column: chat_messages.isBookmarked)
+e: [ksp] /home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/ChatDao.kt:64: Not sure how to convert the query result to this function's return type (kotlinx.coroutines.flow.Flow<kotlin.collections.List<com.example.`data`.local.ChatMessageEntity>>).
+
+> Task :app:mergeExtDexStandardDebug
+> Task :app:kspStandardDebugKotlin FAILED
+> Task :app:mergeLibDexStandardDebug
+> Task :app:checkStandardDebugAarMetadata
+> Task :app:compileStandardDebugNavigationResources FROM-CACHE
+> Task :app:mapStandardDebugSourceSetPaths
+> Task :app:mergeStandardDebugResources
+> Task :app:createStandardDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksStandardDebug
+
+> Task :app:processStandardDebugMainManifest
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:25:5-102 Warning:
+	uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE was tagged at AndroidManifest.xml:25 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:26:5-97 Warning:
+	uses-permission#android.permission.QUERY_ALL_PACKAGES was tagged at AndroidManifest.xml:26 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:27:5-98 Warning:
+	uses-permission#android.permission.SYSTEM_ALERT_WINDOW was tagged at AndroidManifest.xml:27 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:28:5-103 Warning:
+	uses-permission#android.permission.REQUEST_INSTALL_PACKAGES was tagged at AndroidManifest.xml:28 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:29:5-102 Warning:
+	uses-permission#android.permission.REQUEST_DELETE_PACKAGES was tagged at AndroidManifest.xml:29 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:30:5-89 Warning:
+	uses-permission#android.permission.CALL_PHONE was tagged at AndroidManifest.xml:30 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:31:5-92 Warning:
+	uses-permission#android.permission.READ_CONTACTS was tagged at AndroidManifest.xml:31 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:32:5-93 Warning:
+	uses-permission#android.permission.WRITE_SETTINGS was tagged at AndroidManifest.xml:32 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:33:5-87 Warning:
+	uses-permission#android.permission.READ_SMS was tagged at AndroidManifest.xml:33 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:34:5-90 Warning:
+	uses-permission#android.permission.RECEIVE_SMS was tagged at AndroidManifest.xml:34 to remove other declarations but no other declaration present
+
+> Task :app:processStandardDebugManifest
+> Task :app:processStandardDebugManifestForPackage
+> Task :app:mergeStandardDebugJniLibFolders
+> Task :app:mergeStandardDebugNativeLibs
+
+> Task :app:stripStandardDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so, libtermux.so. Run with --info option to learn more.
+
+> Task :app:validateSigningStandardDebug
+> Task :app:writeStandardDebugAppMetadata
+> Task :app:writeStandardDebugSigningConfigVersions
+> Task :app:processStandardDebugResources
+
+[Incubating] Problems report is available at: file:///home/runner/work/Saif-/Saif-/final/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:kspStandardDebugKotlin'.
+> A failure occurred while executing com.google.devtools.ksp.gradle.KspAAWorkerAction
+   > KSP failed with exit code: PROCESSING_ERROR
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3m 42s
+69 actionable tasks: 68 executed, 1 from cache
