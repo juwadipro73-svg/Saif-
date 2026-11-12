@@ -1,6 +1,6 @@
 # CI compile report
 
-run: 43230750497  commit: 0df420cdd26b87f15cd385a788c55d6fb5e5b9ca  exit: 0
+run: 43231944066  commit: 433b6cf2fce428ba40769fd6581436c8c85a5324  exit: 0
 
 ## errors by file (unique)
 
@@ -9,6 +9,35 @@ run: 43230750497  commit: 0df420cdd26b87f15cd385a788c55d6fb5e5b9ca  exit: 0
 ## failed tasks, causes, resolution problems
 
 ## tail
+> Task :apprunner:mergeDebugNativeLibs NO-SOURCE
+> Task :apprunner:stripDebugDebugSymbols NO-SOURCE
+> Task :apprunner:mergeExtDexDebug
+> Task :apprunner:validateSigningDebug
+> Task :apprunner:writeDebugAppMetadata
+> Task :apprunner:writeDebugSigningConfigVersions
+> Task :app:bundleBrowserExtensions
+> Task :app:bundleExtensionDocs
+> Task :app:copyScriptsToAssets
+> Task :app:processStandardDebugGoogleServices
+> Task :apprunner:packageDebug
+> Task :apprunner:createDebugApkListingFileRedirect
+> Task :apprunner:assembleDebug
+> Task :app:bundleBaseRunnerApk
+> Task :app:preBuild
+> Task :app:preStandardDebugBuild
+> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateStandardDebugBuildConfig
+> Task :app:generateStandardDebugResources
+> Task :app:packageStandardDebugResources
+> Task :app:processStandardDebugNavigationResources
+> Task :app:parseStandardDebugLocalResources
+> Task :app:generateStandardDebugRFile
+> Task :app:javaPreCompileStandardDebug
+> Task :app:generateStandardDebugAssets
+> Task :app:mergeStandardDebugAssets
+> Task :app:compressStandardDebugAssets
+> Task :app:checkStandardDebugDuplicateClasses
+> Task :app:desugarStandardDebugFileDependencies
 > Task :app:kspStandardDebugKotlin
 > Task :app:mergeExtDexStandardDebug
 > Task :app:mergeLibDexStandardDebug
@@ -54,35 +83,6 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:writeStandardDebugAppMetadata
 > Task :app:writeStandardDebugSigningConfigVersions
 > Task :app:compileStandardDebugKotlin
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ActionSpec.kt:209:72 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/Args.kt:228:64 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ArtifactSnapshotsUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/BackgroundCommandsUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/BackgroundTasksUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/BattleModeInfosUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CacheRequestOptions.kt:143:77 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CancelCascadeStepsRequest.kt:144:65 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ChatMessagePrompt.kt:624:68 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ChatStartMetadata.kt:319:80 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CodeAcknowledgementInfo.kt:166:65 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CompactionInfo.kt:117:77 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ConversationAnnotations.kt:431:55 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Long>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexCortexstepreadnotebook_Args.kt:162:64 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexStepCheckpoint.kt:632:74 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexStepGeneratorMetadata.kt:316:65 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexStepGeneratorMetadata.kt:330:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexTrajectoryMetadata.kt:534:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ExecutorMetadata.kt:505:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ExecutorMetadatasUpdate.kt:184:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/FetchAvailableModelsResponse.kt:393:66 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/GeneratorMetadatasUpdate.kt:184:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/PendingAgentMessagesUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/QueuedStepsUpdate.kt:159:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/RepeatedDiff.kt:162:67 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/SeenNuxUids.kt:115:56 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/State.kt:397:66 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/StepsUpdate.kt:181:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/TrajectoryFileDiffsUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
 w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/AssistantOverlayActivity.kt:12:27 The corresponding parameter in the supertype 'ComponentActivity' is named 'savedInstanceState'. This may cause problems when calling this function with named arguments.
 w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/LiveVoiceSessionManager.kt:708:27 'var isSpeakerphoneOn: Boolean' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agent/ScreenObserver.kt:255:34 'var isChecked: Boolean' is deprecated. Deprecated in Java.
@@ -157,5 +157,5 @@ w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/virtu
 
 [Incubating] Problems report is available at: file:///home/runner/work/Saif-/Saif-/final/build/reports/problems/problems-report.html
 
-BUILD SUCCESSFUL in 4m 55s
-78 actionable tasks: 77 executed, 1 from cache
+BUILD SUCCESSFUL in 3m 58s
+77 actionable tasks: 76 executed, 1 from cache
