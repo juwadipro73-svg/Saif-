@@ -1,6 +1,6 @@
 # CI compile report
 
-run: 43233667722  commit: 6adc3669c637c204b328aaf7def480295f22bf14  exit: 0
+run: 43262311823  commit: f6e7fbdad018aa47745e678c89bc4f05d98c820f  exit: 0
 
 ## errors by file (unique)
 
@@ -9,16 +9,18 @@ run: 43233667722  commit: 6adc3669c637c204b328aaf7def480295f22bf14  exit: 0
 ## failed tasks, causes, resolution problems
 
 ## tail
+> Task :apprunner:mergeProjectDexDebug FROM-CACHE
+> Task :apprunner:mergeDebugJniLibFolders
 > Task :apprunner:mergeDebugNativeLibs NO-SOURCE
 > Task :apprunner:stripDebugDebugSymbols NO-SOURCE
-> Task :apprunner:mergeExtDexDebug
+> Task :apprunner:mergeDebugJavaResource
 > Task :apprunner:validateSigningDebug
 > Task :apprunner:writeDebugAppMetadata
 > Task :apprunner:writeDebugSigningConfigVersions
 > Task :app:bundleBrowserExtensions
 > Task :app:bundleExtensionDocs
 > Task :app:copyScriptsToAssets
-> Task :app:processStandardDebugGoogleServices
+> Task :app:processStandardDebugGoogleServices FROM-CACHE
 > Task :apprunner:packageDebug
 > Task :apprunner:createDebugApkListingFileRedirect
 > Task :apprunner:assembleDebug
@@ -27,26 +29,25 @@ run: 43233667722  commit: 6adc3669c637c204b328aaf7def480295f22bf14  exit: 0
 > Task :app:preStandardDebugBuild
 > Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
 > Task :app:generateStandardDebugBuildConfig
-> Task :app:generateStandardDebugResources
-> Task :app:packageStandardDebugResources
-> Task :app:processStandardDebugNavigationResources
-> Task :app:parseStandardDebugLocalResources
-> Task :app:generateStandardDebugRFile
-> Task :app:javaPreCompileStandardDebug
+> Task :app:generateStandardDebugResources FROM-CACHE
+> Task :app:packageStandardDebugResources FROM-CACHE
+> Task :app:processStandardDebugNavigationResources FROM-CACHE
+> Task :app:parseStandardDebugLocalResources FROM-CACHE
+> Task :app:generateStandardDebugRFile FROM-CACHE
+> Task :app:javaPreCompileStandardDebug FROM-CACHE
 > Task :app:generateStandardDebugAssets
 > Task :app:mergeStandardDebugAssets
 > Task :app:compressStandardDebugAssets
 > Task :app:checkStandardDebugDuplicateClasses
-> Task :app:desugarStandardDebugFileDependencies
-> Task :app:kspStandardDebugKotlin
-> Task :app:mergeExtDexStandardDebug
-> Task :app:mergeLibDexStandardDebug
+> Task :app:desugarStandardDebugFileDependencies FROM-CACHE
+> Task :app:mergeExtDexStandardDebug FROM-CACHE
+> Task :app:mergeLibDexStandardDebug FROM-CACHE
 > Task :app:checkStandardDebugAarMetadata
 > Task :app:compileStandardDebugNavigationResources FROM-CACHE
 > Task :app:mapStandardDebugSourceSetPaths
-> Task :app:mergeStandardDebugResources
+> Task :app:mergeStandardDebugResources FROM-CACHE
 > Task :app:createStandardDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksStandardDebug
+> Task :app:extractDeepLinksStandardDebug FROM-CACHE
 
 > Task :app:processStandardDebugMainManifest
 /home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:25:5-102 Warning:
@@ -82,6 +83,7 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:validateSigningStandardDebug
 > Task :app:writeStandardDebugAppMetadata
 > Task :app:writeStandardDebugSigningConfigVersions
+> Task :app:kspStandardDebugKotlin
 > Task :app:compileStandardDebugKotlin
 w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/AssistantOverlayActivity.kt:12:27 The corresponding parameter in the supertype 'ComponentActivity' is named 'savedInstanceState'. This may cause problems when calling this function with named arguments.
 w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/LiveVoiceSessionManager.kt:708:27 'var isSpeakerphoneOn: Boolean' is deprecated. Deprecated in Java.
@@ -147,7 +149,7 @@ w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/virtu
 
 > Task :app:compileStandardDebugJavaWithJavac
 > Task :app:dexBuilderStandardDebug
-> Task :app:mergeStandardDebugGlobalSynthetics
+> Task :app:mergeStandardDebugGlobalSynthetics FROM-CACHE
 > Task :app:processStandardDebugJavaRes
 > Task :app:mergeProjectDexStandardDebug
 > Task :app:mergeStandardDebugJavaResource
@@ -155,7 +157,5 @@ w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/virtu
 > Task :app:createStandardDebugApkListingFileRedirect
 > Task :app:assembleStandardDebug
 
-[Incubating] Problems report is available at: file:///home/runner/work/Saif-/Saif-/final/build/reports/problems/problems-report.html
-
-BUILD SUCCESSFUL in 4m 56s
-77 actionable tasks: 76 executed, 1 from cache
+BUILD SUCCESSFUL in 2m 2s
+77 actionable tasks: 42 executed, 35 from cache
