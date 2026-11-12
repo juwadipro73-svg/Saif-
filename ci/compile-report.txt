@@ -1,111 +1,14 @@
 # CI compile report
 
-run: 43229126848  commit: 661f94e220906250a227cafc678bd1876b6cc914  exit: 1
+run: 43230750497  commit: 0df420cdd26b87f15cd385a788c55d6fb5e5b9ca  exit: 0
 
 ## errors by file (unique)
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:259:29 No parameter with name 'totalTokens' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:260:29 No parameter with name 'durationMs' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No parameter with name 'model' found.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'completionTokens'.
-final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'get'.
-final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:586:9 Cannot infer type for type parameter 'T'. Specify it explicitly.
-final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:9 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:654:13 Cannot infer type for type parameter 'R'. Specify it explicitly.
-final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:655:30 Unresolved reference 'setConfig'.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:30 Syntax error: Expecting comma or ')'.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 An explicit type is required on a value parameter.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 Primary constructor of data class must only have property ('val' / 'var') parameters.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:34 Syntax error: Parameters must have type annotation.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:37 Syntax error: Expecting a top level declaration.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:39 Syntax error: Expecting a top level declaration.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:51 Syntax error: Expecting a top level declaration.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:94:29 Syntax error: Property getter or setter expected.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:95:33 Syntax error: Property getter or setter expected.
-final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:97:1 Syntax error: Expecting a top level declaration.
-final/app/src/main/java/com/example/slash/SaifSlashCommandRegistry.kt:155:34 Argument type mismatch: actual type is 'Context!', but 'Application' was expected.
 
 ## javac / aapt errors
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:30 Syntax error: Expecting comma or ')'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:34 Syntax error: Parameters must have type annotation.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:37 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:39 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:51 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:94:29 Syntax error: Property getter or setter expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:95:33 Syntax error: Property getter or setter expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:97:1 Syntax error: Expecting a top level declaration.
 
 ## failed tasks, causes, resolution problems
-* What went wrong:
-> Task :app:compileStandardDebugKotlin FAILED
-Execution failed for task ':app:compileStandardDebugKotlin'.
-FAILURE: Build failed with an exception.
 
 ## tail
-> Task :apprunner:generateDebugResources
-> Task :apprunner:packageDebugResources
-> Task :apprunner:processDebugNavigationResources
-> Task :apprunner:javaPreCompileDebug
-> Task :apprunner:generateDebugAssets UP-TO-DATE
-> Task :apprunner:mergeDebugAssets
-> Task :apprunner:parseDebugLocalResources
-> Task :apprunner:compressDebugAssets
-> Task :apprunner:desugarDebugFileDependencies
-> Task :apprunner:checkDebugAarMetadata
-> Task :apprunner:generateDebugRFile
-> Task :apprunner:compileDebugNavigationResources
-> Task :apprunner:compileDebugKotlin NO-SOURCE
-
-> Task :apprunner:compileDebugJavaWithJavac
-Note: /home/runner/work/Saif-/Saif-/final/apprunner/src/main/java/com/saif/apprunner/MainActivity.java uses or overrides a deprecated API.
-Note: Recompile with -Xlint:deprecation for details.
-
-> Task :apprunner:mapDebugSourceSetPaths
-> Task :apprunner:createDebugCompatibleScreenManifests
-> Task :apprunner:extractDeepLinksDebug
-> Task :apprunner:processDebugMainManifest
-> Task :apprunner:mergeDebugResources
-> Task :apprunner:processDebugManifest
-> Task :apprunner:processDebugJavaRes NO-SOURCE
-> Task :apprunner:processDebugManifestForPackage
-> Task :apprunner:processDebugResources
-> Task :apprunner:mergeDebugJavaResource
-> Task :apprunner:dexBuilderDebug
-> Task :apprunner:checkDebugDuplicateClasses
-> Task :apprunner:mergeDebugGlobalSynthetics
-> Task :apprunner:mergeLibDexDebug
-> Task :apprunner:mergeProjectDexDebug
-> Task :apprunner:mergeDebugJniLibFolders
-> Task :apprunner:mergeDebugNativeLibs NO-SOURCE
-> Task :apprunner:stripDebugDebugSymbols NO-SOURCE
-> Task :apprunner:mergeExtDexDebug
-> Task :apprunner:validateSigningDebug
-> Task :apprunner:writeDebugAppMetadata
-> Task :apprunner:writeDebugSigningConfigVersions
-> Task :app:bundleBrowserExtensions
-> Task :app:bundleExtensionDocs
-> Task :app:copyScriptsToAssets
-> Task :app:generateStandardDebugProtos
-> Task :app:processStandardDebugGoogleServices
-> Task :apprunner:packageDebug
-> Task :apprunner:createDebugApkListingFileRedirect
-> Task :apprunner:assembleDebug
-> Task :app:bundleBaseRunnerApk
-> Task :app:preBuild
-> Task :app:preStandardDebugBuild
-> Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
-> Task :app:generateStandardDebugBuildConfig
-> Task :app:generateStandardDebugResources
-> Task :app:packageStandardDebugResources
-> Task :app:processStandardDebugNavigationResources
-> Task :app:parseStandardDebugLocalResources
-> Task :app:generateStandardDebugRFile
-> Task :app:javaPreCompileStandardDebug
-> Task :app:generateStandardDebugAssets
-> Task :app:mergeStandardDebugAssets
-> Task :app:compressStandardDebugAssets
-> Task :app:checkStandardDebugDuplicateClasses
-> Task :app:desugarStandardDebugFileDependencies
 > Task :app:kspStandardDebugKotlin
 > Task :app:mergeExtDexStandardDebug
 > Task :app:mergeLibDexStandardDebug
@@ -151,44 +54,108 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:writeStandardDebugAppMetadata
 > Task :app:writeStandardDebugSigningConfigVersions
 > Task :app:compileStandardDebugKotlin
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:259:29 No parameter with name 'totalTokens' found.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:260:29 No parameter with name 'durationMs' found.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No parameter with name 'model' found.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'completionTokens'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiAgentEngine.kt:261:29 No value passed for parameter 'get'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:586:9 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:9 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:587:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:654:13 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/github/GitHubIntegrationManager.kt:655:30 Unresolved reference 'setConfig'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:30 Syntax error: Expecting comma or ')'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 Primary constructor of data class must only have property ('val' / 'var') parameters.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:31 An explicit type is required on a value parameter.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:34 Syntax error: Parameters must have type annotation.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:37 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:39 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:93:51 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:94:29 Syntax error: Property getter or setter expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:95:33 Syntax error: Property getter or setter expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/core/SaifCorePorts.kt:97:1 Syntax error: Expecting a top level declaration.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/slash/SaifSlashCommandRegistry.kt:155:34 Argument type mismatch: actual type is 'Context!', but 'Application' was expected.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ActionSpec.kt:209:72 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/Args.kt:228:64 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ArtifactSnapshotsUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/BackgroundCommandsUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/BackgroundTasksUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/BattleModeInfosUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CacheRequestOptions.kt:143:77 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CancelCascadeStepsRequest.kt:144:65 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ChatMessagePrompt.kt:624:68 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ChatStartMetadata.kt:319:80 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CodeAcknowledgementInfo.kt:166:65 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CompactionInfo.kt:117:77 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ConversationAnnotations.kt:431:55 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Long>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexCortexstepreadnotebook_Args.kt:162:64 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexStepCheckpoint.kt:632:74 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexStepGeneratorMetadata.kt:316:65 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexStepGeneratorMetadata.kt:330:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/CortexTrajectoryMetadata.kt:534:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ExecutorMetadata.kt:505:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/ExecutorMetadatasUpdate.kt:184:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/FetchAvailableModelsResponse.kt:393:66 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/GeneratorMetadatasUpdate.kt:184:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/PendingAgentMessagesUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/QueuedStepsUpdate.kt:159:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/RepeatedDiff.kt:162:67 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/SeenNuxUids.kt:115:56 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/State.kt:397:66 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/StepsUpdate.kt:181:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build/generated/source/wire/standardDebug/exa/language_server_pb/TrajectoryFileDiffsUpdate.kt:161:60 Unnecessary non-null assertion (!!) on a non-null receiver of type 'MutableList<Int>'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/AssistantOverlayActivity.kt:12:27 The corresponding parameter in the supertype 'ComponentActivity' is named 'savedInstanceState'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/LiveVoiceSessionManager.kt:708:27 'var isSpeakerphoneOn: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agent/ScreenObserver.kt:255:34 'var isChecked: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agent/skills/CallSkill.kt:80:35 'var isSpeakerphoneOn: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiDialog.kt:169:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/audio/AudioPipeline.kt:84:48 'var isBluetoothScoOn: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/audio/AudioPipeline.kt:84:80 'var isBluetoothA2dpOn: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/audio/AudioPipeline.kt:84:113 'var isWiredHeadsetOn: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/builder/agent/SandboxRunner.kt:58:34 'var databaseEnabled: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/builder/agent/SandboxRunner.kt:99:97 Unnecessary safe call on a non-null receiver of type 'ConsoleMessage'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/AppCompilerEngine.kt:1432:39 'constructor(name: String!, privateKey: PrivateKey!, certificates: (Mutable)List<X509Certificate!>!): ApkSigner.SignerConfig.Builder' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/AuthManager.kt:98:91 Condition is always 'true'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/AuthManager.kt:135:33 Condition is always 'true'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/AIApiUtility.kt:610:42 Unnecessary safe call on a non-null receiver of type 'LlmError'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProvidersSettingsDialog.kt:284:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/components/MarkdownBlocks.kt:292:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:201:73 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:201:97 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:202:31 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:203:69 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:203:93 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorController.kt:300:171 Unnecessary safe call on a non-null receiver of type 'QuestionCard'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:386:91 Redundant call of conversion method.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:519:50 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:523:50 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:526:42 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:582:35 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:586:35 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/SceneFx.kt:522:83 Redundant call of conversion method.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/render/StudioFrameRenderer.kt:70:80 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ItemAnimation'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/render/StudioFrameRenderer.kt:72:101 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ItemAnimation'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/render/StudioFrameRenderer.kt:75:103 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ItemAnimation'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioAiProModal.kt:195:46 'val Icons.Filled.VolumeDown: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.VolumeDown.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioToolbar.kt:105:38 'val Icons.Filled.CallSplit: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.CallSplit.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioTuneInspector.kt:367:13 'when' is exhaustive so 'else' is redundant here.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioTuneInspector.kt:372:13 'when' is exhaustive so 'else' is redundant here.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/ChatViewModel.kt:519:42 Condition is always 'true'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:399:113 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ChatSessionEntity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:404:107 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ChatSessionEntity'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:587:98 Unnecessary safe call on a non-null receiver of type 'PrivateFileTypes.Selection'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:594:68 'val Icons.Filled.InsertDriveFile: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.InsertDriveFile.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:1275:24 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:1276:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:1279:28 'var isStatusBarContrastEnforced: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:1203:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:2073:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:2451:48 'val Icons.Filled.OpenInNew: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.OpenInNew.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:3339:40 'val Icons.Filled.Send: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Send.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AiProviderSettingsInline.kt:329:57 'val Icons.Filled.OpenInNew: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.OpenInNew.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AppRunnerDialog.kt:777:26 'var databaseEnabled: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AppRunnerDialog.kt:1507:17 Condition is always 'true'.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/BuildAIScreen.kt:118:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/FlowAiStudio.kt:258:14 'var databaseEnabled: Boolean' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/GeminiAssistantSheet.kt:91:9 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/GitHubConnectDialog.kt:367:57 'val Icons.Outlined.OpenInNew: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.OpenInNew.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:221:57 'val Icons.Filled.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.HelpOutline.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:284:17 'fun ScrollableTabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., edgePadding: Dp = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryScrollableTabRow and SecondaryScrollableTabRow tab variants.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:294:38 'fun Modifier.tabIndicatorOffset(currentTabPosition: TabPosition): Modifier' is deprecated. Solely for use alongside deprecated TabRowDefaults.Indicator method. For recommended PrimaryIndicator and SecondaryIndicator methods, please use TabIndicatorScope.tabIndicatorOffset method.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:1154:38 'val Icons.Filled.VolumeDown: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.VolumeDown.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/core/SaifVoiceEngine.kt:45:29 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/virtualization/SaifNativeWorkspaceEngine.kt:105:38 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
 
-> Task :app:compileStandardDebugKotlin FAILED
+> Task :app:compileStandardDebugJavaWithJavac
+> Task :app:dexBuilderStandardDebug
+> Task :app:mergeStandardDebugGlobalSynthetics
+> Task :app:processStandardDebugJavaRes
+> Task :app:mergeProjectDexStandardDebug
+> Task :app:mergeStandardDebugJavaResource
+> Task :app:packageStandardDebug
+> Task :app:createStandardDebugApkListingFileRedirect
+> Task :app:assembleStandardDebug
 
 [Incubating] Problems report is available at: file:///home/runner/work/Saif-/Saif-/final/build/reports/problems/problems-report.html
 
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:compileStandardDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
-   > Compilation error. See log for more details
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to generate a Build Scan (Powered by Develocity).
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 5m 45s
-70 actionable tasks: 69 executed, 1 from cache
+BUILD SUCCESSFUL in 4m 55s
+78 actionable tasks: 77 executed, 1 from cache
