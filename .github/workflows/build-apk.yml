@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: saif-build-${{ github.ref }}
@@ -14,7 +14,7 @@ concurrency:
 
 env:
   PROJECT_DIR: final
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 jobs:
   build:
@@ -31,9 +31,6 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Gradle cache
         uses: actions/cache@v4
         with:
@@ -43,11 +40,17 @@ jobs:
           key: gradle-${{ runner.os }}-${{ hashFiles('final/gradle/wrapper/gradle-wrapper.properties','final/gradle/libs.versions.toml','final/**/*.gradle.kts') }}
           restore-keys: gradle-${{ runner.os }}-
 
-      - name: Accept SDK licences + install platforms
+      - name: Ensure Android SDK packages
+        shell: bash
         run: |
-          yes | sdkmanager --licenses >/dev/null 2>&1 || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools" >/dev/null 2>&1 || \
-            sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools" >/dev/null 2>&1 || true
+          set +e
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME/platforms" 2>/dev/null
+          ls "$ANDROID_HOME/build-tools" 2>/dev/null
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" 2>&1 | tail -5
+          ls "$ANDROID_HOME/platforms" 2>/dev/null
+          exit 0
 
       - name: Build debug APK
         id: build
@@ -57,7 +60,7 @@ jobs:
           cd "$PROJECT_DIR"
           chmod +x gradlew
           set +e
-          ./gradlew :app:assembleStandardDebug --no-daemon --no-configuration-cache --stacktrace --continue 2>&1 | tee /tmp/build.log
+          ./gradlew :app:assembleStandardDebug --no-daemon --no-configuration-cache --continue 2>&1 | tee /tmp/build.log
           rc=${PIPESTATUS[0]}
           echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
           exit 0
@@ -69,40 +72,49 @@ jobs:
           set +e
           mkdir -p ci
           {
-            echo "### exit code: ${{ steps.build.outputs.exit_code }}"
+            echo "# CI compile report"
             echo
-            echo "#### Kotlin/Java errors (e: / error:)"
-            grep -E "^(e|w): |error: " /tmp/build.log | grep -E "^(e): |error: " | sed 's|file:///home/runner/work/[^/]*/[^/]*/||' | sort -u
+            echo "run: ${{ github.run_id }}  commit: ${{ github.sha }}  exit: ${{ steps.build.outputs.exit_code }}"
             echo
-            echo "#### Failed tasks / causes"
-            grep -E "^> Task .*FAILED|^FAILURE|What went wrong|^Caused by|Execution failed for task|Could not (resolve|find|GET|download)|Plugin \[id" /tmp/build.log | sort -u | head -200
+            echo "## errors by file (unique)"
+            grep -E "^e: " /tmp/build.log | sed 's|^e: file:///home/runner/work/[^/]*/[^/]*/||' | sort -u
             echo
-            echo "#### Tail"
-            tail -120 /tmp/build.log
+            echo "## javac / aapt errors"
+            grep -E "error: " /tmp/build.log | sort -u | head -300
+            echo
+            echo "## failed tasks, causes, resolution problems"
+            grep -E "^> Task .*FAILED|^FAILURE|What went wrong|^Caused by|Execution failed for task|Could not (resolve|find|GET|download)|Plugin \[id|^> Could not" /tmp/build.log | sort -u | head -120
+            echo
+            echo "## tail"
+            tail -150 /tmp/build.log
           } > ci/compile-report.txt
-          grep -cE "^e: " /tmp/build.log > ci/error-count.txt 2>/dev/null || echo 0 > ci/error-count.txt
-          echo "errors: $(cat ci/error-count.txt)"
-          head -80 ci/compile-report.txt
+          echo "$(grep -cE '^e: ' /tmp/build.log)" > ci/error-count.txt
+          echo "kotlin errors: $(cat ci/error-count.txt)"
+          head -60 ci/compile-report.txt
 
-      - name: Upload build log + report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: saif-build-log
-          path: |
-            ci/compile-report.txt
-            /tmp/build.log
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Upload APK
+      - name: Publish APK into branch (delivery path)
         if: steps.build.outputs.exit_code == '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: SAIF-AI-apk
-          path: final/app/build/outputs/apk/**/*.apk
-          if-no-files-found: error
-          retention-days: 30
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="$(find "$PROJECT_DIR/app/build/outputs/apk" -name '*.apk' | head -n 1)"
+          test -n "$apk"
+          mkdir -p ci
+          cp "$apk" ci/SAIF-AI-debug.apk
+          ls -lh ci/SAIF-AI-debug.apk
+          md5sum ci/SAIF-AI-debug.apk > ci/SAIF-AI-debug.apk.md5
+
+      - name: Commit report and APK back to the branch
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "saif-ci"
+          git config user.email "ci@saif.ai"
+          git add -f ci/ || true
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "ci: build report ${GITHUB_RUN_ID} [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - name: Fail job if build failed
         if: steps.build.outputs.exit_code != '0'
