@@ -41,8 +41,9 @@ against **the owner's own AI provider**, with no dependency on Google's Antigrav
 
 ## Build artefact
 
-- CI run `43230750497`: `BUILD SUCCESSFUL`, 0 Kotlin errors.
-- APK: `ci/SAIF-AI-debug.apk` (≈49 MB), `ci/SAIF-AI-debug.apk.md5`.
+- CI run `43231944066` (after the proto/Wire and keystore cleanup): `BUILD SUCCESSFUL`, 0 Kotlin errors.
+- APK: `ci/SAIF-AI-debug.apk` (≈46 MB), `ci/SAIF-AI-debug.apk.md5`
+  (md5 `3efcb4fe6cca1becbd4fc3734af994c9`).
 - Download: <https://github.com/juwadipro73-svg/Saif-/raw/arena/64ef18d1-saif/ci/SAIF-AI-debug.apk>
 - The APK is debug-signed with Gradle's default debug key, so install it with
   `adb install -r` or uninstall the previous build first.
