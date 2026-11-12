@@ -216,7 +216,7 @@ object BuildAgent {
                     )
 
                     moduleFiles.putAll(fixedModules)
-                    assembledHtml = Assembler.assemble(project.appName, spec, moduleFiles),
+                    assembledHtml = Assembler.assemble(project.appName, spec, moduleFiles)
                     testReport = SandboxRunner.testHtml(context, assembledHtml, spec)
                     onEvent(BuildEvent.SandboxRun(testReport.passed, testReport.issues.map { it.message }, testReport.passedCount, testReport.totalCount))
                 }

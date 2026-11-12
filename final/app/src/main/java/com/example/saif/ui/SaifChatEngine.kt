@@ -107,7 +107,7 @@ fun SaifMarkdown(
                     codeBuffer.clear()
                     inCodeBlock = false
                 } else {
-                    inCodeBlock = true,
+                    inCodeBlock = true
                     codeLang = trimmed.removePrefix("```").trim()
                 }
                 continue

@@ -350,7 +350,7 @@ object ScreenObserver {
 
         if (withScreenshot) {
             val shotResult = service.captureScreenshotBase64()
-            screenshotBase64 = shotResult.base64,
+            screenshotBase64 = shotResult.base64
             isSecure = shotResult.isSecure
         }
 

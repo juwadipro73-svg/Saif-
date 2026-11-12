@@ -158,7 +158,7 @@ object SaifAiEditingEngine {
                     if (response.isSuccess) {
                         val text = response.getOrNull()?.text ?: ""
                         if (text.isNotBlank()) {
-                            rawPlanJson = text,
+                            rawPlanJson = text
                             llmSuccess = true
                         }
                     } else {
@@ -181,7 +181,7 @@ object SaifAiEditingEngine {
                     if (fallbackRes.isSuccess) {
                         val fallbackText = fallbackRes.getOrNull()?.trim() ?: ""
                         if (fallbackText.isNotBlank()) {
-                            rawPlanJson = fallbackText,
+                            rawPlanJson = fallbackText
                             llmSuccess = true
                             for (chunk in fallbackText.chunked(40)) {
                                 delay(10)

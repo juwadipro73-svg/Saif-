@@ -703,7 +703,7 @@ fun ProjectEditorScreen(
             isDarkTheme = isDarkTheme,
             onDismiss = { showRunDialog = false },
             onAskSaifAi = { errorInfo ->
-                showRunDialog = false,
+                showRunDialog = false
                 activeSubScreen = ProjectSubScreen.BuildAI(errorInfo)
             }
         )

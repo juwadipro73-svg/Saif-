@@ -35,7 +35,7 @@ object ComputerUseBrain : AgentBrain {
     private var failureCount = 0
 
     fun resetSession() {
-        previousInteractionId = null,
+        previousInteractionId = null
         failureCount = 0
     }
 

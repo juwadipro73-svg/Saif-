@@ -493,9 +493,9 @@ fun VideoAiVideoGeneratorDialog(
                 Button(
                     onClick = {
                         if (!isGenerating) {
-                            isGenerating = true,
+                            isGenerating = true
                             generationProgress = 0.05f
-                            generationPhase = "Phase 1: Planning Motion & Camera Choreography...",
+                            generationPhase = "Phase 1: Planning Motion & Camera Choreography..."
                             generatedClip = null
                             generatedAsset = null
 
@@ -512,7 +512,7 @@ fun VideoAiVideoGeneratorDialog(
 
                                     val trimmedKey = userKey.trim()
                                     if (trimmedKey.startsWith("sk-ant-")) {
-                                        activeProvider = "Anthropic",
+                                        activeProvider = "Anthropic"
                                         activeModel = "claude-3-7-sonnet-20250219"
                                     } else if (trimmedKey.startsWith("sk-or-")) {
                                         activeProvider = "OpenRouter"
@@ -527,7 +527,7 @@ fun VideoAiVideoGeneratorDialog(
                                     val effectiveKey = trimmedKey
 
                                     delay(350)
-                                    generationProgress = 0.25f,
+                                    generationProgress = 0.25f
                                     generationPhase = "Phase 1: Generating scene cinematography plan with $activeProvider..."
 
                                     var aiResponseText = ""
@@ -549,15 +549,15 @@ fun VideoAiVideoGeneratorDialog(
                                     }
 
                                     delay(400)
-                                    generationProgress = 0.55f,
+                                    generationProgress = 0.55f
                                     generationPhase = "Phase 2: Neural Latent Frame Diffusion (Temporal Consistency)..."
 
                                     delay(450)
-                                    generationProgress = 0.80f,
+                                    generationProgress = 0.80f
                                     generationPhase = "Phase 3: 4K Neural Super-Resolution & Film Color Grading..."
 
                                     delay(350)
-                                    generationProgress = 1.0f,
+                                    generationProgress = 1.0f
                                     generationPhase = "Phase 4: Synthesis Complete! Clip Ready."
 
                                     // Build timeline media clip
@@ -605,7 +605,7 @@ fun VideoAiVideoGeneratorDialog(
                                     isGenerating = false
                                     Toast.makeText(context, "✅ AI Scene Synthesized!", Toast.LENGTH_SHORT).show()
                                 } catch (e: Exception) {
-                                    isGenerating = false,
+                                    isGenerating = false
                                     generationPhase = "Synthesis Error: ${e.message}"
                                     Toast.makeText(context, "AI synthesis completed with fallback", Toast.LENGTH_SHORT).show()
                                 }

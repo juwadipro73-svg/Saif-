@@ -15,7 +15,7 @@ import org.json.JSONObject
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-data class TimeRange(val startMs: Long, val endMs: Long) { val length get() = endMs - startMs }
+data class TimeRange(val startMs: Long, val endMs: Long) { val length: Long get() = endMs - startMs }
 
 data class VideoAnalysis(
     val uri: String, val durationMs: Long, val width: Int, val height: Int, val rotation: Int, val fps: Float,
@@ -155,9 +155,9 @@ object VideoAnalyzer {
                 stage = "copying the video"
                 r.release(); r = MediaMetadataRetriever()
                 val t = copyToCache(context, original); temp = t
-                active = Uri.fromFile(t),
+                active = Uri.fromFile(t)
                 stage = "opening the copied video"
-                problem = openSource(r, context, active),
+                problem = openSource(r, context, active)
                 dur = if (problem == null) r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L else 0L
             }
             if (problem != null) return@withContext Result.failure(IllegalStateException("Could not open this video: $problem. Try another file or an MP4 (H.264)."))
@@ -194,7 +194,7 @@ object VideoAnalyzer {
                 stage = "analyzing audio"
                 onStep("Analyzing audio for speech and silence")
                 runCatching { AudioDecoder.decodeTo16kMono(context, active, maxMs = 30 * 60 * 1000L) }.getOrNull()?.let { pcm ->
-                    silences = SignalAnalysis.silences(pcm),
+                    silences = SignalAnalysis.silences(pcm)
                     speech = (1f - silences.sumOf { it.length }.toFloat() / dur).coerceIn(0f, 1f)
                 }
             }

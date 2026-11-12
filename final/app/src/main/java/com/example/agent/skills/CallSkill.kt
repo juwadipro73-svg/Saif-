@@ -30,7 +30,7 @@ object CallSkill : Skill {
         val displayName: String
 
         if (cleanNumber.length >= 7) {
-            finalNumber = cleanNumber,
+            finalNumber = cleanNumber
             displayName = query
         } else {
             // Resolve contact
@@ -50,7 +50,7 @@ object CallSkill : Skill {
                 matches.first()
             }
 
-            finalNumber = chosen.phoneNumber,
+            finalNumber = chosen.phoneNumber
             displayName = chosen.name
         }
 

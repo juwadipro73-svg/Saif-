@@ -261,7 +261,7 @@ fun TerminalProvidersSettingsDialog(
     Alignment.CenterVertically) {
                         FilledTonalButton(
                             onClick = {
-                                editingSpec = null,
+                                editingSpec = null
                                 showEditor = true
                             },
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
@@ -496,7 +496,7 @@ fun TerminalProvidersSettingsDialog(
                                             }
                                             OutlinedButton(
                                                 onClick = {
-                                                    editingSpec = prov,
+                                                    editingSpec = prov
                                                     showEditor = true
                                                 },
                                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
@@ -944,7 +944,7 @@ fun CustomProviderEditorDialog(
                             AssistChip(
                                 onClick = {
                                     if (name.isBlank()) name = preset.label
-                                    endpointUrl = preset.defaultBaseUrl,
+                                    endpointUrl = preset.defaultBaseUrl
                                     protocol = preset.protocol
                                     availableModels = preset.defaultModels
                                     if (preset.defaultModels.isNotEmpty()) {
@@ -1100,10 +1100,10 @@ fun CustomProviderEditorDialog(
                                     if (selectedModel.isBlank() && list.isNotEmpty()) {
                                         selectedModel = list.first()
                                     }
-                                    testResultOk = true,
+                                    testResultOk = true
                                     testResultText = "Loaded ${list.size} models from endpoint."
                                 }.onFailure { err ->
-                                    testResultOk = false,
+                                    testResultOk = false
                                     testResultText = err.message ?: "Could not fetch models"
                                 }
                                 isBusy = false
@@ -1120,7 +1120,7 @@ fun CustomProviderEditorDialog(
                             isBusy = true
                             scope.launch {
                                 val res = TerminalProviderManager.testProviderConnection(context, currentDraft())
-                                testResultOk = res.ok,
+                                testResultOk = res.ok
                                 testResultText = res.message
                                 isBusy = false
                             }

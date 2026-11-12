@@ -497,7 +497,7 @@ fun StudioExportDialog(
                                 bitrateTier = selectedBitrateTier
                             )
 
-                            isExporting = true,
+                            isExporting = true
                             exportProgress = 0.02f
                             exportStatusText = "Rendering MP4 on phone…"
                             var cancelled = false
@@ -509,14 +509,14 @@ fun StudioExportDialog(
                                         project = project,
                                         config = config,
                                         onProgress = { pct, status, eta ->
-                                            exportProgress = pct,
+                                            exportProgress = pct
                                             exportStatusText = status
                                             exportEtaMs = eta
                                         },
                                         isCancelled = { cancelled }
                                     )
                                     if (out.success) {
-                                        exportWarnings = out.warnings,
+                                        exportWarnings = out.warnings
                                         exportResultUri = out.outputUri ?: out.filePath?.let { Uri.fromFile(java.io.File(it)) }
                                     } else if (!cancelled) {
                                         exportError = out.errorMessage ?: "Video export failed"

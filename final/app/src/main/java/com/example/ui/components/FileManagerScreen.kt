@@ -145,7 +145,7 @@ fun FileManagerScreen(
             )
 
             withContext(context = Dispatchers.Main) {
-                itemsList = mapped,
+                itemsList = mapped
                 isLoading = false
             }
         }

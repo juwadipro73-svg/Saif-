@@ -332,7 +332,7 @@ fun VideoExportStudioScreen(
                         val isSelected = selectedRes == res
                         Surface(
                             onClick = {
-                                selectedRes = res,
+                                selectedRes = res
                                 estSize = size
                             },
                             shape =
@@ -933,9 +933,9 @@ fun VideoExportStudioScreen(
                 Button(
                     onClick = {
                         if (!isRendering) {
-                            isRendering = true,
+                            isRendering = true
                             renderProgress = 0f
-                            isExportComplete = false,
+                            isExportComplete = false
                             currentRenderFrame = 0
                             renderEtaSeconds = 8
                             scope.launch {
@@ -950,19 +950,19 @@ fun VideoExportStudioScreen(
                                     bitrateTier = selectedBitrateTier,
                                     isWatermarkEnabled = isWatermarkEnabled,
                                     onProgress = { p, status ->
-                                        renderProgress = p,
+                                        renderProgress = p
                                         renderPassText = status
                                     },
                                     onProgressWithMetrics = { p, status, frame, total, eta ->
-                                        renderProgress = p,
+                                        renderProgress = p
                                         renderPassText = status
-                                        currentRenderFrame = frame,
+                                        currentRenderFrame = frame
                                         totalRenderFrames = total
                                         renderEtaSeconds = eta
                                     }
                                 )
                                 delay(300)
-                                isRendering = false,
+                                isRendering = false
                                 exportResult = res
                                 isExportComplete = res.success
                                 if (res.success) {

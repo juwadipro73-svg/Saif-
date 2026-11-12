@@ -123,7 +123,7 @@ object AndroidVideoExportEngine {
                 val inputSurface = encoder.createInputSurface()
                 encoder.start()
 
-                muxer = MediaMuxer(tempOutputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4),
+                muxer = MediaMuxer(tempOutputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
                 canUseHardwareCodec = true
 
                 // Render frames to surface

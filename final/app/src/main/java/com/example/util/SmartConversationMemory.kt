@@ -63,7 +63,7 @@ object SmartConversationMemory {
             user.uid == it && user.isActive && !user.isBanned
         } == true }
         if (boundUid == owner && (owner == null || prefs != null)) return
-        boundUid = null,
+        boundUid = null
         prefs = null
         memoryMap.clear()
         activeTopicOrEntity = ""

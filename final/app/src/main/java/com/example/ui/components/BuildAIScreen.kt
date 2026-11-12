@@ -271,7 +271,7 @@ fun BuildAIScreen(
             }
 
             val decodeOptions = android.graphics.BitmapFactory.Options().apply {
-                inSampleSize = sampleSize,
+                inSampleSize = sampleSize
                 inPreferredConfig = android.graphics.Bitmap.Config.RGB_565
             }
             val bmp = ctx.contentResolver.openInputStream(uri)?.use { stream ->
@@ -1006,7 +1006,7 @@ fun BuildAIScreen(
             project = project,
             isDarkTheme = true,
             onBuildApk = {
-                showAppRunnerDialog = false,
+                showAppRunnerDialog = false
                 showBuildProgress = true
             },
             onDismiss = { showAppRunnerDialog = false }

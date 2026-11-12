@@ -785,7 +785,7 @@ private fun LiveWebViewApp(
                 settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
                 settings.cacheMode = WebSettings.LOAD_DEFAULT
                 settings.userAgentString = "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"
-                webViewClient = WebViewClient(),
+                webViewClient = WebViewClient()
                 webChromeClient = object : WebChromeClient() {
                     override fun onJsAlert(view: WebView?, url: String?, message: String?, result: android.webkit.JsResult?): Boolean {
                         message?.let { Toast.makeText(ctx, it, Toast.LENGTH_SHORT).show() }
@@ -1519,7 +1519,7 @@ private fun LiveInteractiveLayoutView(projectDir: File, project: ProjectData) {
                     isStopwatchRunning = isStopwatchRunning,
                     onToggleStopwatch = { isStopwatchRunning = it },
                     onResetStopwatch = {
-                        isStopwatchRunning = false,
+                        isStopwatchRunning = false
                         stopwatchMs = 0L
                     },
                     onToggleFlash = toggleFlash,

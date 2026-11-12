@@ -1083,7 +1083,7 @@ $stringFields
             canvas.drawRoundRect(rect, 44f, 44f, paint)
 
             val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                style = Paint.Style.STROKE,
+                style = Paint.Style.STROKE
                 strokeWidth = 3.5f
                 color = Color.argb(140, 255, 255, 255)
             }
@@ -1097,9 +1097,9 @@ $stringFields
             }
 
             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.WHITE,
+                color = Color.WHITE
                 textSize = if (letters.length > 1) 68f else 92f
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD),
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
                 textAlign = Paint.Align.CENTER
                 setShadowLayer(8f, 0f, 4f, Color.argb(140, 0, 0, 0))
             }

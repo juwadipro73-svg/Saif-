@@ -21,7 +21,7 @@ object UserDialogBridge {
     suspend fun askUser(question: String, options: List<String>? = null, listener: AgentListener? = null): String {
         Log.i(TAG, "Asking user: $question (options: $options)")
         isAwaiting.set(true)
-        pendingQuestion = question,
+        pendingQuestion = question
         pendingOptions = options
 
         val deferred = CompletableDeferred<String>()
@@ -35,7 +35,7 @@ object UserDialogBridge {
         }
 
         isAwaiting.set(false)
-        responseDeferred = null,
+        responseDeferred = null
         pendingQuestion = ""
         pendingOptions = null
 

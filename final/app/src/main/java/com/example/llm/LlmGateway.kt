@@ -182,7 +182,7 @@ object LlmGateway {
                     val alt = findAlternativeModel(profile, activeModel)
                     if (alt != null) {
                         Log.i(TAG, "Switching model from $activeModel to $alt after shrink limit")
-                        activeModel = alt,
+                        activeModel = alt
                         shrinkAttempts = 0
                         continue
                     }

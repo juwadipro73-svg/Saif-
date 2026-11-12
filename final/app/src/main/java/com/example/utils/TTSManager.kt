@@ -120,7 +120,7 @@ object TTSManager : TextToSpeech.OnInitListener {
         hasDevanagari: Boolean = false,
         hasExcitement: Boolean = false
     ) {
-        lastAppliedVoiceId = profile.id,
+        lastAppliedVoiceId = profile.id
         lastAppliedIsHindi = isHinglish || hasDevanagari
 
         // 1. Configure Language / Locale
@@ -541,7 +541,7 @@ object TTSManager : TextToSpeech.OnInitListener {
     fun shutdown() {
         stop()
         tts?.shutdown()
-        tts = null,
+        tts = null
         isReady = false
     }
 }

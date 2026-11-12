@@ -179,7 +179,7 @@ fun SaifAiMemoryDialog(
                         OutlinedTextField(
                             value = pinInput,
                             onValueChange = {
-                                pinInput = it,
+                                pinInput = it
                                 pinError = null
                             },
                             singleLine =
@@ -283,7 +283,7 @@ fun SaifAiMemoryDialog(
 
                         // Guest accounts cannot recover a forgotten PIN with an account password.
                         if (com.example.data.local.AuthManager.currentUser.value?.email != "guest@saif.ai") TextButton(onClick = {
-                            accountPasswordInput = "",
+                            accountPasswordInput = ""
                             accountPasswordError = null
                             showForgotPinDialog = true
                         }) {
@@ -421,9 +421,9 @@ fun SaifAiMemoryDialog(
                             val pinActive = isPinProtected
                             Surface(
                                 onClick = {
-                                    newPinInput = "",
+                                    newPinInput = ""
                                     confirmPinInput = ""
-                                    pinSetupError = null,
+                                    pinSetupError = null
                                     showPinSetupDialog = true
                                 },
                                 shape =
@@ -466,7 +466,7 @@ fun SaifAiMemoryDialog(
                                 // Immediate Lock Vault Button
                                 Surface(
                                     onClick = {
-                                        isUnlocked = false,
+                                        isUnlocked = false
                                         pinInput = ""
                                         pinError = null
                                         Toast.makeText(context, "Memory Vault Locked", Toast.LENGTH_SHORT).show()
@@ -510,7 +510,7 @@ fun SaifAiMemoryDialog(
                             // Add Memory Button
                             Surface(
                                 onClick = {
-                                    newFactKey = "",
+                                    newFactKey = ""
                                     newFactValue = ""
                                     showAddMemoryDialog = true
                                 },
@@ -685,10 +685,10 @@ fun SaifAiMemoryDialog(
                             val success = runCatching {
                                 SmartConversationMemory.resetPinUsingAccountPassword(accountPasswordInput)
                             }.getOrDefault(false)
-                            accountPasswordInput = "",
+                            accountPasswordInput = ""
                             isVerifyingAccountPassword = false
                             if (success) {
-                                showForgotPinDialog = false,
+                                showForgotPinDialog = false
                                 isUnlocked = true
                                 refreshMemories()
                                 Toast.makeText(context, "Account verified. Memory PIN reset.", Toast.LENGTH_LONG).show()

@@ -118,7 +118,7 @@ fun BuildProgressDialog(
                 directDownloadUrl = runCatching {
                     AndroidLocalBridgeServer.instance.registerDownloadFile(context, exported, cleanZip)
                 }.getOrNull()
-                zipArtifact = exported,
+                zipArtifact = exported
                 progress = 1f
                 currentStepTitle = "Project ZIP Ready"
                 logs.add("> Saved: ${exported.name} (${exported.length() / 1024} KB)")
@@ -138,7 +138,7 @@ fun BuildProgressDialog(
     context,
                 project = project,
                 onStepChanged = { step, p ->
-                    currentStepTitle = step.title,
+                    currentStepTitle = step.title
                     progress = p
                 },
                 onLogAdded = { entry ->
@@ -161,7 +161,7 @@ fun BuildProgressDialog(
                     apkFile = result.apkFile,
                     downloadsFile = saved
                 )
-                directDownloadUrl = localState.directDownloadUrl,
+                directDownloadUrl = localState.directDownloadUrl
                 progress = 1f
                 currentStepTitle = "APK Signed & Ready!"
                 logs.add("> Saved to Downloads & Direct Link Ready")

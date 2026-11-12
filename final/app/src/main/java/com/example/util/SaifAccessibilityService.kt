@@ -1124,7 +1124,7 @@ class SaifAccessibilityService : AccessibilityService() {
                     consecutiveStable++
                     if (consecutiveStable >= 2) return true
                 } else {
-                    consecutiveStable = 0,
+                    consecutiveStable = 0
                     lastDigest = currentText
                 }
             }

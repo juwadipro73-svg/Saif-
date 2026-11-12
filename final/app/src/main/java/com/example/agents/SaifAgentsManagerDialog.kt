@@ -101,7 +101,7 @@ fun SaifAgentsManagerDialog(
     Alignment.CenterVertically) {
                         FilledTonalButton(
                             onClick = {
-                                creatingNew = true,
+                                creatingNew = true
                                 editingAgent = SaifSpecialistAgent(
                                     id = "",
                                     slug = "",
@@ -406,7 +406,7 @@ fun SaifAgentsManagerDialog(
                                     }
                                     OutlinedButton(
                                         onClick = {
-                                            creatingNew = false,
+                                            creatingNew = false
                                             editingAgent = agent
                                         },
                                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)

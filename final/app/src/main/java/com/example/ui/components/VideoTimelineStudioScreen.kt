@@ -131,14 +131,14 @@ fun VideoTimelineStudioScreen(
 
     fun pushState(newProject: VideoProjectData) {
         undoStack = undoStack + currentProject
-        redoStack = emptyList(),
+        redoStack = emptyList()
         currentProject = newProject
     }
 
     fun handleUndo() {
         if (undoStack.isNotEmpty()) {
             val prev = undoStack.last()
-            undoStack = undoStack.dropLast(1),
+            undoStack = undoStack.dropLast(1)
             redoStack = redoStack + currentProject
             currentProject = prev
             Toast.makeText(context, "Undo", Toast.LENGTH_SHORT).show()
@@ -150,7 +150,7 @@ fun VideoTimelineStudioScreen(
     fun handleRedo() {
         if (redoStack.isNotEmpty()) {
             val next = redoStack.last()
-            redoStack = redoStack.dropLast(1),
+            redoStack = redoStack.dropLast(1)
             undoStack = undoStack + currentProject
             currentProject = next
             Toast.makeText(context, "Redo", Toast.LENGTH_SHORT).show()
@@ -262,7 +262,7 @@ fun VideoTimelineStudioScreen(
                     val clipStart = accum
                     val clipEnd = accum + clip.durationSeconds
                     if (playhead >= clipStart && playhead <= clipEnd + 0.05f) {
-                        foundIdx = i,
+                        foundIdx = i
                         offsetAtPlayhead = (playhead - clipStart).coerceIn(0f, clip.durationSeconds)
                         break
                     }
@@ -707,7 +707,7 @@ fun VideoTimelineStudioScreen(
     fun handleGenerateFromPrompt(userPrompt: String) {
         if (userPrompt.isBlank() || isGeneratingFromPrompt) return
         coroutineScope.launch {
-            isGeneratingFromPrompt = true,
+            isGeneratingFromPrompt = true
             promptGenerationStatus = "Analyzing topic & researching..."
             val result = com.example.ui.components.SaifAiEditingEngine.generateAutonomousDirectorEdl(
                 context =
@@ -718,13 +718,13 @@ fun VideoTimelineStudioScreen(
             )
             result.onSuccess { (_, proj) ->
                 pushState(proj)
-                currentProject = proj,
+                currentProject = proj
                 isPlaying = true
                 Toast.makeText(context, "✅ Assembled video from prompt!", Toast.LENGTH_SHORT).show()
             }.onFailure { err ->
                 Toast.makeText(context, "Generation error: ${err.message}", Toast.LENGTH_LONG).show()
             }
-            isGeneratingFromPrompt = false,
+            isGeneratingFromPrompt = false
             promptGenerationStatus = ""
         }
     }
@@ -755,7 +755,7 @@ fun VideoTimelineStudioScreen(
                 val tot = if (currentProject.totalDurationSeconds > 0.5f) currentProject.totalDurationSeconds else 15.0f
                 val next = cur + 0.05f
                 if (next >= tot) {
-                    currentProject = currentProject.copy(currentPositionSeconds = 0f),
+                    currentProject = currentProject.copy(currentPositionSeconds = 0f)
                     isPlaying = false
                     com.example.utils.TTSManager.stop()
                 } else {
@@ -777,7 +777,7 @@ fun VideoTimelineStudioScreen(
                 var isPhoto = false
                 val mime = context.contentResolver.getType(uri) ?: ""
                 if (mime.startsWith("image/")) {
-                    isPhoto = true,
+                    isPhoto = true
                     duration = 4.0f
                 } else {
                     try {
@@ -790,11 +790,11 @@ fun VideoTimelineStudioScreen(
                             duration = (durMs / 1000f).coerceIn(1.0f, 600.0f)
                             isPhoto = false
                         } else {
-                            isPhoto = true,
+                            isPhoto = true
                             duration = 4.0f
                         }
                     } catch (_: Exception) {
-                        isPhoto = mime.startsWith("image/"),
+                        isPhoto = mime.startsWith("image/")
                         duration = 4.0f
                     }
                 }
@@ -1196,7 +1196,7 @@ fun VideoTimelineStudioScreen(
                                 onStartRender = {
                                     if (!isSimulatingRender) {
                                         coroutineScope.launch {
-                                            isSimulatingRender = true,
+                                            isSimulatingRender = true
                                             renderProgress = 0.15f
                                             renderLogText = "[1/5] Scanning assets_catalog.json for Telegram assets..."
                                             delay(350)
@@ -1212,7 +1212,7 @@ fun VideoTimelineStudioScreen(
                                             renderProgress = 1.0f
                                             renderLogText += "\n[5/5] ✅ Live Render Complete! Output: 1080x1920 MP4 ready on timeline."
                                             delay(300)
-                                            isSimulatingRender = false,
+                                            isSimulatingRender = false
                                             viewportMode = "VIDEO"
                                             isPlaying = true
                                             Toast.makeText(context, "✅ Rendered video from Python code! Playing now.", Toast.LENGTH_SHORT).show()
@@ -1421,7 +1421,7 @@ fun VideoTimelineStudioScreen(
                                     }
                                     if (!isPlaying) {
                                         val startPos = if (currentProject.currentPositionSeconds >= safeTotal - 0.25f) 0f else currentProject.currentPositionSeconds
-                                        currentProject = currentProject.copy(currentPositionSeconds = startPos, totalDurationSeconds = safeTotal),
+                                        currentProject = currentProject.copy(currentPositionSeconds = startPos, totalDurationSeconds = safeTotal)
                                         isPlaying = true
                                     } else {
                                         isPlaying = false
@@ -1486,7 +1486,7 @@ fun VideoTimelineStudioScreen(
 
                         Surface(
                             onClick = {
-                                isPlaying = false,
+                                isPlaying = false
                                 activeSubView = VideoStudioSubView.AI_DIRECTOR_CHAT
                                 Toast.makeText(context, "Co-Director at ${formatExactTimestamp(currentProject.currentPositionSeconds)}", Toast.LENGTH_SHORT).show()
                             },
@@ -2287,9 +2287,9 @@ fun VideoTimelineStudioScreen(
                                             ) {
                                                 Surface(
                                                     onClick = {
-                                                        selectedTrackNum = 1,
+                                                        selectedTrackNum = 1
                                                         selectedCardId = item.id
-                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds),
+                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds)
                                                         activeToolTab = VideoStudioToolTab.TUNE
                                                     },
                                                     shape =
@@ -2406,9 +2406,9 @@ fun VideoTimelineStudioScreen(
                                             ) {
                                                 Surface(
                                                     onClick = {
-                                                        selectedTrackNum = 2,
+                                                        selectedTrackNum = 2
                                                         selectedCardId = clip.id
-                                                        currentProject = currentProject.copy(selectedClipIndex = index, currentPositionSeconds = startOfClip),
+                                                        currentProject = currentProject.copy(selectedClipIndex = index, currentPositionSeconds = startOfClip)
                                                         activeToolTab = VideoStudioToolTab.TUNE
                                                     },
                                                     shape =
@@ -2561,9 +2561,9 @@ fun VideoTimelineStudioScreen(
                                             ) {
                                                 Surface(
                                                     onClick = {
-                                                        selectedTrackNum = 3,
+                                                        selectedTrackNum = 3
                                                         selectedCardId = item.id
-                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds),
+                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds)
                                                         activeToolTab = VideoStudioToolTab.TUNE
                                                     },
                                                     shape =
@@ -2679,9 +2679,9 @@ fun VideoTimelineStudioScreen(
                                             ) {
                                                 Surface(
                                                     onClick = {
-                                                        selectedTrackNum = 4,
+                                                        selectedTrackNum = 4
                                                         selectedCardId = item.id
-                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds),
+                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds)
                                                         activeToolTab = VideoStudioToolTab.TUNE
                                                     },
                                                     shape =
@@ -2797,9 +2797,9 @@ fun VideoTimelineStudioScreen(
                                             ) {
                                                 Surface(
                                                     onClick = {
-                                                        selectedTrackNum = 5,
+                                                        selectedTrackNum = 5
                                                         selectedCardId = item.id
-                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds),
+                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds)
                                                         activeToolTab = VideoStudioToolTab.TUNE
                                                         com.example.utils.TTSManager.init(context)
                                                         com.example.utils.TTSManager.speak(item.narration, context)
@@ -2917,9 +2917,9 @@ fun VideoTimelineStudioScreen(
                                             ) {
                                                 Surface(
                                                     onClick = {
-                                                        selectedTrackNum = 6,
+                                                        selectedTrackNum = 6
                                                         selectedCardId = item.id
-                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds),
+                                                        currentProject = currentProject.copy(currentPositionSeconds = item.startSeconds)
                                                         activeToolTab = VideoStudioToolTab.TUNE
                                                     },
                                                     shape =

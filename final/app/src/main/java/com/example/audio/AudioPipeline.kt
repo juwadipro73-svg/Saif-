@@ -237,7 +237,7 @@ class AudioPipeline(
         try { noiseSuppressor?.release() } catch (ignored: Exception) {}
         try { echoCanceler?.release() } catch (ignored: Exception) {}
         try { audioRecord?.release() } catch (ignored: Exception) {}
-        noiseSuppressor = null,
+        noiseSuppressor = null
         echoCanceler = null
         audioRecord = null
     }

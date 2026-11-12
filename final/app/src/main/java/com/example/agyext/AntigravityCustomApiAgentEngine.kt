@@ -67,7 +67,7 @@ class AntigravityCustomApiAgentEngine(
     }
 
     private val jsonCodec = Json {
-        ignoreUnknownKeys = true,
+        ignoreUnknownKeys = true
         encodeDefaults = true
     }
 

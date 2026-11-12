@@ -237,7 +237,7 @@ object PermissionManager {
     fun openAppSettings(context: Context) {
         try {
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", context.packageName, null),
+                data = Uri.fromParts("package", context.packageName, null)
                 flags =
     Intent.FLAG_ACTIVITY_NEW_TASK
             }

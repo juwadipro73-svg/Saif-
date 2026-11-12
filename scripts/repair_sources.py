@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""Repair mechanical source damage in the SAIF AI Kotlin tree.
+"""Repair the mechanical source damage left by the earlier one-line-at-a-time rewrite.
 
-The tree went through a rewrite pass that renamed things in one place but not in the
-body that used them. These are pure identifier/formatting repairs, no behaviour change:
+Every rule here is a pure formatting/identifier repair; no behaviour is invented.
+Rules are idempotent and only fire on the exact damaged text.
 
-  1. catch (err: E) { ... e.message ... }            -> catch (e: E)
-  2. context.resolver                               -> context.contentResolver
-  3. enableVibration(value = true)                  -> enableVibration(true)
-  4. string literals split over lines by a lost \n   -> one line with \n
-  5. a missing comma between two named arguments     -> comma restored
+  1. `catch (err: E) { ... e.message ... }`  -> parameter renamed to `e` when the body used it
+  2. `context.resolver`                      -> `context.contentResolver`
+  3. `enableVibration(value = true)`         -> positional argument
+  4. missing comma between named arguments   -> restored, but ONLY inside an argument list
+                                                 (paren depth greater than brace depth)
+  5. stray `}` at end of file                -> removed when the file over-closes
+  6. known broken string literals            -> repaired one by one
 """
+import os
 import re
 import sys
-import os
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "final", "app", "src")
 
@@ -25,7 +27,6 @@ def kt_files():
 
 
 def match_brace(s, i):
-    """Return index just past the block that starts at s[i] == '{'."""
     depth = 0
     n = len(s)
     while i < n:
@@ -77,8 +78,7 @@ def fix_catch(s):
             pos = m.end(1)
             changes += 1
             continue
-        else:
-            out.append(s[pos:m.end()])
+        out.append(s[pos:m.end()])
         pos = m.end()
     return "".join(out), changes
 
@@ -90,38 +90,250 @@ SIMPLE = [
     (re.compile(r"setShowBadge\(value\s*=\s*(true|false)\)"), r"setShowBadge(\1)"),
 ]
 
-# named-argument lines that are missing their trailing comma
-MISSING_COMMA = re.compile(
-    r"^(?P<indent>[ \t]+)(?P<arg>[A-Za-z_]\w*\s*=\s*(?:\"[^\"]*\"|'[^']*'|\d[\w.]*|[A-Za-z_][\w.]*(?:\([^()]*\))?))\n"
-    r"(?P<next>[ \t]+[A-Za-z_]\w*\s*=)",
-    re.M,
+NAMED_LINE = re.compile(r"^\s*[A-Za-z_]\w*\s*=\s*.+$")
+
+
+def context_at_line_starts(s):
+    """For each line, the top of the bracket stack at that line start ('P' call args, 'B' block)."""
+    out = [""]
+    stack = []
+    i = 0
+    n = len(s)
+    while i < n:
+        c = s[i]
+        if c == "\n":
+            i += 1
+            out.append(stack[-1] if stack else "")
+            continue
+        if c == "/" and i + 1 < n and s[i + 1] == "/":
+            j = s.find("\n", i)
+            i = n if j < 0 else j
+            continue
+        if c == "/" and i + 1 < n and s[i + 1] == "*":
+            j = s.find("*/", i + 2)
+            i = n if j < 0 else j + 2
+            continue
+        if s[i:i + 3] == '"""':
+            j = s.find('"""', i + 3)
+            i = n if j < 0 else j + 3
+            continue
+        if c == '"':
+            i += 1
+            while i < n and s[i] != '"':
+                if s[i] == "\\":
+                    i += 1
+                i += 1
+            i += 1
+            continue
+        if c == "'":
+            i += 1
+            while i < n and s[i] != "'":
+                if s[i] == "\\":
+                    i += 1
+                i += 1
+            i += 1
+            continue
+        if c == "(":
+            stack.append("P")
+        elif c == "[":
+            stack.append("I")
+        elif c == "{":
+            stack.append("B")
+        elif c == ")":
+            while stack and stack[-1] not in ("P",):
+                stack.pop()
+            if stack:
+                stack.pop()
+        elif c == "]":
+            while stack and stack[-1] not in ("I", "P"):
+                stack.pop()
+            if stack:
+                stack.pop()
+        elif c == "}":
+            while stack and stack[-1] != "B":
+                stack.pop()
+            if stack:
+                stack.pop()
+        i += 1
+    return out
+
+
+STATEMENT_ASSIGN = re.compile(
+    r"^\s*(?:val|var|return|=)?\s*[A-Za-z_]\w*(?:\.[A-Za-z_]\w*|\[[^\]]*\])*\s*=\s*.+$"
 )
 
 
-def odd_quote_lines(s):
-    """Lines that end inside an unterminated string literal (source damage report)."""
-    bad = []
-    for i, line in enumerate(s.split("\n"), 1):
-        if line.lstrip().startswith("//"):
+def fix_statement_comma(s):
+    """Drop a comma that was appended to an assignment statement inside a block."""
+    contexts = context_at_line_starts(s)
+    lines = s.split("\n")
+    out = []
+    changes = 0
+    for idx, line in enumerate(lines):
+        stripped = line.rstrip()
+        if (
+            stripped.endswith(",")
+            and idx < len(contexts)
+            and contexts[idx] in ("B", "")
+            and STATEMENT_ASSIGN.match(stripped[:-1])
+            and not stripped.lstrip().startswith("//")
+        ):
+            out.append(stripped[:-1])
+            changes += 1
+        else:
+            out.append(line)
+    return "\n".join(out), changes
+
+
+ARG_VALUE = r'(?:"[^"]*"|\'[^\']*\'|[\d.]+[fFlL]?|true|false|null|[A-Za-z_][\w.]*(?:\([^()]*\))?)'
+
+
+def fix_missing_comma(s):
+    """Insert a comma between two named arguments of the same call."""
+    contexts = context_at_line_starts(s)
+    lines = s.split("\n")
+    out = []
+    changes = 0
+    for idx, line in enumerate(lines):
+        out.append(line)
+        if idx + 1 >= len(lines):
             continue
-        quotes = 0
-        j = 0
-        while j < len(line):
-            if line[j] == "\\":
-                j += 2
-                continue
-            if line[j] == '"':
-                quotes += 1
-            j += 1
-        if quotes % 2 == 1:
-            bad.append(i)
-    return bad
+        if idx < len(contexts) and not line.endswith(",") and contexts[idx] == "P":
+            nxt = lines[idx + 1]
+            cur = line.strip()
+            if (
+                re.match(r"^[A-Za-z_]\w*\s*=\s*" + ARG_VALUE + r"$", cur)
+                and re.match(r"^[A-Za-z_]\w*\s*=", nxt.strip())
+                and line.rstrip() == line
+            ):
+                out[-1] = line + ","
+                changes += 1
+    return "\n".join(out), changes
+
+
+def fix_trailing_brace(s):
+    """Drop an extra closing brace at end of file when the file over-closes."""
+    depth = 0
+    i = 0
+    n = len(s)
+    while i < n:
+        c = s[i]
+        if c == "/" and i + 1 < n and s[i + 1] == "/":
+            j = s.find("\n", i)
+            i = n if j < 0 else j
+            continue
+        if c == "/" and i + 1 < n and s[i + 1] == "*":
+            j = s.find("*/", i + 2)
+            i = n if j < 0 else j + 2
+            continue
+        if s[i:i + 3] == '"""':
+            j = s.find('"""', i + 3)
+            i = n if j < 0 else j + 3
+            continue
+        if c == '"':
+            i += 1
+            while i < n and s[i] != '"':
+                if s[i] == "\\":
+                    i += 1
+                i += 1
+            i += 1
+            continue
+        if c == "'":
+            i += 1
+            while i < n and s[i] != "'":
+                if s[i] == "\\":
+                    i += 1
+                i += 1
+            i += 1
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        i += 1
+    if depth == -1:
+        stripped = s.rstrip()
+        if stripped.endswith("}"):
+            return stripped[:-1].rstrip() + "\n", 1
+    return s, 0
+
+
+EXACT_REPAIRS = [
+    # HTTP responses that lost their escape sequences
+    (
+        'final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt',
+        '            serverSocket = s,\n',
+        '            serverSocket = s\n',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt',
+        '''                        val header = "HTTP/1.1 200 OK
+" +
+                                "Content-Type: ${entry.mimeType}
+" +
+                                "Content-Length: $length
+" +
+                                "Content-Disposition: attachment; filename="${entry.fileName}"
+" +
+                                "Connection: close
+
+"
+''',
+        '''                        val header = "HTTP/1.1 200 OK\\r\\n" +
+                                "Content-Type: ${entry.mimeType}\\r\\n" +
+                                "Content-Length: $length\\r\\n" +
+                                "Content-Disposition: attachment; filename=\\"${entry.fileName}\\"\\r\\n" +
+                                "Connection: close\\r\\n\\r\\n"
+''',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt',
+        '''                val notFound = "HTTP/1.1 404 Not Found
+Content-Length: 0
+Connection: close
+
+"
+''',
+        '''                val notFound = "HTTP/1.1 404 Not Found\\r\\nContent-Length: 0\\r\\nConnection: close\\r\\n\\r\\n"
+''',
+    ),
+    # Skill package text that lost its newline escapes
+    (
+        'final/app/src/main/java/com/saifai/skills/SaifSkillsEngine.kt',
+        '"\nSource: "',
+        '"\\nSource: "',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/skills/SaifSkillsEngine.kt',
+        '"\n\n"',
+        '"\\n\\n"',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/skills/SaifSkillsEngine.kt',
+        'sb.append("\n--- BEGIN FILE: ").append(relPath).append(" ---\n")',
+        'sb.append("\\n--- BEGIN FILE: ").append(relPath).append(" ---\\n")',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/skills/SaifSkillsEngine.kt',
+        'sb.append("\n--- END FILE: ").append(relPath).append(" ---\n")',
+        'sb.append("\\n--- END FILE: ").append(relPath).append(" ---\\n")',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/browser/SaifResearchBrowserView.kt',
+        'progressVal = newProgress / 100f',
+        'progressVal = progressValue / 100f',
+    ),
+    (
+        'final/app/src/main/java/com/saifai/engine/SaifMcpServerHub.kt',
+        '} catch (err: Throwable) {\n            "Tool execution exception: ${t.localizedMessage}"',
+        '} catch (t: Throwable) {\n            "Tool execution exception: ${t.localizedMessage}"',
+    ),
+]
 
 
 def main():
     apply = "--apply" in sys.argv
-    total = {"catch": 0, "simple": 0, "strings": 0, "comma": 0}
-    touched = []
+    totals = {"catch": 0, "simple": 0, "comma": 0, "brace": 0, "exact": 0, "stmt_comma": 0}
     for path in kt_files():
         src = open(path, encoding="utf-8").read()
         new, c1 = fix_catch(src)
@@ -129,27 +341,30 @@ def main():
         for rx, repl in SIMPLE:
             new, n = rx.subn(repl, new)
             c2 += n
-        c3 = 0
-        bad = odd_quote_lines(new)
-        if bad:
-            print(f"UNTERMINATED STRING {os.path.relpath(path, ROOT)}: lines {bad[:8]}")
-        if os.sep + "test" + os.sep in path and "--include-tests" not in sys.argv:
-            c4 = 0
-        else:
-            new, c4 = MISSING_COMMA.subn(r"\g<indent>\g<arg>,\n\g<next>", new)
+        c3 = c7 = 0
+        if "--commas" in sys.argv:
+            new, c3 = fix_missing_comma(new)
+            new, c7 = fix_statement_comma(new)
+        totals["stmt_comma"] += c7
+        new, c6 = fix_trailing_brace(new)
         if new != src:
-            touched.append((os.path.relpath(path, ROOT), c1, c2, c3, c4))
-            total["catch"] += c1
-            total["simple"] += c2
-            total["strings"] += c3
-            total["comma"] += c4
+            totals["catch"] += c1
+            totals["simple"] += c2
+            totals["comma"] += c3
+            totals["brace"] += c6
             if apply:
                 open(path, "w", encoding="utf-8").write(new)
-    for t in touched:
-        print(f"{t[0]}: catch={t[1]} simple={t[2]} strings={t[3]} comma={t[4]}")
-    print(f"\nfiles touched: {len(touched)}  {total}")
-    if not apply:
-        print("(dry run - pass --apply)")
+    for rel, old, new in EXACT_REPAIRS:
+        path = os.path.join(ROOT, "..", "..", "..", rel)
+        path = os.path.normpath(path)
+        if not os.path.exists(path):
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", rel)
+        text = open(path, encoding="utf-8").read()
+        if old in text:
+            totals["exact"] += 1
+            if apply:
+                open(path, "w", encoding="utf-8").write(text.replace(old, new, 1))
+    print(totals, "(applied)" if apply else "(dry run)")
 
 
 if __name__ == "__main__":

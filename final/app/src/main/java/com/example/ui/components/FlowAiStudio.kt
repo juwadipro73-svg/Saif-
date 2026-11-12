@@ -535,7 +535,7 @@ fun FlowBatchDialog(topic: String, aspect: String, style: String, onDismiss: () 
 
     LaunchedEffect(topic) {
         val r = services.flowImagePrompts(topic, 15, aspect, style)
-        prompts = r.getOrNull(),
+        prompts = r.getOrNull()
         loadErr = r.exceptionOrNull()?.message ?: ""
     }
     LaunchedEffect(finished) {

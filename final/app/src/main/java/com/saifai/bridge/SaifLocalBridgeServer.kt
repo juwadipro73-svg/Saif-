@@ -57,7 +57,7 @@ class SaifLocalBridgeServer private constructor() {
         if (isRunning) { return }
         try {
             val s = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))
-            serverSocket = s,
+            serverSocket = s
             port = s.localPort
             isRunning = true
             Log.i(TAG, "SAIF AI Local Bridge Server listening on 127.0.0.1:$port")

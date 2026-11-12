@@ -637,7 +637,7 @@ SPOKEN RESPONSE FORMAT:
     }
 
     private fun onSpeechPlaybackComplete() {
-        isTtsSpeaking = false,
+        isTtsSpeaking = false
         lastTtsFinishTime = System.currentTimeMillis()
         animationJob?.cancel()
         _amplitude.value = 0f
@@ -689,7 +689,7 @@ SPOKEN RESPONSE FORMAT:
     }
 
     fun stop() {
-        isRecording = false,
+        isRecording = false
         isTtsSpeaking = false
         clearStreamingQueue()
 

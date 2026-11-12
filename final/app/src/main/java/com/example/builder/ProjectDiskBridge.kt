@@ -292,3 +292,4 @@ object ProjectDiskBridge {
             // Ignored in non-Robolectric JVM unit test environments
         }
     }
+}

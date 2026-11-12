@@ -784,7 +784,7 @@ fun GitHubConnectDialog(
                                                     isPrivate = newRepoPrivate
                                                 )
                                                 if (res.isSuccess) {
-                                                    newRepoName = "",
+                                                    newRepoName = ""
                                                     newRepoDesc = ""
                                                     showCreateRepoPanel = false
                                                 }

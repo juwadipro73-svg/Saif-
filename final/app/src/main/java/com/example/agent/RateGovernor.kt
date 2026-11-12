@@ -29,7 +29,7 @@ object RateGovernor {
                 val neededMs = ((1.0 - availableTokens) * REFILL_INTERVAL_MS).toLong().coerceAtLeast(100L)
                 Log.d(TAG, "RateGovernor throttling for ${neededMs}ms")
                 delay(neededMs)
-                availableTokens = 1.0,
+                availableTokens = 1.0
                 lastRefillTime = System.currentTimeMillis()
             }
 

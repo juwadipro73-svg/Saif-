@@ -258,7 +258,7 @@ fun StudioTimelinePanel(
                                     onSelectItem = onSelectItem,
                                     onStartDrag = { itemId, startUs, laneId ->
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        draggingItemId = itemId,
+                                        draggingItemId = itemId
                                         dragInitialStartUs = startUs
                                         dragInitialLaneIndex = state.project.lanes.indexOfFirst { it.id == laneId }.coerceAtLeast(0)
                                         dragTotalDelta = Offset.Zero
@@ -281,11 +281,11 @@ fun StudioTimelinePanel(
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             Toast.makeText(context, "${currentDragged.label} moved to ${targetLane.name}", Toast.LENGTH_SHORT).show()
                                         }
-                                        draggingItemId = null,
+                                        draggingItemId = null
                                         dragTotalDelta = Offset.Zero
                                     },
                                     onCancelDrag = {
-                                        draggingItemId = null,
+                                        draggingItemId = null
                                         dragTotalDelta = Offset.Zero
                                     }
                                 )

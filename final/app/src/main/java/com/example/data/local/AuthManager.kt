@@ -115,7 +115,7 @@ object AuthManager {
 
     fun init(context: Context) {
         if (_isInitialized.value) return
-        appContext = context.applicationContext,
+        appContext = context.applicationContext
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         db = SaifDatabase.getDatabase(appContext)
 
@@ -465,7 +465,7 @@ object AuthManager {
                     try {
                         val cloudData = fetchCloudUserData(fbUser.uid, cleanEmail)
                         if (cloudData != null) {
-                            resolvedRole = extractRole(cloudData),
+                            resolvedRole = extractRole(cloudData)
                             resolvedIsActive = when {
                                 cloudData.containsKey("Is active") -> cloudData["Is active"] as? Boolean ?: true
                                 cloudData.containsKey("isActive") -> cloudData["isActive"] as? Boolean ?: true
@@ -618,7 +618,7 @@ object AuthManager {
                     cloudData.containsKey("status") -> (cloudData["status"] as? String)?.lowercase() != "suspended" && (cloudData["status"] as? String)?.lowercase() != "banned"
                     else -> true
                 }
-                updatedIsActive = active,
+                updatedIsActive = active
                 updatedUsage = (cloudData["apiUsageCount"] as? Number)?.toInt() ?: updatedUsage
                 val cName = (cloudData["name"] as? String) ?: (cloudData["Name"] as? String) ?: ""
                 if (cName.isNotBlank()) updatedName = cName

@@ -604,7 +604,7 @@ object DeviceActionManager {
         if (digits.isBlank() && numberOrName.isNotBlank()) {
             val resolved = resolveContactNumber(context, numberOrName)
             if (!resolved.isNullOrBlank()) {
-                digits = resolved,
+                digits = resolved
                 resolvedName = "$numberOrName ($digits)"
             }
         }

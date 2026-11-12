@@ -63,11 +63,11 @@ class VadGate(
     private val turnAudioBuffer = ByteArrayOutputStream()
 
     fun reset() {
-        isSpeechActive = false,
+        isSpeechActive = false
         peakSpeechRms = BASE_NOISE_FLOOR_RMS
-        peakSpeechSnrDb = 0.0,
+        peakSpeechSnrDb = 0.0
         voicedFrameCount = 0
-        totalTurnFrameCount = 0,
+        totalTurnFrameCount = 0
         silenceDurationMs = 0L
         utteranceDurationMs = 0L
         turnAudioBuffer.reset()
@@ -176,9 +176,9 @@ class VadGate(
                 if (voicedCountInWindow >= 4) {
                     isInterruption = true
                     if (!isSpeechActive) {
-                        isSpeechActive = true,
+                        isSpeechActive = true
                         peakSpeechRms = rms
-                        voicedFrameCount = 4,
+                        voicedFrameCount = 4
                         totalTurnFrameCount = 4
                         utteranceDurationMs = frameDurationMs * 4L
                         silenceDurationMs = 0L
@@ -195,9 +195,9 @@ class VadGate(
             if (!isSpeechActive) {
                 // Check onset condition: 3 of last 5 frames voiced
                 if (voicedCountInWindow >= MIN_VOICED_ONSET_COUNT) {
-                    isSpeechActive = true,
+                    isSpeechActive = true
                     peakSpeechRms = maxOf(rms, speechRmsThreshold)
-                    voicedFrameCount = voicedCountInWindow,
+                    voicedFrameCount = voicedCountInWindow
                     totalTurnFrameCount = ONSET_WINDOW_SIZE
                     utteranceDurationMs = frameDurationMs * ONSET_WINDOW_SIZE.toLong()
                     silenceDurationMs = 0L
@@ -233,7 +233,7 @@ class VadGate(
                 if (reachedSilenceTimeout || reachedMaxDuration) {
                     val speechDurationActual = (voicedFrameCount * frameDurationMs).toLong()
                     if (speechDurationActual >= minSpeechDurationMs) {
-                        isEndOfSpeech = true,
+                        isEndOfSpeech = true
                         completedTurnAudio = turnAudioBuffer.toByteArray()
                         completedDurationMs = utteranceDurationMs
                         // Capture turn statistics before reset and before the trailing silence

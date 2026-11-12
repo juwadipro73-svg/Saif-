@@ -2130,9 +2130,9 @@ private fun AdminApiGatewayTab(
         if (currentConfig.defaultModel.isNotBlank()) {
             modelInput = currentConfig.defaultModel
         }
-        chatLimitInput = currentConfig.chatLimitPerUser,
+        chatLimitInput = currentConfig.chatLimitPerUser
         imageLimitInput = currentConfig.imageLimitPerUser
-        appBuildLimitInput = currentConfig.appBuildLimitPerUser,
+        appBuildLimitInput = currentConfig.appBuildLimitPerUser
         totalLimitInput = currentConfig.totalApiLimitPerUser
     }
 
@@ -2298,7 +2298,7 @@ private fun AdminApiGatewayTab(
     RoundedCornerShape(12.dp)
                             )
                             .clickable {
-                                selectedProvider = provider,
+                                selectedProvider = provider
                                 testResultBanner = null
                                 modelInput = when (provider) {
                                     "Ashna AI" -> "ashna-x1"
@@ -2608,7 +2608,7 @@ private fun AdminApiGatewayTab(
                                 RoundedCornerShape(8.dp)
                             )
                             .clickable {
-                                modelInput = preset,
+                                modelInput = preset
                                 testResultBanner = null
                             }
                             .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -2631,7 +2631,7 @@ private fun AdminApiGatewayTab(
             Button(
                 onClick = {
                     scope.launch {
-                        isTestingConnection = true,
+                        isTestingConnection = true
                         testResultBanner = null
                         val res = AdminConfigManager.testApiKey(apiKeyInput, selectedProvider, modelInput)
                         isTestingConnection = false
@@ -3138,7 +3138,7 @@ private fun AdminBroadcastTab(
                             .background(Color(0x259B82EC))
                             .border(BorderStroke(1.dp, Color(0x509B82EC)), RoundedCornerShape(8.dp))
                             .clickable {
-                                pushTitle = content.first,
+                                pushTitle = content.first
                                 pushMessage = content.second
                                 pushSentSuccess = false
                             }
@@ -3309,7 +3309,7 @@ private fun AdminBroadcastTab(
                             title = pushTitle.ifBlank { "SAIF AI Announcement" },
                             message = pushMessage.trim()
                         )
-                        isSendingPush = false,
+                        isSendingPush = false
                         pushSentSuccess = success
                         if (success) {
                             Toast.makeText(context, "✅ Push notification dispatched to all users!", Toast.LENGTH_LONG).show()

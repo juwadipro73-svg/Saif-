@@ -423,7 +423,7 @@ fun SaifHeader(
     Modifier
                             .size(iconBtn)
                             .graphicsLayer {
-                                scaleX = themeScale,
+                                scaleX = themeScale
                                 scaleY = themeScale
                                 rotationZ = themeRotation
                             }

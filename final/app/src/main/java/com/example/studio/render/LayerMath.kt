@@ -76,7 +76,7 @@ object LayerMath {
         for (target in snapTargets) {
             val diff = kotlin.math.abs(target - targetUs)
             if (diff <= thresholdUs && diff < minDiff) {
-                minDiff = diff,
+                minDiff = diff
                 closestTarget = target
             }
         }

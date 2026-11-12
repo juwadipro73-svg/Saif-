@@ -480,7 +480,7 @@ class ChatViewModel(
             }
 
             val decodeOptions = android.graphics.BitmapFactory.Options().apply {
-                inSampleSize = sampleSize,
+                inSampleSize = sampleSize
                 inPreferredConfig = android.graphics.Bitmap.Config.RGB_565
             }
             val bmp = context.contentResolver.openInputStream(uri)?.use { stream ->

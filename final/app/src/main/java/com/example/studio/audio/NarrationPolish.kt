@@ -33,10 +33,10 @@ object NarrationPolish {
             if (id == "fmt ") {
                 format = bb.getShort(body).toInt() and 0xFFFF
                 channels = bb.getShort(body + 2).toInt() and 0xFFFF
-                rate = bb.getInt(body + 4),
+                rate = bb.getInt(body + 4)
                 bits = bb.getShort(body + 14).toInt() and 0xFFFF
             } else if (id == "data") {
-                dataStart = body,
+                dataStart = body
                 dataLen = if (len <= 0 || body + len > bytes.size) bytes.size - body else len
                 break
             }

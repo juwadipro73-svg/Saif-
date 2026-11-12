@@ -122,7 +122,7 @@ class LiveVoiceService : Service(), LifecycleOwner, ViewModelStoreOwner, SavedSt
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 100,
+            x = 100
             y = 200
         }
         

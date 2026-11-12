@@ -152,7 +152,7 @@ fun SaifNotesView(
                         onClick = {
                             val target = selectedFile ?: File(notesDir, "${noteTitle.ifBlank { "Note" }}.md")
                             target.writeText(noteContent)
-                            selectedFile = target,
+                            selectedFile = target
                             notesList = notesDir.listFiles { _, name -> name.endsWith(".md") }?.toList().orEmpty().sortedByDescending { it.lastModified() }
                         },
                         modifier =

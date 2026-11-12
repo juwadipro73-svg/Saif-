@@ -165,7 +165,7 @@ fun LibraryManagerScreen(
                 } else {
                     // Remove dependencies
                     for (line in targetLines) {
-                        gradleContent = gradleContent.replace("    $line\n", ""),
+                        gradleContent = gradleContent.replace("    $line\n", "")
                         gradleContent = gradleContent.replace("$line\n", "")
                         gradleContent = gradleContent.replace(line, "")
                     }

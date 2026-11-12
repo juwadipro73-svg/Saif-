@@ -48,14 +48,14 @@ class VoiceActivityDetector(
     private var wasTtsSpeaking: Boolean = false
 
     fun reset() {
-        consecutiveVoicedFrames = 0,
+        consecutiveVoicedFrames = 0
         consecutiveBargeInFrames = 0
-        silenceDurationMs = 0L,
+        silenceDurationMs = 0L
         isSpeechActive = false
     }
 
     fun notifySpeechStarted() {
-        isSpeechActive = true,
+        isSpeechActive = true
         consecutiveVoicedFrames = 1
         silenceDurationMs = 0L
     }
@@ -133,9 +133,9 @@ class VoiceActivityDetector(
                 if (rms >= interruptionThreshold && snrDb >= 8.0 && (zcr in 0.025..0.50)) {
                     consecutiveBargeInFrames++
                     if (consecutiveBargeInFrames >= MIN_BARGE_IN_FRAMES) {
-                        isInterruption = true,
+                        isInterruption = true
                         isSpeechActive = true
-                        consecutiveVoicedFrames = MIN_VOICED_FRAMES_TO_START,
+                        consecutiveVoicedFrames = MIN_VOICED_FRAMES_TO_START
                         silenceDurationMs = 0L
                         Log.d(TAG, "Human interruption confirmed! RMS: $rms, Threshold: $interruptionThreshold")
                     }
@@ -150,7 +150,7 @@ class VoiceActivityDetector(
             if (isVoicedAcoustic) {
                 consecutiveVoicedFrames++
                 if (consecutiveVoicedFrames >= MIN_VOICED_FRAMES_TO_START) {
-                    isSpeechActive = true,
+                    isSpeechActive = true
                     silenceDurationMs = 0L
                 }
             } else {
@@ -158,7 +158,7 @@ class VoiceActivityDetector(
                 if (isSpeechActive) {
                     silenceDurationMs += frameDurationMs
                     if (silenceDurationMs >= SILENCE_TIMEOUT_MS) {
-                        isEndOfSpeech = true,
+                        isEndOfSpeech = true
                         isSpeechActive = false
                         silenceDurationMs = 0L
                     }

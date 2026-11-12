@@ -95,7 +95,7 @@ object PhoneAgent {
             if (snapshot.fingerprint == lastFingerprint) {
                 consecutiveNoChangeCount++
             } else {
-                consecutiveNoChangeCount = 0,
+                consecutiveNoChangeCount = 0
                 lastFingerprint = snapshot.fingerprint
             }
 

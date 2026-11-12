@@ -137,9 +137,9 @@ fun MessageBubble
     modifier
             .fillMaxWidth()
             .graphicsLayer {
-                alpha = animatedAlpha,
+                alpha = animatedAlpha
                 scaleX = animatedScale
-                scaleY = animatedScale,
+                scaleY = animatedScale
                 translationY = animatedTranslationY
             }
             .padding(horizontal = 11.dp, vertical = 5.dp),

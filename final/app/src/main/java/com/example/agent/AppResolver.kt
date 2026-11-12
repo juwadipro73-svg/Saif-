@@ -62,7 +62,7 @@ object AppResolver {
             Log.w(TAG, "Error querying launcher activities: ${e.message}")
         }
 
-        cachedApps = list,
+        cachedApps = list
         lastCacheTime = now
         return list
     }

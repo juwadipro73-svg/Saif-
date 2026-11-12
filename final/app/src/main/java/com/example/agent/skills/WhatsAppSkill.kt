@@ -40,7 +40,7 @@ object WhatsAppSkill : Skill {
             val matches = ContactAliasStore.resolveContact(env.context, contactQuery)
             if (matches.isNotEmpty()) {
                 val resolved = matches.first()
-                contactName = resolved.name,
+                contactName = resolved.name
                 targetDigits = ContactAliasStore.normalizePhoneNumber(resolved.phoneNumber)
             }
         }

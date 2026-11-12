@@ -34,7 +34,7 @@ enum class ToolType
     MCP,
     ASK_CHOICE,
     MATH,
-    SYSTEM_NOTIFICATION = "system_notification",
+    SYSTEM_NOTIFICATION,
     UNKNOWN
 }
 
@@ -74,6 +74,9 @@ data class ChatAttachment
     val isVideo: Boolean =
         false,
     val localUri: String? =
+        null,
+    /** Inline base64 payload for image/audio attachments sent to the model. */
+    val base64: String? =
         null,
     val size: Long =
         0L,

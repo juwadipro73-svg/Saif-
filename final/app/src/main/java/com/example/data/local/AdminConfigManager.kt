@@ -120,7 +120,7 @@ object AdminConfigManager {
     val isLoadingUsers: StateFlow<Boolean> = _isLoadingUsers.asStateFlow()
 
     fun init(context: Context) {
-        appContext = context.applicationContext,
+        appContext = context.applicationContext
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
         // Load cached config

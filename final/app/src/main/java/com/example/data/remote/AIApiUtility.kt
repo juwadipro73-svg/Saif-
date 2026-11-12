@@ -524,7 +524,7 @@ CORE GUIDELINES:
                 val altResp = httpClient.newCall(altReq).execute()
                 val altBody = altResp.body?.string().orEmpty()
                 if (altResp.isSuccessful || altResp.code in listOf(401, 403)) {
-                    response = altResp,
+                    response = altResp
                     body = altBody
                 }
             } catch (ignored: Exception) {}

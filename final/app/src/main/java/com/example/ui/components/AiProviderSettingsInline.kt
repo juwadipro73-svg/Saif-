@@ -244,11 +244,11 @@ fun AiProviderSettingsInline() {
                                 }
                             },
                             onClick = { 
-                                providerName = pName,
+                                providerName = pName
                                 fetchedModels = emptyList()
-                                fetchError = null,
+                                fetchError = null
                                 fetchSuccessMessage = null
-                                saveSuccessMessage = null,
+                                saveSuccessMessage = null
                                 expanded = false
                                 
                                 // Auto-update activeModel to a sensible default for the new provider
@@ -270,7 +270,7 @@ fun AiProviderSettingsInline() {
                                     pName.contains("Gemini", ignoreCase = true) -> "gemini-flash-latest"
                                     else -> "mercury-2.5"
                                 }
-                                activeModel = newDefault,
+                                activeModel = newDefault
                                 buildModel = newDefault
                                 val cleanedList = apiKeys.map { AIApiUtility.sanitizeKey(it) }.filter { it.isNotBlank() }
                                 ProviderSettingsManager.saveState(ProviderState(
@@ -356,7 +356,7 @@ fun AiProviderSettingsInline() {
                             val cleanKey = AIApiUtility.sanitizeKey(newKey)
                             val updated = apiKeys.toMutableList()
                             updated[index] = cleanKey
-                            apiKeys = updated,
+                            apiKeys = updated
                             fetchError = null
                             saveSuccessMessage = null
 
@@ -372,7 +372,7 @@ fun AiProviderSettingsInline() {
                                  cleanKey.startsWith("inception") || cleanKey.startsWith("fw_"))
 
                             if (shouldAutoSwitch) {
-                                providerName = autoProv,
+                                providerName = autoProv
                                 activeModel = detectedProfile.defaultFallbackModels.firstOrNull() ?: activeModel
                             }
 
@@ -464,9 +464,9 @@ fun AiProviderSettingsInline() {
                 val rawKey = apiKeys.firstOrNull { it.isNotBlank() }
                 if (rawKey != null) {
                     val keyToUse = AIApiUtility.sanitizeKey(rawKey)
-                    isFetching = true,
+                    isFetching = true
                     fetchError = null
-                    fetchSuccessMessage = null,
+                    fetchSuccessMessage = null
                     saveSuccessMessage = null
                     scope.launch {
                         try {
@@ -496,7 +496,7 @@ fun AiProviderSettingsInline() {
                                 } else {
                                     "No models found. Please check your API key."
                                 }
-                                fetchError = "❌ Invalid API Key for $providerName: $errDetail",
+                                fetchError = "❌ Invalid API Key for $providerName: $errDetail"
                                 fetchedModels = emptyList()
                                 fetchSuccessMessage = null
                             } else {
@@ -696,7 +696,7 @@ fun AiProviderSettingsInline() {
                         val isSelected = activeModel.equals(name, ignoreCase = true)
                         Surface(
                             onClick = {
-                                activeModel = name,
+                                activeModel = name
                                 buildModel = name
                                 fetchError = null
                                 val cleanedKeys = apiKeys.map { it.trim() }.filter { it.isNotBlank() }
@@ -816,7 +816,7 @@ fun AiProviderSettingsInline() {
             TextField(
                 value = activeModel,
                 onValueChange = { 
-                    activeModel = it,
+                    activeModel = it
                     buildModel = it
                     saveSuccessMessage = null
                 },
@@ -905,7 +905,7 @@ fun AiProviderSettingsInline() {
                     ProviderProfile.getById(finalProv).defaultFallbackModels.firstOrNull() ?: "ashna-x1"
                 } else activeModel
 
-                providerName = finalProv,
+                providerName = finalProv
                 activeModel = finalModel
                 ProviderSettingsManager.saveState(ProviderState(
                     providerName = finalProv,
@@ -1019,9 +1019,9 @@ fun AiProviderSettingsInline() {
                                 val isSelected = activeModel == name
                                 Surface(
                                     onClick = { 
-                                        activeModel = name,
+                                        activeModel = name
                                         buildModel = name
-                                        fetchError = null,
+                                        fetchError = null
                                         showAllModelsDialog = false
                                         
                                         // Auto-save model selection

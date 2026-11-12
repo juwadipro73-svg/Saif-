@@ -202,7 +202,7 @@ object SttRouter {
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (err: Exception) {
                 lastFailureReason = e.message ?: "Network error"
                 Log.w(TAG, "Attempt with ${candidate.service} failed: $lastFailureReason")
             }

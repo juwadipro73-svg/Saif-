@@ -445,7 +445,7 @@ fun ConfigureProjectDialog(
                                 label = "Package Name",
                                 value = packageName,
                                 onValueChange = {
-                                    packageName = it,
+                                    packageName = it
                                     isPackageCustom = true
                                 },
                                 placeholder = "e.g. com.saifai.app",
@@ -966,7 +966,7 @@ fun ConfigureProjectDialog(
     Modifier.height(16.dp))
                     TextButton(
                         onClick = {
-                            finalIconBitmap = null,
+                            finalIconBitmap = null
                             showIconSourceSheet = false
                         }
                     ) {
@@ -990,7 +990,7 @@ fun ConfigureProjectDialog(
         ImageCropEditPanel(
             bitmap = editingBitmap!!,
             onCropConfirmed = { cropped ->
-                finalIconBitmap = cropped,
+                finalIconBitmap = cropped
                 editingBitmap = null
             },
             onDismiss = {
@@ -1048,7 +1048,7 @@ fun ConfigureProjectDialog(
                                 .fillMaxWidth()
                                 .clip(shape = RoundedCornerShape(14.dp))
                                 .clickable {
-                                    selectedLanguage = lang,
+                                    selectedLanguage = lang
                                     showLanguageSheet = false
                                 },
                             shape =
@@ -1172,7 +1172,7 @@ fun ConfigureProjectDialog(
                                 .fillMaxWidth()
                                 .clip(shape = RoundedCornerShape(14.dp))
                                 .clickable {
-                                    minSdk = opt.apiLevel,
+                                    minSdk = opt.apiLevel
                                     showMinSdkSheet = false
                                 },
                             shape =
@@ -1272,7 +1272,7 @@ fun ConfigureProjectDialog(
                                 .fillMaxWidth()
                                 .clip(shape = RoundedCornerShape(14.dp))
                                 .clickable {
-                                    targetSdk = opt.apiLevel,
+                                    targetSdk = opt.apiLevel
                                     showTargetSdkSheet = false
                                 },
                             shape =
@@ -1403,7 +1403,7 @@ fun decodeUriToBitmap(context: Context, uri: Uri, maxDim: Int = 1280): Bitmap? {
         }
 
         val decodeOptions = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize,
+            inSampleSize = sampleSize
             inPreferredConfig = Bitmap.Config.ARGB_8888
         }
         context.contentResolver.openInputStream(uri)?.use { stream ->

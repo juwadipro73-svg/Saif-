@@ -222,7 +222,7 @@ fun ImageCropEditPanel(
                             nativeCanvas.scale(sx, sy)
 
                             val paint = AndroidPaint().apply {
-                                isAntiAlias = true,
+                                isAntiAlias = true
                                 isFilterBitmap = true
                             }
 
@@ -359,9 +359,9 @@ fun ImageCropEditPanel(
                                 icon = Icons.Default.Refresh,
                                 label = "Reset",
                                 onClick = {
-                                    userZoom = 1.0f,
+                                    userZoom = 1.0f
                                     panOffset = Offset.Zero
-                                    rotationDegrees = 0f,
+                                    rotationDegrees = 0f
                                     isFlippedHorizontal = false
                                 }
                             )
