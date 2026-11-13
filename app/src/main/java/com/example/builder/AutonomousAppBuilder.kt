@@ -60,6 +60,7 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
         var latestSummary = ""
         val updatedFiles = mutableListOf<String>()
 
+        com.example.builder.agent.BuildService.start(context, project.appName, "Starting your build...")
         val result = com.example.builder.agent.BuildAgent.run(
             context = context,
             project = project,
@@ -69,6 +70,7 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
             onEvent = { event ->
                 when (event) {
                     is com.example.builder.agent.BuildEvent.PhaseStarted -> {
+                        com.example.builder.agent.BuildService.updateProgress(context, event.phase.displayName)
                         val stageNum = when (event.phase) {
                             com.example.builder.agent.BuildPhase.S0_INTAKE,
                             com.example.builder.agent.BuildPhase.S1_SPEC,
@@ -125,6 +127,8 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
                 }
             }
         )
+
+        com.example.builder.agent.BuildService.finish(context, result.isSuccess)
 
         if (result.isSuccess) {
             val rootHtml = File(projectDir, "index.html")

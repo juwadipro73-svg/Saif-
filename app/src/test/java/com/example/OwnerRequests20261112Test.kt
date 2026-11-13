@@ -33,7 +33,7 @@ class OwnerRequests20261112Test {
         assertFalse(settings.contains("EDITING ENGINE", ignoreCase = true))
         assertFalse(settings.contains("AdvancedEditingEnginePrefs"))
         assertTrue(settings.contains("SectionHeader(\"STORAGE\")"))
-        assertTrue(settings.contains("SectionHeader(\"ABOUT & LICENCES\")"))
+        assertTrue(settings.contains("SectionHeader(\"ABOUT & CREDITS\")"))
     }
 
     @Test fun anApiKeyNeverLeadsToAnAntigravitySignInScreen() {
