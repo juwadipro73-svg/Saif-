@@ -11,6 +11,10 @@ import android.view.WindowManager
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -42,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
@@ -1466,10 +1471,17 @@ fun ChatScreen(
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
                                                 listOf(
-                                                    Triple("✦  Build", "Plan and create an app", "Help me plan and build a polished mobile app for "),
-                                                    Triple("⌘  Code", "Debug or explore code", "Help me debug this code: "),
-                                                    Triple("◈  Create", "Turn an idea into a plan", "Help me turn this idea into a clear step-by-step plan: ")
-                                                ).forEach { (title, subtitle, prompt) ->
+                                                    Triple("🧠", "Build Architect", "Plan and create an app", "Help me plan and build a polished mobile app for "),
+                                                    Triple("🛠️", "Code Detective", "Debug or explore code", "Help me debug this code: "),
+                                                    Triple("✨", "Idea Muse", "Turn an idea into a plan", "Help me turn this idea into a clear step-by-step plan: ")
+                                                ).forEach { (avatar, title, subtitle, prompt) ->
+                                                    val characterMotion = rememberInfiniteTransition(label = "welcome-character-$title")
+                                                    val avatarScale by characterMotion.animateFloat(
+                                                        initialValue = 0.96f,
+                                                        targetValue = 1.04f,
+                                                        animationSpec = infiniteRepeatable(tween(1100), RepeatMode.Reverse),
+                                                        label = "avatar-scale-$title"
+                                                    )
                                                     Card(
                                                         modifier = Modifier.width(190.dp).animateContentSize().clickable {
                                                             textFieldValue = TextFieldValue(prompt)
@@ -1479,8 +1491,16 @@ fun ChatScreen(
                                                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
                                                     ) {
                                                         Column(Modifier.padding(16.dp)) {
-                                                            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                                                            Spacer(Modifier.height(6.dp))
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Box(
+                                                                    Modifier.size(38.dp).graphicsLayer { scaleX = avatarScale; scaleY = avatarScale }
+                                                                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                                                    contentAlignment = Alignment.Center
+                                                                ) { Text(avatar, fontSize = 20.sp) }
+                                                                Spacer(Modifier.width(10.dp))
+                                                                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                                            }
+                                                            Spacer(Modifier.height(10.dp))
                                                             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                         }
                                                     }
