@@ -7,6 +7,7 @@ class SaifApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         ProviderSettingsManager.init(this)
+        runCatching { com.example.util.DynamicLauncherIcon.initialize(this) }
 
         // Pre-load the on-device speech model at app start, so voice typing and the live conversation work with
         // ANY provider key. Cloud speech-to-text exists only for Groq, OpenAI and Gemini keys; for every other

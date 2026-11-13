@@ -69,11 +69,47 @@
             android:theme="@style/Theme.Gemini"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize">
+        </activity>
+
+        <activity-alias
+            android:name=".LauncherIconViolet"
+            android:targetActivity="com.example.MainActivity"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_variant_violet"
+            android:roundIcon="@mipmap/ic_launcher_variant_violet"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherIconCyan"
+            android:targetActivity="com.example.MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_variant_cyan"
+            android:roundIcon="@mipmap/ic_launcher_variant_cyan"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherIconAmber"
+            android:targetActivity="com.example.MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_variant_amber"
+            android:roundIcon="@mipmap/ic_launcher_variant_amber"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <service
             android:name="com.example.LiveVoiceService"

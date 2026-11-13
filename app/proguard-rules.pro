@@ -89,6 +89,8 @@
 }
 # WorkManager's Room database is created by reflection; R8 full mode strips its no-arg constructor.
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
+# The launcher palette worker is restored from WorkManager's persisted class name after process/device restart.
+-keep class com.example.util.LauncherIconWorker { public <init>(...); *; }
 
 # On-device speech recognition (com.example.stt.OfflineSpeech).
 # The Vosk library reaches its native code through JNA, and JNA finds classes, fields and methods by name at run
