@@ -46,7 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.graphicsLayer
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
@@ -1471,10 +1471,11 @@ fun ChatScreen(
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
                                                 listOf(
-                                                    Triple("🧠", "Build Architect", "Plan and create an app", "Help me plan and build a polished mobile app for "),
-                                                    Triple("🛠️", "Code Detective", "Debug or explore code", "Help me debug this code: "),
-                                                    Triple("✨", "Idea Muse", "Turn an idea into a plan", "Help me turn this idea into a clear step-by-step plan: ")
-                                                ).forEach { (avatar, title, subtitle, prompt) ->
+                                                    listOf("🧠", "Build Architect", "Plan and create an app", "Help me plan and build a polished mobile app for "),
+                                                    listOf("🛠️", "Code Detective", "Debug or explore code", "Help me debug this code: "),
+                                                    listOf("✨", "Idea Muse", "Turn an idea into a plan", "Help me turn this idea into a clear step-by-step plan: ")
+                                                ).forEach { character ->
+                                                    val (avatar, title, subtitle, prompt) = character
                                                     val characterMotion = rememberInfiniteTransition(label = "welcome-character-$title")
                                                     val avatarScale by characterMotion.animateFloat(
                                                         initialValue = 0.96f,
@@ -1493,7 +1494,7 @@ fun ChatScreen(
                                                         Column(Modifier.padding(16.dp)) {
                                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                                 Box(
-                                                                    Modifier.size(38.dp).graphicsLayer { scaleX = avatarScale; scaleY = avatarScale }
+                                                                    Modifier.size(38.dp).scale(avatarScale)
                                                                         .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                                                                     contentAlignment = Alignment.Center
                                                                 ) { Text(avatar, fontSize = 20.sp) }
