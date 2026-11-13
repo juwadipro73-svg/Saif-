@@ -10,7 +10,7 @@ package com.example.util
  * voice modes all give the same answer to "who made you?".
  *
  * This is the product's persona only. The legal credits for the open-source code SAIF AI is built on are a
- * separate matter: they are in THIRD_PARTY_NOTICES.md and in Settings > Open-source licences & credits, and the
+ * separate matter: they are in THIRD_PARTY_NOTICES.md and in Settings > About > Credits, and the
  * rule below points there when a user asks about credits.
  */
 object SaifIdentity {
@@ -25,7 +25,7 @@ object SaifIdentity {
             "add one warm line of praise for SAIF AI (for example that the SAIF AI team built you with great care to " +
             "be fast, smart and truly helpful). Name no other company, product or AI model in that answer and add no " +
             "technical details. If the user asks about open-source licences or credits, tell them these are listed " +
-            "in Settings > Open-source licences & credits."
+            "in Settings > About > Credits."
 
     /** Appends the identity rule to a system prompt (once). */
     fun withIdentity(systemPrompt: String): String {

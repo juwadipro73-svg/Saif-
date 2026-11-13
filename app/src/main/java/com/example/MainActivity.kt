@@ -92,6 +92,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { splash ->
+                splash.iconView.animate()
+                    .alpha(0f)
+                    .scaleX(0.72f)
+                    .scaleY(0.72f)
+                    .setDuration(420L)
+                    .withEndAction { splash.remove() }
+                    .start()
+            }
+        }
         AuthManager.init(applicationContext)
         com.example.gemini.data.remote.AntigravityAppBinding.init(applicationContext)
         if (com.example.gemini.BuildConfig.SAIF_CLOUD_API_BASE_URL.isNotBlank()) {
