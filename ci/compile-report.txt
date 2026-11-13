@@ -1,26 +1,84 @@
 # CI compile report
 
-run: 43262311823  commit: f6e7fbdad018aa47745e678c89bc4f05d98c820f  exit: 0
+run: 43415820068  commit: 211794da28f360bac0a347fbdbab481c2d5f1688  exit: 1
 
 ## errors by file (unique)
+final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:106:21 Unresolved reference 'setExecutable'.
+final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:107:21 Unresolved reference 'setReadable'.
+final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:110:21 Unresolved reference 'setExecutable'.
+final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:111:21 Unresolved reference 'setReadable'.
+final/app/src/main/java/com/example/saif/data/local/LocalEnvironmentManager.kt:164:50 Argument type mismatch: actual type is 'String?', but 'String' was expected.
+final/app/src/main/java/com/example/ui/components/CreditsSheet.kt:51:82 Unresolved reference 'AutoAwesome'.
+final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:118:31 Unresolved reference 'currentFrameTimeMillis'.
+final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:120:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
+final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:121:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
+final/app/src/main/java/com/example/ui/components/SaifEngineScreens.kt:194:41 Unresolved reference 'fillMaxWidth'.
+final/app/src/main/java/com/saifai/brand/DynamicAppIcon.kt:132:32 Unresolved reference 'setApplicationIconSetting'.
+final/app/src/main/java/com/saifai/brand/SaifCredits.kt:24:48 Initializer type mismatch: expected 'List<Pair<String, String>>', actual 'List<String>'.
+final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt:259:62 Suspend function 'suspend fun compileLinuxDirectoryToApk(context: Context, requestJson: JSONObject): JSONObject' can only be called from a coroutine or another suspend function.
 
 ## javac / aapt errors
 
 ## failed tasks, causes, resolution problems
+* What went wrong:
+> Task :app:compileStandardDebugKotlin FAILED
+Execution failed for task ':app:compileStandardDebugKotlin'.
+FAILURE: Build failed with an exception.
 
 ## tail
-> Task :apprunner:mergeProjectDexDebug FROM-CACHE
+
+> Configure project :app
+w: file:///home/runner/work/Saif-/Saif-/final/app/build.gradle.kts:289:45: 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build.gradle.kts:297:45: 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
+w: file:///home/runner/work/Saif-/Saif-/final/app/build.gradle.kts:310:45: 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
+
+> Task :apprunner:preBuild UP-TO-DATE
+> Task :apprunner:preDebugBuild UP-TO-DATE
+> Task :apprunner:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :apprunner:generateDebugResources
+> Task :apprunner:packageDebugResources
+> Task :apprunner:processDebugNavigationResources
+> Task :apprunner:javaPreCompileDebug
+> Task :apprunner:generateDebugAssets UP-TO-DATE
+> Task :apprunner:mergeDebugAssets
+> Task :apprunner:compressDebugAssets
+> Task :apprunner:parseDebugLocalResources
+> Task :apprunner:desugarDebugFileDependencies
+> Task :apprunner:checkDebugAarMetadata
+> Task :apprunner:generateDebugRFile
+> Task :apprunner:compileDebugNavigationResources
+> Task :apprunner:compileDebugKotlin NO-SOURCE
+
+> Task :apprunner:compileDebugJavaWithJavac
+Note: /home/runner/work/Saif-/Saif-/final/apprunner/src/main/java/com/saif/apprunner/MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :apprunner:mapDebugSourceSetPaths
+> Task :apprunner:createDebugCompatibleScreenManifests
+> Task :apprunner:extractDeepLinksDebug
+> Task :apprunner:processDebugMainManifest
+> Task :apprunner:mergeDebugResources
+> Task :apprunner:processDebugManifest
+> Task :apprunner:processDebugJavaRes NO-SOURCE
+> Task :apprunner:processDebugManifestForPackage
+> Task :apprunner:processDebugResources
+> Task :apprunner:mergeDebugJavaResource
+> Task :apprunner:dexBuilderDebug
+> Task :apprunner:mergeDebugGlobalSynthetics
+> Task :apprunner:checkDebugDuplicateClasses
 > Task :apprunner:mergeDebugJniLibFolders
+> Task :apprunner:mergeLibDexDebug
+> Task :apprunner:mergeProjectDexDebug
 > Task :apprunner:mergeDebugNativeLibs NO-SOURCE
 > Task :apprunner:stripDebugDebugSymbols NO-SOURCE
-> Task :apprunner:mergeDebugJavaResource
+> Task :apprunner:mergeExtDexDebug
 > Task :apprunner:validateSigningDebug
 > Task :apprunner:writeDebugAppMetadata
 > Task :apprunner:writeDebugSigningConfigVersions
 > Task :app:bundleBrowserExtensions
 > Task :app:bundleExtensionDocs
 > Task :app:copyScriptsToAssets
-> Task :app:processStandardDebugGoogleServices FROM-CACHE
+> Task :app:processStandardDebugGoogleServices
 > Task :apprunner:packageDebug
 > Task :apprunner:createDebugApkListingFileRedirect
 > Task :apprunner:assembleDebug
@@ -29,47 +87,48 @@ run: 43262311823  commit: f6e7fbdad018aa47745e678c89bc4f05d98c820f  exit: 0
 > Task :app:preStandardDebugBuild
 > Task :app:mergeStandardDebugNativeDebugMetadata NO-SOURCE
 > Task :app:generateStandardDebugBuildConfig
-> Task :app:generateStandardDebugResources FROM-CACHE
-> Task :app:packageStandardDebugResources FROM-CACHE
-> Task :app:processStandardDebugNavigationResources FROM-CACHE
-> Task :app:parseStandardDebugLocalResources FROM-CACHE
-> Task :app:generateStandardDebugRFile FROM-CACHE
-> Task :app:javaPreCompileStandardDebug FROM-CACHE
+> Task :app:generateStandardDebugResources
+> Task :app:packageStandardDebugResources
+> Task :app:processStandardDebugNavigationResources
+> Task :app:parseStandardDebugLocalResources
+> Task :app:generateStandardDebugRFile
+> Task :app:javaPreCompileStandardDebug
 > Task :app:generateStandardDebugAssets
 > Task :app:mergeStandardDebugAssets
 > Task :app:compressStandardDebugAssets
 > Task :app:checkStandardDebugDuplicateClasses
-> Task :app:desugarStandardDebugFileDependencies FROM-CACHE
-> Task :app:mergeExtDexStandardDebug FROM-CACHE
-> Task :app:mergeLibDexStandardDebug FROM-CACHE
+> Task :app:desugarStandardDebugFileDependencies
+> Task :app:kspStandardDebugKotlin
+> Task :app:mergeExtDexStandardDebug
+> Task :app:mergeLibDexStandardDebug
 > Task :app:checkStandardDebugAarMetadata
 > Task :app:compileStandardDebugNavigationResources FROM-CACHE
 > Task :app:mapStandardDebugSourceSetPaths
-> Task :app:mergeStandardDebugResources FROM-CACHE
+> Task :app:mergeStandardDebugResources
 > Task :app:createStandardDebugCompatibleScreenManifests
-> Task :app:extractDeepLinksStandardDebug FROM-CACHE
+> Task :app:extractDeepLinksStandardDebug
 
 > Task :app:processStandardDebugMainManifest
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:25:5-102 Warning:
-	uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE was tagged at AndroidManifest.xml:25 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:26:5-97 Warning:
-	uses-permission#android.permission.QUERY_ALL_PACKAGES was tagged at AndroidManifest.xml:26 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:27:5-98 Warning:
-	uses-permission#android.permission.SYSTEM_ALERT_WINDOW was tagged at AndroidManifest.xml:27 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:28:5-103 Warning:
-	uses-permission#android.permission.REQUEST_INSTALL_PACKAGES was tagged at AndroidManifest.xml:28 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:29:5-102 Warning:
-	uses-permission#android.permission.REQUEST_DELETE_PACKAGES was tagged at AndroidManifest.xml:29 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:30:5-89 Warning:
-	uses-permission#android.permission.CALL_PHONE was tagged at AndroidManifest.xml:30 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:31:5-92 Warning:
-	uses-permission#android.permission.READ_CONTACTS was tagged at AndroidManifest.xml:31 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:32:5-93 Warning:
-	uses-permission#android.permission.WRITE_SETTINGS was tagged at AndroidManifest.xml:32 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:33:5-87 Warning:
-	uses-permission#android.permission.READ_SMS was tagged at AndroidManifest.xml:33 to remove other declarations but no other declaration present
-/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:34:5-90 Warning:
-	uses-permission#android.permission.RECEIVE_SMS was tagged at AndroidManifest.xml:34 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:31:5-102 Warning:
+	uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE was tagged at AndroidManifest.xml:31 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:32:5-97 Warning:
+	uses-permission#android.permission.QUERY_ALL_PACKAGES was tagged at AndroidManifest.xml:32 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:33:5-98 Warning:
+	uses-permission#android.permission.SYSTEM_ALERT_WINDOW was tagged at AndroidManifest.xml:33 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:34:5-103 Warning:
+	uses-permission#android.permission.REQUEST_INSTALL_PACKAGES was tagged at AndroidManifest.xml:34 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:35:5-102 Warning:
+	uses-permission#android.permission.REQUEST_DELETE_PACKAGES was tagged at AndroidManifest.xml:35 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:36:5-89 Warning:
+	uses-permission#android.permission.CALL_PHONE was tagged at AndroidManifest.xml:36 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:37:5-92 Warning:
+	uses-permission#android.permission.READ_CONTACTS was tagged at AndroidManifest.xml:37 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:38:5-93 Warning:
+	uses-permission#android.permission.WRITE_SETTINGS was tagged at AndroidManifest.xml:38 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:39:5-87 Warning:
+	uses-permission#android.permission.READ_SMS was tagged at AndroidManifest.xml:39 to remove other declarations but no other declaration present
+/home/runner/work/Saif-/Saif-/final/app/src/main/AndroidManifest.xml:40:5-90 Warning:
+	uses-permission#android.permission.RECEIVE_SMS was tagged at AndroidManifest.xml:40 to remove other declarations but no other declaration present
 
 > Task :app:processStandardDebugManifest
 > Task :app:processStandardDebugManifestForPackage
@@ -78,84 +137,42 @@ run: 43262311823  commit: f6e7fbdad018aa47745e678c89bc4f05d98c820f  exit: 0
 > Task :app:mergeStandardDebugNativeLibs
 
 > Task :app:stripStandardDebugDebugSymbols
-Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so, libtermux.so. Run with --info option to learn more.
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
 
 > Task :app:validateSigningStandardDebug
 > Task :app:writeStandardDebugAppMetadata
 > Task :app:writeStandardDebugSigningConfigVersions
-> Task :app:kspStandardDebugKotlin
 > Task :app:compileStandardDebugKotlin
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/AssistantOverlayActivity.kt:12:27 The corresponding parameter in the supertype 'ComponentActivity' is named 'savedInstanceState'. This may cause problems when calling this function with named arguments.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/LiveVoiceSessionManager.kt:708:27 'var isSpeakerphoneOn: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agent/ScreenObserver.kt:255:34 'var isChecked: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agent/skills/CallSkill.kt:80:35 'var isSpeakerphoneOn: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/agyext/AntigravityCustomApiDialog.kt:169:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/audio/AudioPipeline.kt:84:48 'var isBluetoothScoOn: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/audio/AudioPipeline.kt:84:80 'var isBluetoothA2dpOn: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/audio/AudioPipeline.kt:84:113 'var isWiredHeadsetOn: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/builder/agent/SandboxRunner.kt:58:34 'var databaseEnabled: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/builder/agent/SandboxRunner.kt:99:97 Unnecessary safe call on a non-null receiver of type 'ConsoleMessage'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/AppCompilerEngine.kt:1432:39 'constructor(name: String!, privateKey: PrivateKey!, certificates: (Mutable)List<X509Certificate!>!): ApkSigner.SignerConfig.Builder' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/AuthManager.kt:98:91 Condition is always 'true'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/local/AuthManager.kt:135:33 Condition is always 'true'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/data/remote/AIApiUtility.kt:610:42 Unnecessary safe call on a non-null receiver of type 'LlmError'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/providers/TerminalProvidersSettingsDialog.kt:284:17 'fun TabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryTabRow and SecondaryTabRow.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/ui/components/MarkdownBlocks.kt:292:21 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:201:73 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:201:97 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:202:31 'constructor(p0: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:203:69 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/AudioTools.kt:203:93 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorController.kt:300:171 Unnecessary safe call on a non-null receiver of type 'QuestionCard'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:386:91 Redundant call of conversion method.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:519:50 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:523:50 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:526:42 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:582:35 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/DirectorServices.kt:586:35 Unnecessary safe call on a non-null receiver of type 'AgentActivity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/director/SceneFx.kt:522:83 Redundant call of conversion method.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/render/StudioFrameRenderer.kt:70:80 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ItemAnimation'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/render/StudioFrameRenderer.kt:72:101 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ItemAnimation'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/render/StudioFrameRenderer.kt:75:103 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ItemAnimation'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioAiProModal.kt:195:46 'val Icons.Filled.VolumeDown: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.VolumeDown.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioToolbar.kt:105:38 'val Icons.Filled.CallSplit: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.CallSplit.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioTuneInspector.kt:367:13 'when' is exhaustive so 'else' is redundant here.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/studio/ui/StudioTuneInspector.kt:372:13 'when' is exhaustive so 'else' is redundant here.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/ChatViewModel.kt:519:42 Condition is always 'true'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:399:113 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ChatSessionEntity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:404:107 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ChatSessionEntity'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:587:98 Unnecessary safe call on a non-null receiver of type 'PrivateFileTypes.Selection'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:594:68 'val Icons.Filled.InsertDriveFile: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.InsertDriveFile.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:1275:24 'var statusBarColor: Int' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:1276:24 'var navigationBarColor: Int' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/SaifAiApp.kt:1279:28 'var isStatusBarContrastEnforced: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:1203:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:2073:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:2451:48 'val Icons.Filled.OpenInNew: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.OpenInNew.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AdminDashboardScreen.kt:3339:40 'val Icons.Filled.Send: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Send.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AiProviderSettingsInline.kt:329:57 'val Icons.Filled.OpenInNew: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.OpenInNew.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AppRunnerDialog.kt:777:26 'var databaseEnabled: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/AppRunnerDialog.kt:1507:17 Condition is always 'true'.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/BuildAIScreen.kt:118:28 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/FlowAiStudio.kt:258:14 'var databaseEnabled: Boolean' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/GeminiAssistantSheet.kt:91:9 'val LocalClipboardManager: ProvidableCompositionLocal<ClipboardManager>' is deprecated. Use LocalClipboard instead which supports suspend functions.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/GitHubConnectDialog.kt:367:57 'val Icons.Outlined.OpenInNew: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.OpenInNew.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:221:57 'val Icons.Filled.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.HelpOutline.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:284:17 'fun ScrollableTabRow(selectedTabIndex: Int, modifier: Modifier = ..., containerColor: Color = ..., contentColor: Color = ..., edgePadding: Dp = ..., indicator: ComposableFunction1<List<TabPosition>, Unit> = ..., divider: ComposableFunction0<Unit> = ..., tabs: ComposableFunction0<Unit>): Unit' is deprecated. Replaced with PrimaryScrollableTabRow and SecondaryScrollableTabRow tab variants.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:294:38 'fun Modifier.tabIndicatorOffset(currentTabPosition: TabPosition): Modifier' is deprecated. Solely for use alongside deprecated TabRowDefaults.Indicator method. For recommended PrimaryIndicator and SecondaryIndicator methods, please use TabIndicatorScope.tabIndicatorOffset method.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifAiEditingModal.kt:1154:38 'val Icons.Filled.VolumeDown: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.VolumeDown.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/core/SaifVoiceEngine.kt:45:29 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/virtualization/SaifNativeWorkspaceEngine.kt:105:38 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:106:21 Unresolved reference 'setExecutable'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:107:21 Unresolved reference 'setReadable'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:110:21 Unresolved reference 'setExecutable'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:111:21 Unresolved reference 'setReadable'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/data/local/LocalEnvironmentManager.kt:164:50 Argument type mismatch: actual type is 'String?', but 'String' was expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/CreditsSheet.kt:51:82 Unresolved reference 'AutoAwesome'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:118:31 Unresolved reference 'currentFrameTimeMillis'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:120:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:121:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineScreens.kt:194:41 Unresolved reference 'fillMaxWidth'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/brand/DynamicAppIcon.kt:132:32 Unresolved reference 'setApplicationIconSetting'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/brand/SaifCredits.kt:24:48 Initializer type mismatch: expected 'List<Pair<String, String>>', actual 'List<String>'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt:259:62 Suspend function 'suspend fun compileLinuxDirectoryToApk(context: Context, requestJson: JSONObject): JSONObject' can only be called from a coroutine or another suspend function.
 
-> Task :app:compileStandardDebugJavaWithJavac
-> Task :app:dexBuilderStandardDebug
-> Task :app:mergeStandardDebugGlobalSynthetics FROM-CACHE
-> Task :app:processStandardDebugJavaRes
-> Task :app:mergeProjectDexStandardDebug
-> Task :app:mergeStandardDebugJavaResource
-> Task :app:packageStandardDebug
-> Task :app:createStandardDebugApkListingFileRedirect
-> Task :app:assembleStandardDebug
+> Task :app:compileStandardDebugKotlin FAILED
 
-BUILD SUCCESSFUL in 2m 2s
-77 actionable tasks: 42 executed, 35 from cache
+[Incubating] Problems report is available at: file:///home/runner/work/Saif-/Saif-/final/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileStandardDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3m 13s
+69 actionable tasks: 68 executed, 1 from cache
