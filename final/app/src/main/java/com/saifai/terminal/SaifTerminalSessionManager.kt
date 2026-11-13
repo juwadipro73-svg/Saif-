@@ -61,7 +61,7 @@ class SaifTerminalSessionManager private constructor() {
 
         sessionScope.launch {
             try {
-                val pb = ProcessBuilder("sh")
+                val pb = ProcessBuilder("/system/bin/sh")
                     .directory(wsDir)
                     .redirectErrorStream(true)
 
@@ -77,13 +77,25 @@ class SaifTerminalSessionManager private constructor() {
                 val writer = BufferedWriter(OutputStreamWriter(proc.outputStream))
                 inputWriters[session.sessionId] = writer
 
-                val reader = BufferedReader(InputStreamReader(proc.inputStream))
-                val readBuf = CharArray(1024)
-                var readCount = reader.read(readBuf)
-                while (readCount != -1) {
-                    val chunk = String(readBuf, 0, readCount)
-                    bufferFlow.value = (bufferFlow.value + chunk).takeLast(60000)
-                    readCount = reader.read(readBuf)
+                // Drain the shell on its own thread. Reading it inline blocked the whole
+                // session coroutine, which made long commands look like a dropped connection.
+                Thread {
+                    try {
+                        val reader = BufferedReader(InputStreamReader(proc.inputStream))
+                        val readBuf = CharArray(1024)
+                        var readCount = reader.read(readBuf)
+                        while (readCount != -1) {
+                            val chunk = String(readBuf, 0, readCount)
+                            bufferFlow.value = (bufferFlow.value + chunk).takeLast(60000)
+                            readCount = reader.read(readBuf)
+                        }
+                    } catch (_: Throwable) {
+                        // The shell was closed.
+                    }
+                }.apply {
+                    isDaemon = true
+                    name = "saif-terminal-reader"
+                    start()
                 }
             } catch (t: Throwable) {
                 bufferFlow.value += "\nSession terminated: ${t.localizedMessage}\n"

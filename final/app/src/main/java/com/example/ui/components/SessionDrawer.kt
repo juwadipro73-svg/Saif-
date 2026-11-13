@@ -27,9 +27,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PowerSettingsNew
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
@@ -105,8 +103,6 @@ fun SessionDrawerContent(
     engineAuthInfo: com.example.saif.data.remote.SaifAccountInfo? = null,
     engineStatusColor: Color = Color(0xFF22C55E),
     onExitApp: () -> Unit = {},
-    onOpenFileManager: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
     onOpenEngineAccount: () -> Unit = {},
     onUpgradeAccount: () -> Unit = {},
     modifier: Modifier =
@@ -217,7 +213,6 @@ fun SessionDrawerContent(
                         }
                     }
                 }
-                DrawerSquareButton(icon = Icons.Filled.Folder, description = "Files and workspace", tint = SaifTheme.colors.textSecondary, onClick = onOpenFileManager)
                 DrawerSquareButton(
                     icon = Icons.Default.Search,
                     description = "Search chats",
@@ -524,7 +519,9 @@ fun SessionDrawerContent(
                     }
                 }
 
-                // Engine footer: Settings on the left, the Google account chip on the right
+                // Engine footer: the Google account chip only.
+                // The old "Settings" entry was removed here because the whole settings panel is
+                // already reachable from the header gear - keeping both was duplicated clutter.
                 Row(
                     modifier =
     Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 10.dp),
@@ -533,19 +530,6 @@ fun SessionDrawerContent(
                     horizontalArrangement =
     Arrangement.SpaceBetween
                 ) {
-                    Row(
-                        modifier =
-    Modifier.clip(shape = RoundedCornerShape(14.dp)).clickable { onOpenSettings() }.padding(horizontal = 8.dp, vertical = 8.dp),
-                        verticalAlignment =
-    Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings", tint = SaifTheme.colors.textSecondary, modifier =
-    Modifier.size(22.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Settings", color = SaifTheme.colors.textPrimary, fontSize =
-    15.sp, fontWeight =
-    FontWeight.Medium)
-                    }
                     if (engineAuthInfo != null) {
                         SaifEngineAccountChip(
                             authInfo = engineAuthInfo,

@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material.icons.filled.PhotoCamera
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -177,6 +179,10 @@ fun SettingsSheet(
     var showSkillsManager by remember { mutableStateOf(false) }
     var showTerminalProviders by remember { mutableStateOf(false) }
     var showSignOutConfirmDialog by remember { mutableStateOf(false) }
+    var showCreditsSheet by remember { mutableStateOf(false) }
+    // "Appearance" is the single parent group: every other settings block lives underneath it.
+    // Main (profile + account) always stays at the very top and is never collapsed.
+    var appearanceExpanded by remember { mutableStateOf(true) }
     val displayName = authUser?.name?.ifBlank { authUser?.email?.substringBefore("@")?.replaceFirstChar { it.uppercase() } } ?: "User"
 
     val photoPicker = rememberLauncherForActivityResult(
@@ -573,8 +579,28 @@ fun SettingsSheet(
             Spacer(modifier =
     Modifier.height(24.dp))
 
-            // SAIF AI's original Appearance control comes first, before the editing engine.
-            SectionHeader("APPEARANCE")
+            // ===== MAIN ===== Everything the user needs most sits above the Appearance group.
+            SectionHeader("MAIN")
+
+            Spacer(modifier =
+    Modifier.height(24.dp))
+
+            // ===== APPEARANCE ===== The single parent group. Every other block below is nested
+            // inside it, so the panel reads as: Main -> Appearance -> (theme, account, memory, ...).
+            ExpandableSectionHeader(
+                title = "APPEARANCE",
+                subtitle = "Theme, account, memory, agents and the workspace engine",
+                expanded = appearanceExpanded,
+                onToggle = { appearanceExpanded = !appearanceExpanded }
+            )
+
+            // The theme switcher is the first child of the Appearance group.
+            AnimatedVisibility(
+                visible = appearanceExpanded,
+                enter = fadeIn(tween(220)) + expandVertically(tween(260)),
+                exit = fadeOut(tween(160)) + shrinkVertically(tween(220))
+            ) {
+            Column {
             BoxWithConstraints(
                 modifier =
     Modifier.fillMaxWidth().height(64.dp)
@@ -866,10 +892,32 @@ fun SettingsSheet(
 
             Spacer(Modifier.height(32.dp))
 
+            // ===== ABOUT ===== The credits live here and only here. The old standalone "Credits"
+            // block at the end of the panel was removed because About already carries them.
+            SectionHeader("ABOUT")
+            LiquidSurface(
+                color = SaifTheme.colors.surfaceCard,
+                glassBorderBrush = glassBorderBrush,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    SettingsActionRow(
+                        "Credits",
+                        "SAIF AI and every open-source project it builds on",
+                        onClick = { showCreditsSheet = true }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
             // Permission Manager Section
             PermissionManagerSection(glassBorderBrush = glassBorderBrush)
             Spacer(modifier =
     Modifier.height(32.dp))
+            } // end Appearance group column
+            } // end Appearance group AnimatedVisibility
 
             // Footer
             Text(
@@ -912,6 +960,10 @@ fun SettingsSheet(
         com.example.agyext.AntigravityCustomApiDialog(
             onDismiss = { showCustomApiExtDialog = false }
         )
+    }
+
+    if (showCreditsSheet) {
+        CreditsSheet(onDismiss = { showCreditsSheet = false })
     }
 
     if (showSignOutConfirmDialog) {
@@ -1032,6 +1084,61 @@ fun SectionHeader(title: String, modifier: Modifier =
         modifier =
     modifier
     )
+}
+
+/**
+ * A section header that can be collapsed. The chevron rotates smoothly and the body animates its
+ * height, so expanding and collapsing never feels abrupt.
+ */
+@Composable
+fun ExpandableSectionHeader(
+    title: String,
+    subtitle: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "SectionChevron"
+    )
+    val tint by animateColorAsState(
+        targetValue = if (expanded) PrimaryAccent else SubtextMuted,
+        animationSpec = tween(220),
+        label = "SectionHeaderTint"
+    )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .padding(bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = tint,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                fontSize = 11.sp,
+                color = SubtextMuted.copy(alpha = 0.8f)
+            )
+        }
+        Icon(
+            imageVector = Icons.Outlined.ChevronRight,
+            contentDescription = if (expanded) "Collapse $title" else "Expand $title",
+            tint = tint,
+            modifier = Modifier
+                .size(18.dp)
+                .rotate(rotation)
+        )
+    }
 }
 
 @Composable

@@ -98,15 +98,37 @@ class SaifNativeWorkspaceEngine private constructor() {
         _status.value = EngineStatus.Active(wsDir, activeProcessRegistry.size)
 
         try {
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
-            var line: String? = reader.readLine()
-            while (line != null) {
-                withContext(context = Dispatchers.Main) {
-                    onOutputLine(line!!)
+            // Drain on a worker thread so the timeout applies while the script is still
+            // producing output. This keeps the terminal session alive across long builds.
+            val drained = java.util.concurrent.CountDownLatch(1)
+            Thread {
+                try {
+                    val reader = BufferedReader(InputStreamReader(process.inputStream))
+                    var line: String? = reader.readLine()
+                    while (line != null) {
+                        val text = line!!
+                        // Hand the line back to the caller without blocking the reader.
+                        runCatching { onOutputLine(text) }
+                        line = reader.readLine()
+                    }
+                } catch (_: Throwable) {
+                    // Process killed mid-read.
+                } finally {
+                    drained.countDown()
                 }
-                line = reader.readLine()
+            }.apply {
+                isDaemon = true
+                name = "saif-native-workspace-reader"
+                start()
             }
-            process.waitFor(120, TimeUnit.SECONDS)
+
+            val finished = process.waitFor(120, TimeUnit.SECONDS)
+            if (!finished) {
+                process.destroyForcibly()
+                drained.await(500, TimeUnit.MILLISECONDS)
+                return@withContext -1
+            }
+            drained.await(2, TimeUnit.SECONDS)
             process.exitValue()
         } catch (err: Exception) {
             process.destroyForcibly()

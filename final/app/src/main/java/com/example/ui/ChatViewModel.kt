@@ -487,6 +487,9 @@ class ChatViewModel(
         activeGenerationJob = viewModelScope.launch {
             _isGenerating.value = true
             var sessionId: String? = null
+            // Keep the task alive in the background. When it completes, a single "Work done sir"
+            // notification is posted - but only if the user is not already looking at the app.
+            com.example.task.BackgroundTaskService.start(context, "Working on your task…")
             try {
                 com.example.saif.data.remote.AndroidLocalBridgeServer.ensureLinuxCliReady(context)
                 com.example.github.GitHubIntegrationManager.init(context)
@@ -593,6 +596,10 @@ class ChatViewModel(
             } finally {
                 _currentStreamingContent.value = ""
                 _isGenerating.value = false
+                // Post the single completion notification, but only when the user has left the
+                // app. If SAIF AI is still open the result is already on screen.
+                val userIsAway = !com.example.LiveVoiceManager.isAppInForeground.value
+                com.example.task.BackgroundTaskService.finish(context, postedIfBackground = userIsAway)
             }
         }
         return activeGenerationJob

@@ -430,8 +430,6 @@ fun SaifAiApp(
                     engineAuthInfo = antigravityAuthInfo,
                     engineStatusColor = antigravityConnection.dotColor,
                     onExitApp = { showExitConfirm = true },
-                    onOpenFileManager = { scope.launch { drawerState.close() }; openEngineView("IDE") },
-                    onOpenSettings = { scope.launch { drawerState.close() }; showSettings = true },
                     onOpenEngineAccount = { scope.launch { drawerState.close() }; showConnectionDialog = true },
                     onUpgradeAccount = {
                         accountUpgradeSourceUid = appUser?.uid
@@ -788,6 +786,11 @@ fun SaifAiApp(
                                 engineVm.retryConnections()
                                 com.example.saif.data.local.LocalServerManager.restartServer(context.applicationContext)
                                 showCustomApiFromHome = true
+                            },
+                            onCharacterPicked = { characterId ->
+                                // Start the chat straight away with the chosen specialist's brief.
+                                viewModel.createNewSession()
+                                viewModel.sendMessage(context, characterPromptFor(characterId))
                             },
                             modifier =
     Modifier.fillMaxSize()
@@ -1409,4 +1412,28 @@ private fun claimCreateTap(): Boolean {
     if (now - lastCreateTapMs < 1200L) return false
     lastCreateTapMs = now
     return true
+}
+
+/**
+ * The opening brief for one of the animated character cards on the empty chat screen. Picking a
+ * character starts the conversation with the right instructions already in place.
+ */
+private fun characterPromptFor(characterId: String): String = when (characterId) {
+    "builder" ->
+        "Act as my app builder. Describe the app you want me to build (name, screens and features) " +
+            "and then create it, compile it on the terminal and hand me the installable APK."
+
+    "reviewer" ->
+        "Act as my code reviewer. Point me at the files you want reviewed (or say \"review the workspace\") " +
+            "and then review them for bugs, crashes and security issues, and explain every fix you propose."
+
+    "terminal" ->
+        "Act as my terminal operator. Run the shell commands I need in the workspace, install what is " +
+            "missing and report the exact output of every command."
+
+    "researcher" ->
+        "Act as my researcher. Look up the documentation and references I need, summarise the " +
+            "findings with links and turn them into a concrete plan."
+
+    else -> "Hello SAIF AI, help me with my workspace."
 }

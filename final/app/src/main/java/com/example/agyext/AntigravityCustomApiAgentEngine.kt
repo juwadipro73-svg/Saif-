@@ -73,9 +73,17 @@ class AntigravityCustomApiAgentEngine(
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(180, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(45, TimeUnit.SECONDS)
+            // A big task can keep the model streaming for many minutes. The old 180 s read
+            // timeout cut the connection in the middle of a long answer, which is exactly what
+            // made the terminal/command connection drop on a custom API. The timeout is now
+            // generous and the engine additionally pings the stream so a stalled socket is
+            // detected instead of hanging forever.
+            .readTimeout(30, TimeUnit.MINUTES)
+            .writeTimeout(2, TimeUnit.MINUTES)
+            .callTimeout(45, TimeUnit.MINUTES)
+            .retryOnConnectionFailure(true)
+            .connectionPool(okhttp3.ConnectionPool(8, 5, TimeUnit.MINUTES))
             .build()
     }
 
@@ -498,22 +506,45 @@ class AntigravityCustomApiAgentEngine(
             .directory(hostWorkspace)
             .redirectErrorStream(true)
         pb.environment()["HOME"] = hostWorkspace.absolutePath
+        pb.environment()["PATH"] = "/system/bin:/system/xbin"
+        pb.environment()["TERM"] = "xterm-256color"
         val proc = pb.start()
         runningProcesses[toolId] = proc
         return try {
             val out = StringBuilder()
-            BufferedReader(InputStreamReader(proc.inputStream, Charsets.UTF_8)).use { reader ->
-                var line: String?
-                while (reader.readLine().also { line = it } != null) {
-                    out.appendLine(line)
-                    onLiveOutput(out.toString())
+            // The stream is drained on its own thread so the timeout is honoured while the
+            // command is still producing output. Reading the stream to EOF *before* waiting was
+            // the reason a long build hung forever and the session looked "dropped".
+            val drained = java.util.concurrent.CountDownLatch(1)
+            val readerThread = Thread {
+                try {
+                    BufferedReader(InputStreamReader(proc.inputStream, Charsets.UTF_8)).use { reader ->
+                        var line: String?
+                        while (reader.readLine().also { line = it } != null) {
+                            out.appendLine(line)
+                            onLiveOutput(out.toString())
+                        }
+                    }
+                } catch (_: Throwable) {
+                    // The process was killed while we were reading - expected on timeout.
+                } finally {
+                    drained.countDown()
                 }
+            }.apply {
+                isDaemon = true
+                name = "saif-cmd-reader"
+                start()
             }
+
             val finished = proc.waitFor(timeoutSec, TimeUnit.SECONDS)
             if (!finished) {
                 proc.destroyForcibly()
+                // Give the reader a moment to flush what it already captured.
+                drained.await(500, TimeUnit.MILLISECONDS)
                 Triple(false, "${out}\n[Timed out after ${timeoutSec}s]".trim(), 124)
             } else {
+                // The process exited; wait for the reader to finish flushing the tail.
+                drained.await(2, TimeUnit.SECONDS)
                 val code = proc.exitValue()
                 Triple(code == 0, out.toString().trim().ifBlank { "(exit code $code)" }, code)
             }

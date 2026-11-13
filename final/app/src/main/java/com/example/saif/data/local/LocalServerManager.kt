@@ -18,6 +18,17 @@ object LocalServerManager {
     fun startServer(context: Context) {
         runCatching { SaifLocalBridgeServer.instance.start(context.applicationContext) }
         started = true
+        // Install the terminal build commands (`saif-build-apk`, `saif-apk-link`) so a project
+        // written in the terminal can be compiled on the device. Without this the terminal
+        // commands pointed at a bridge that was never running.
+        runCatching {
+            val bridge = SaifLocalBridgeServer.instance
+            com.example.compiler.LinuxApkBuildBridge.installLinuxCliTools(
+                context.applicationContext,
+                bridge.port,
+                bridge.deviceId
+            )
+        }
     }
 
     fun stopServer() {

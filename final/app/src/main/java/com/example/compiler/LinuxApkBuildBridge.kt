@@ -61,16 +61,24 @@ object LinuxApkBuildBridge {
     }
 
     /**
-     * Installs `/usr/local/bin/saif-build-apk` and `/usr/local/bin/saif-apk-link` inside the
-     * Ubuntu rootfs so Antigravity can compile native signed Android APKs and mint download
-     * links directly from its normal Linux terminal commands in chat.
+     * Installs the `saif-build-apk` and `saif-apk-link` terminal commands.
+     *
+     * The scripts are plain POSIX shell and only use `toybox` utilities that every Android
+     * device ships with, so they work in the on-device terminal without a Linux rootfs and
+     * without python3. They talk to the local bridge server, which runs the real on-device
+     * compiler and hands back a signed APK.
+     *
+     * This is what makes "type a build command in the terminal and get an APK" work with any
+     * custom AI API: the build path never depends on the provider.
      */
     fun installLinuxCliTools(context: Context, boundPort: Int, deviceId: String) {
         if (deviceId.length <= 5) return
         runCatching {
             val envDirs = listOf(
-                File(context.filesDir, "ubuntu/root/.config"),
-                File(context.filesDir, "home/.config")
+                File(context.filesDir, "saif_root/.config"),
+                File(context.filesDir, "workspace/.config"),
+                File(context.filesDir, "home/.config"),
+                File(context.filesDir, "ubuntu/root/.config")
             )
             val envText = buildString {
                 appendLine("SAIF_BRIDGE_URL=\"http://127.0.0.1:$boundPort\"")
@@ -84,134 +92,25 @@ object LinuxApkBuildBridge {
                 f.setReadable(true, true)
             }
 
-            val binDir = File(context.filesDir, "ubuntu/usr/local/bin").apply { mkdirs() }
-
-            val buildScript = File(binDir, "saif-build-apk")
-            buildScript.writeText(
-                """#!/bin/sh
-set -e
-ENV_FILE="/root/.config/saif-bridge.env"
-[ -f "${'$'}ENV_FILE" ] || ENV_FILE="/root/workspace/.config/saif-bridge.env"
-if [ ! -f "${'$'}ENV_FILE" ]; then
-  echo "ERROR: SAIF bridge environment file not found" >&2
-  exit 1
-fi
-. "${'$'}ENV_FILE"
-
-PROJECT_DIR=""
-APP_NAME=""
-PKG_NAME=""
-
-while [ "${'$'}#" -gt 0 ]; do
-  case "${'$'}1" in
-    --name|-n)
-      APP_NAME="${'$'}2"
-      shift 2
-      ;;
-    --package|-p)
-      PKG_NAME="${'$'}2"
-      shift 2
-      ;;
-    *)
-      if [ -z "${'$'}PROJECT_DIR" ]; then
-        PROJECT_DIR="${'$'}1"
-      fi
-      shift
-      ;;
-  esac
-done
-
-if [ -z "${'$'}PROJECT_DIR" ]; then
-  PROJECT_DIR="${'$'}(pwd)"
-fi
-case "${'$'}PROJECT_DIR" in
-  /*) ;;
-  *) PROJECT_DIR="${'$'}(cd "${'$'}PROJECT_DIR" && pwd)" ;;
-esac
-
-python3 - "${'$'}SAIF_BRIDGE_URL/api/builder/compile-apk" "${'$'}SAIF_DEVICE_ID" "${'$'}PROJECT_DIR" "${'$'}APP_NAME" "${'$'}PKG_NAME" <<'PY'
-import json, sys, urllib.request, urllib.error
-
-url, dev_id, proj_dir, app_name, pkg_name = sys.argv[1:6]
-payload = json.dumps({
-    "projectDir": proj_dir,
-    "appName": app_name,
-    "packageName": pkg_name
-}).encode("utf-8")
-
-req = urllib.request.Request(
-    url,
-    data=payload,
-    headers={"Content-Type": "application/json", "X-Device-Id": dev_id},
-    method="POST"
-)
-try:
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-except urllib.error.HTTPError as e:
-    err_body = e.read().decode("utf-8", errors="replace")
-    print(f"BUILD_FAILED: {err_body}", file=sys.stderr)
-    sys.exit(1)
-
-if not data.get("success"):
-    print("BUILD_FAILED: " + str(data.get("error", "Unknown error")), file=sys.stderr)
-    sys.exit(1)
-
-print("APK_BUILT=" + str(data.get("linuxApkPath", "")))
-print("DOWNLOAD_URL=" + str(data.get("downloadUrl", "")))
-print("SIZE_BYTES=" + str(data.get("sizeBytes", 0)))
-PY
-"""
+            // The commands are installed next to the workspace so the terminal PATH finds them,
+            // and into the legacy rootfs path so an already running Linux terminal sees them too.
+            val binDirs = listOf(
+                File(context.filesDir, "saif_root/bin"),
+                File(context.filesDir, "workspace/bin"),
+                File(context.filesDir, "ubuntu/usr/local/bin")
             )
-            buildScript.setExecutable(true, false)
-            buildScript.setReadable(true, false)
 
-            val linkScript = File(binDir, "saif-apk-link")
-            linkScript.writeText(
-                """#!/bin/sh
-set -e
-ENV_FILE="/root/.config/saif-bridge.env"
-[ -f "${'$'}ENV_FILE" ] || ENV_FILE="/root/workspace/.config/saif-bridge.env"
-. "${'$'}ENV_FILE"
-
-TARGET="${'$'}1"
-if [ -z "${'$'}TARGET" ]; then
-  echo "Usage: saif-apk-link <file-path>" >&2
-  exit 1
-fi
-case "${'$'}TARGET" in
-  /*) ;;
-  *) TARGET="${'$'}(cd "${'$'}(dirname "${'$'}TARGET")" && pwd)/${'$'}(basename "${'$'}TARGET")" ;;
-esac
-
-python3 - "${'$'}SAIF_BRIDGE_URL/api/builder/publish-file" "${'$'}SAIF_DEVICE_ID" "${'$'}TARGET" <<'PY'
-import json, sys, urllib.request, urllib.error
-
-url, dev_id, target = sys.argv[1:4]
-payload = json.dumps({"linuxPath": target}).encode("utf-8")
-req = urllib.request.Request(
-    url,
-    data=payload,
-    headers={"Content-Type": "application/json", "X-Device-Id": dev_id},
-    method="POST"
-)
-try:
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-except urllib.error.HTTPError as e:
-    print("PUBLISH_FAILED: " + e.read().decode("utf-8", errors="replace"), file=sys.stderr)
-    sys.exit(1)
-
-if not data.get("success"):
-    print("PUBLISH_FAILED: " + str(data.get("error", "Unknown error")), file=sys.stderr)
-    sys.exit(1)
-
-print("DOWNLOAD_URL=" + str(data.get("downloadUrl", "")))
-PY
-"""
-            )
-            linkScript.setExecutable(true, false)
-            linkScript.setReadable(true, false)
+            for (binDir in binDirs) {
+                binDir.mkdirs()
+                File(binDir, "saif-build-apk").writeText(BUILD_APK_SCRIPT).apply {
+                    setExecutable(true, false)
+                    setReadable(true, false)
+                }
+                File(binDir, "saif-apk-link").writeText(APK_LINK_SCRIPT).apply {
+                    setExecutable(true, false)
+                    setReadable(true, false)
+                }
+            }
         }
     }
 
@@ -413,4 +312,136 @@ PY
                 }
             }
     }
+
+    /**
+     * `saif-build-apk` - compiles the current (or given) project folder into a signed APK.
+     * Pure POSIX shell + toybox, so it runs in the on-device terminal as-is.
+     */
+    private val BUILD_APK_SCRIPT: String = """#!/bin/sh
+# SAIF AI - build an Android APK straight from the terminal.
+# Usage: saif-build-apk [project-dir] [--name "App Name"] [--package com.example.app]
+set -e
+
+ENV_FILE="/root/.config/saif-bridge.env"
+[ -f "${'$'}ENV_FILE" ] || ENV_FILE="${'$'}(dirname "${'$'}0")/../.config/saif-bridge.env"
+[ -f "${'$'}ENV_FILE" ] || ENV_FILE="${'$'}(dirname "${'$'}0")/../../.config/saif-bridge.env"
+if [ ! -f "${'$'}ENV_FILE" ]; then
+  echo "ERROR: SAIF bridge environment file not found" >&2
+  exit 1
+fi
+. "${'$'}ENV_FILE"
+
+PROJECT_DIR=""
+APP_NAME=""
+PKG_NAME=""
+
+while [ "${'$'}#" -gt 0 ]; do
+  case "${'$'}1" in
+    --name|-n)
+      APP_NAME="${'$'}2"
+      shift 2
+      ;;
+    --package|-p)
+      PKG_NAME="${'$'}2"
+      shift 2
+      ;;
+    *)
+      if [ -z "${'$'}PROJECT_DIR" ]; then
+        PROJECT_DIR="${'$'}1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "${'$'}PROJECT_DIR" ]; then
+  PROJECT_DIR="${'$'}(pwd)"
+fi
+case "${'$'}PROJECT_DIR" in
+  /*) ;;
+  *) PROJECT_DIR="${'$'}(cd "${'$'}PROJECT_DIR" && pwd)" ;;
+esac
+
+if [ ! -d "${'$'}PROJECT_DIR" ]; then
+  echo "ERROR: project directory not found: ${'$'}PROJECT_DIR" >&2
+  exit 1
+fi
+
+# Build the JSON payload without needing python3 or jq.
+JSON_PROJECT=$(printf '%s' "${'$'}PROJECT_DIR" | sed 's/\\/\\\\/g; s/"/\\"/g')
+JSON_NAME=$(printf '%s' "${'$'}APP_NAME" | sed 's/\\/\\\\/g; s/"/\\"/g')
+JSON_PKG=$(printf '%s' "${'$'}PKG_NAME" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+PAYLOAD="{\"projectDir\":\"${'$'}JSON_PROJECT\",\"appName\":\"${'$'}JSON_NAME\",\"packageName\":\"${'$'}JSON_PKG\"}"
+
+RESPONSE=$(toybox wget -q -O - --header="Content-Type: application/json" --header="X-Device-Id: ${'$'}SAIF_DEVICE_ID" --post-data="${'$'}PAYLOAD" "${'$'}SAIF_BRIDGE_URL/api/builder/compile-apk" 2>/dev/null || echo "")
+
+if [ -z "${'$'}RESPONSE" ]; then
+  echo "ERROR: could not reach the SAIF AI build bridge at ${'$'}SAIF_BRIDGE_URL" >&2
+  exit 1
+fi
+
+# Pull the fields out with plain shell string handling.
+echo "${'$'}RESPONSE" | sed -n 's/.*"success"[[:space:]]*:[[:space:]]*true.*/BUILD_OK/p' | grep -q BUILD_OK || {
+  ERROR=$(printf '%s' "${'$'}RESPONSE" | sed -n 's/.*"error"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+  echo "BUILD_FAILED: ${'$'}{ERROR:-Unknown error}" >&2
+  exit 1
+}
+
+APK_PATH=$(printf '%s' "${'$'}RESPONSE" | sed -n 's/.*"linuxApkPath"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+DOWNLOAD_URL=$(printf '%s' "${'$'}RESPONSE" | sed -n 's/.*"downloadUrl"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+SIZE=$(printf '%s' "${'$'}RESPONSE" | sed -n 's/.*"sizeBytes"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p')
+
+echo "APK_BUILT=${'$'}{APK_PATH}"
+echo "DOWNLOAD_URL=${'$'}{DOWNLOAD_URL}"
+echo "SIZE_BYTES=${'$'}{SIZE:-0}"
+"""
+
+    /**
+     * `saif-apk-link` - publishes an existing file through the local bridge and prints its
+     * download URL. Pure POSIX shell + toybox.
+     */
+    private val APK_LINK_SCRIPT: String = """#!/bin/sh
+# SAIF AI - publish a file from the workspace and print its download link.
+# Usage: saif-apk-link <file-path>
+set -e
+
+ENV_FILE="/root/.config/saif-bridge.env"
+[ -f "${'$'}ENV_FILE" ] || ENV_FILE="${'$'}(dirname "${'$'}0")/../.config/saif-bridge.env"
+[ -f "${'$'}ENV_FILE" ] || ENV_FILE="${'$'}(dirname "${'$'}0")/../../.config/saif-bridge.env"
+if [ ! -f "${'$'}ENV_FILE" ]; then
+  echo "ERROR: SAIF bridge environment file not found" >&2
+  exit 1
+fi
+. "${'$'}ENV_FILE"
+
+TARGET="${'$'}1"
+if [ -z "${'$'}TARGET" ]; then
+  echo "Usage: saif-apk-link <file-path>" >&2
+  exit 1
+fi
+case "${'$'}TARGET" in
+  /*) ;;
+  *) TARGET="${'$'}(cd "${'$'}(dirname "${'$'}TARGET")" && pwd)/${'$'}(basename "${'$'}TARGET")" ;;
+esac
+
+JSON_TARGET=$(printf '%s' "${'$'}TARGET" | sed 's/\\/\\\\/g; s/"/\\"/g')
+PAYLOAD="{\"linuxPath\":\"${'$'}JSON_TARGET\"}"
+
+RESPONSE=$(toybox wget -q -O - --header="Content-Type: application/json" --header="X-Device-Id: ${'$'}SAIF_DEVICE_ID" --post-data="${'$'}PAYLOAD" "${'$'}SAIF_BRIDGE_URL/api/builder/publish-file" 2>/dev/null || echo "")
+
+if [ -z "${'$'}RESPONSE" ]; then
+  echo "ERROR: could not reach the SAIF AI build bridge at ${'$'}SAIF_BRIDGE_URL" >&2
+  exit 1
+fi
+
+DOWNLOAD_URL=$(printf '%s' "${'$'}RESPONSE" | sed -n 's/.*"downloadUrl"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+if [ -z "${'$'}DOWNLOAD_URL" ]; then
+  ERROR=$(printf '%s' "${'$'}RESPONSE" | sed -n 's/.*"error"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+  echo "PUBLISH_FAILED: ${'$'}{ERROR:-Unknown error}" >&2
+  exit 1
+fi
+
+echo "DOWNLOAD_URL=${'$'}DOWNLOAD_URL"
+"""
 }

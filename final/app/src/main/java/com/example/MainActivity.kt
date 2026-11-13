@@ -69,6 +69,9 @@ class MainActivity : ComponentActivity() {
             val activeUid = AuthManager.currentUser.value?.uid
             com.example.providers.TerminalProviderManager.bindUserAccount(applicationContext, activeUid)
             com.example.providers.TerminalProviderManager.resumePendingSetupIfNeeded(applicationContext)
+            // The local bridge serves the terminal build commands. It has to be up before a
+            // `saif-build-apk` can reach the on-device compiler.
+            com.example.saif.data.local.LocalServerManager.startServer(applicationContext)
             if (com.example.saif.data.local.LocalEnvironmentManager.hasVerifiedEnvironment(applicationContext) &&
                 AuthManager.currentUser.value?.isActive == true && AuthManager.currentUser.value?.isBanned == false) {
                 com.saifai.engine.SaifEngineBootstrap.initialize(application)

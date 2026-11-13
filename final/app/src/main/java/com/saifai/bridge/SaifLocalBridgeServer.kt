@@ -41,6 +41,18 @@ class SaifLocalBridgeServer private constructor() {
     private val secureRandom = SecureRandom()
     private val registeredDownloads = ConcurrentHashMap<String, DownloadEntry>()
 
+    /**
+     * The device id the terminal CLI uses to authenticate against the bridge.
+     * It is generated on the device and never leaves it.
+     */
+    @Volatile
+    var deviceId: String = ""
+        private set
+
+    /** The application context, kept so the request handlers can reach the compiler. */
+    @Volatile
+    private var appContext: Context? = null
+
     @Volatile
     var isRunning:
         Boolean = false
@@ -58,6 +70,12 @@ class SaifLocalBridgeServer private constructor() {
     fun start(appContext: Context) {
         if (isRunning) { return }
         try {
+            this.appContext = appContext.applicationContext
+            if (deviceId.isBlank()) {
+                val bytes = ByteArray(16)
+                secureRandom.nextBytes(bytes)
+                deviceId = bytes.joinToString("") { "%02x".format(it) }
+            }
             val s = ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))
             serverSocket = s
             port = s.localPort
@@ -124,7 +142,21 @@ class SaifLocalBridgeServer private constructor() {
 
                 val parts = requestLine.split(" ")
                 if (parts.size < 2) return
+                val method = parts[0].uppercase()
                 val uri = parts[1]
+
+                // ---- Builder API ----------------------------------------------------
+                // These are the endpoints the terminal CLI (`saif-build-apk`, `saif-apk-link`)
+                // talks to. Without them a project written in the terminal could never be
+                // compiled, which is exactly the "build does not work with a custom API"
+                // problem: the CLI pointed at an endpoint that did not exist.
+                if (method == "POST" && uri.startsWith("/api/builder/")) {
+                    val headers = readHeaders(input)
+                    val body = readBody(input, headers)
+                    val response = handleBuilderRequest(uri, body)
+                    writeJson(output, response.second, response.first)
+                    return
+                }
 
                 if (uri.startsWith("/download/")) {
                     val segments = uri.removePrefix("/download/").split("/")
@@ -159,5 +191,95 @@ class SaifLocalBridgeServer private constructor() {
                 output.flush()
             }
         } catch (err: Exception) {}
+    }
+
+    /** Reads the HTTP headers up to the blank line. */
+    private fun readHeaders(input: BufferedReader): Map<String, String> {
+        val headers = mutableMapOf<String, String>()
+        while (true) {
+            val line = input.readLine() ?: break
+            if (line.isEmpty()) break
+            val idx = line.indexOf(':')
+            if (idx > 0) {
+                headers[line.substring(0, idx).trim().lowercase()] = line.substring(idx + 1).trim()
+            }
+        }
+        return headers
+    }
+
+    /** Reads the request body according to its Content-Length header. */
+    private fun readBody(input: BufferedReader, headers: Map<String, String>): String {
+        val length = headers["content-length"]?.toIntOrNull() ?: 0
+        if (length <= 0) return ""
+        val buffer = CharArray(length)
+        var read = 0
+        while (read < length) {
+            val count = input.read(buffer, read, length - read)
+            if (count <= 0) break
+            read += count
+        }
+        return String(buffer, 0, read)
+    }
+
+    /** Writes a JSON response with the given HTTP status code. */
+    private fun writeJson(output: BufferedOutputStream, json: String, statusCode: Int) {
+        val reason = when (statusCode) {
+            200 -> "OK"
+            400 -> "Bad Request"
+            401 -> "Unauthorized"
+            404 -> "Not Found"
+            500 -> "Internal Server Error"
+            else -> "OK"
+        }
+        val bytes = json.toByteArray(Charsets.UTF_8)
+        val header = "HTTP/1.1 $statusCode $reason\r\n" +
+                "Content-Type: application/json; charset=utf-8\r\n" +
+                "Content-Length: ${bytes.size}\r\n" +
+                "Connection: close\r\n\r\n"
+        output.write(header.toByteArray(Charsets.UTF_8))
+        output.write(bytes)
+        output.flush()
+    }
+
+    /**
+     * Handles the builder endpoints.
+     *
+     * @return the HTTP status code and the JSON body.
+     */
+    private fun handleBuilderRequest(uri: String, body: String): Pair<Int, String> {
+        val appContext = this.appContext ?: return 500 to
+                """{"success":false,"error":"App context is not available."}"""
+
+        return when {
+            uri.startsWith("/api/builder/compile-apk") -> {
+                val json = runCatching { org.json.JSONObject(body) }.getOrElse {
+                    return 400 to """{"success":false,"error":"Invalid JSON body."}"""
+                }
+                val result = runCatching {
+                    com.example.compiler.LinuxApkBuildBridge.compileLinuxDirectoryToApk(appContext, json)
+                }.getOrElse { error ->
+                    org.json.JSONObject()
+                        .put("success", false)
+                        .put("error", error.localizedMessage ?: "Build failed.")
+                }
+                200 to result.toString()
+            }
+
+            uri.startsWith("/api/builder/publish-file") -> {
+                val json = runCatching { org.json.JSONObject(body) }.getOrElse {
+                    return 400 to """{"success":false,"error":"Invalid JSON body."}"""
+                }
+                val result = runCatching {
+                    com.example.compiler.LinuxApkBuildBridge.publishLinuxFile(appContext, json)
+                }.getOrElse { error ->
+                    org.json.JSONObject()
+                        .put("success", false)
+                        .put("error", error.localizedMessage ?: "Publish failed.")
+                }
+                200 to result.toString()
+            }
+
+            else -> 404 to """{"success":false,"error":"Unknown endpoint: $uri"}"""
+        }
     }
 }

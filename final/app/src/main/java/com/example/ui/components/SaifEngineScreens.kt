@@ -66,7 +66,8 @@ fun SaifEmptyState(
     isAuthBusy: Boolean,
     onSignIn: () -> Unit,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCharacterPicked: ((String) -> Unit)? = null
 ) {
     val c = SaifTheme.colors
     Column(
@@ -174,6 +175,25 @@ fun SaifEmptyState(
 
             else -> {
                 SaifMarkCircle(icon = Icons.Outlined.Tune, tint = SaifPurple)
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    "Pick a specialist to start",
+                    color = c.textPrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    "Each agent is a different pair of hands for your workspace.",
+                    color = c.textSecondary,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(16.dp))
+                AnimatedCharacterCards(
+                    modifier = Modifier.fillMaxWidth(),
+                    onCardClick = onCharacterPicked
+                )
             }
         }
     }

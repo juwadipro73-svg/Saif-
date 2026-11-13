@@ -147,26 +147,44 @@ object LocalEnvironmentManager {
                 .apply {
                     environment()["HOME"] = workspace.absolutePath
                     environment()["PATH"] = "/system/bin:/system/xbin"
+                    environment()["TERM"] = "xterm-256color"
                 }
                 .start()
-            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                val deadline = System.currentTimeMillis() + timeoutSeconds * 1000
-                while (true) {
-                    val line = reader.readLine() ?: break
-                    output.appendLine(line)
-                    onOutputLine?.invoke(line)
-                    if (System.currentTimeMillis() > deadline) {
-                        process.destroyForcibly()
-                        output.appendLine("[timed out after ${timeoutSeconds}s]")
-                        return WorkspaceCommandResult(output.toString(), 124)
+
+            // Drain the output on a separate thread so the deadline is enforced even while the
+            // command keeps writing. Reading to EOF first made long builds hang past their
+            // timeout and looked like a dropped terminal session.
+            val drained = java.util.concurrent.CountDownLatch(1)
+            Thread {
+                try {
+                    BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                        var line: String?
+                        while (reader.readLine().also { line = it } != null) {
+                            output.appendLine(line)
+                            onOutputLine?.invoke(line)
+                        }
                     }
+                } catch (_: Throwable) {
+                    // Process killed mid-read (timeout path).
+                } finally {
+                    drained.countDown()
                 }
+            }.apply {
+                isDaemon = true
+                name = "saif-workspace-reader"
+                start()
             }
+
             val finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
             if (!finished) {
                 process.destroyForcibly()
-                return WorkspaceCommandResult(output.appendLine("[timed out]").toString(), 124)
+                drained.await(500, TimeUnit.MILLISECONDS)
+                return WorkspaceCommandResult(
+                    output.appendLine("[timed out after ${timeoutSeconds}s]").toString(),
+                    124
+                )
             }
+            drained.await(2, TimeUnit.SECONDS)
             WorkspaceCommandResult(output.toString(), process.exitValue())
         } catch (error: Exception) {
             WorkspaceCommandResult("Command failed: ${error.localizedMessage}", 127)

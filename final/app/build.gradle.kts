@@ -187,41 +187,17 @@ dependencies {
   androidTestImplementation(libs.androidx.compose.ui.test.junit4)
   debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-  // Networking and Serialization
-  implementation(libs.okhttp)
-  implementation(libs.okhttp.sse)
-  implementation(libs.androidx.webkit)
-  implementation(libs.kotlinx.serialization.json)
-  implementation(libs.androidx.datastore.preferences)
+    // Networking and Serialization
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.sse)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.datastore.preferences)
 
-  // Image Loading (Coil for Markdown Images and IDE Asset Viewer)
-  implementation("io.coil-kt:coil-compose:2.7.0")
-  implementation("io.coil-kt:coil-svg:2.7.0")
+    // Image Loading (Coil for Markdown Images and IDE Asset Viewer)
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-svg:2.7.0")
 
-  // Native Android JLaTeXMath / LaTeX Renderer (Pure Android Canvas, Zero WebViews)
-  implementation("io.noties.markwon:ext-latex:4.6.2")
-  implementation("ru.noties:jlatexmath-android:0.2.0")
-
-  // Pure Java/Kotlin SSH Client (Persistent Termux SSH connection pool)
-  implementation("com.github.mwiede:jsch:0.2.20")
-
-  // HTML Parser & Web Content Scraper (Free Web Search & Webpage Reader)
-  implementation("org.jsoup:jsoup:1.18.3")
-
-  // Sora Editor (Industry standard Android Code Editor)
-  implementation("io.github.Rosemoe.sora-editor:editor:0.23.6")
-  implementation("io.github.Rosemoe.sora-editor:language-textmate:0.23.6")
-  implementation("io.github.Rosemoe.sora-editor:language-java:0.23.6")
-
-  // Archive and Compression Utilities (Supports tar, xz, ar, deb extraction)
-  implementation("org.apache.commons:commons-compress:1.26.1")
-  implementation("org.tukaani:xz:1.9")
-
-  // Termux Terminal Emulator with Native PTY Support (Terminal View is compiled from source)
-  implementation("com.github.termux.termux-app:terminal-emulator:v0.118.1")
-  implementation("com.google.guava:listenablefuture:1.0")
-
-  // Local tests: JVM, Robolectric, Compose screenshot tests and coroutines.
+    // Local tests: JVM, Robolectric, Compose screenshot tests and coroutines.
   testImplementation(libs.junit)
   // Plain JVM tests also exercise org.json parsers; Android's stub JSON classes return defaults.
   testImplementation("org.json:json:20240303")
@@ -260,7 +236,6 @@ dependencies {
   implementation(libs.media3.common)
   implementation(libs.apksig) // on-device APK signing (compiler/AppCompilerEngine.kt)
   implementation(libs.kotlinx.coroutines.android)
-  implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }
 
 configurations.all {

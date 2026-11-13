@@ -75,6 +75,11 @@ fun SaifAnimatedSplashOverlay(
         }
 
         val infinite = rememberInfiniteTransition(label = "saif_splash_infinite")
+        // The brand accent rotates with the dynamic app icon, so the splash and the launcher
+        // icon always show the same colours.
+        val brandAccent = remember { com.saifai.brand.DynamicAppIcon.currentPalette }
+        val accentTop = Color(brandAccent.top)
+        val accentBottom = Color(brandAccent.bottom)
         val orbitAngle by infinite.animateFloat(
             initialValue = 0f,
             targetValue = 360f,
@@ -123,8 +128,8 @@ fun SaifAnimatedSplashOverlay(
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFF7C5CE0).copy(alpha = 0.28f),
-                            Color(0xFF4F46E5).copy(alpha = 0.10f),
+                            accentTop.copy(alpha = 0.30f),
+                            accentBottom.copy(alpha = 0.12f),
                             Color.Transparent
                         ),
                         center = center,
@@ -206,9 +211,9 @@ fun SaifAnimatedSplashOverlay(
                             .background(
                                 Brush.linearGradient(
                                     colors = listOf(
-                                        Color(0xFF8B5CF6),
-                                        Color(0xFF5B3CC4),
-                                        Color(0xFF312E81)
+                                        accentTop,
+                                        accentBottom,
+                                        accentBottom.copy(alpha = 0.85f)
                                     )
                                 )
                             )
@@ -308,9 +313,9 @@ fun SaifAnimatedSplashOverlay(
                                 .background(
                                     Brush.horizontalGradient(
                                         listOf(
-                                            Color(0xFF7C5CE0),
-                                            Color(0xFFA78BFA),
-                                            Color(0xFF38BDF8)
+                                            accentTop,
+                                            accentTop.copy(alpha = 0.75f),
+                                            accentBottom
                                         )
                                     )
                                 )

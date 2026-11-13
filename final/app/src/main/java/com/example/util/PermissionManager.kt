@@ -117,14 +117,27 @@ object PermissionManager {
 
         list.add(
             PermissionItemInfo(
-                id = "overlay",
-                title = "Display Over Other Apps (फ़्लोटिंग ओवरले)",
-                description = "Show the live assistant orb and controls over other apps",
-                iconName = "layers",
-                isGranted = hasOverlayPermission(context),
-                isSpecialSettings = true
+                id = "camera",
+                title = "Camera (कैमरा)",
+                description = "Take photos and analyze or scan them",
+                iconName = "camera",
+                isGranted = hasCamera(context),
+                manifestPermission = Manifest.permission.CAMERA
             )
         )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            list.add(
+                PermissionItemInfo(
+                    id = "post_notifications",
+                    title = "System Notifications (सूचना भेजना)",
+                    description = "Show the single \"Work done sir\" alert when a task finishes in the background",
+                    iconName = "notifications_active",
+                    isGranted = hasPostNotifications(context),
+                    manifestPermission = Manifest.permission.POST_NOTIFICATIONS
+                )
+            )
+        }
 
         list.add(
             PermissionItemInfo(
@@ -139,50 +152,6 @@ object PermissionManager {
 
         list.add(
             PermissionItemInfo(
-                id = "camera",
-                title = "Camera (कैमरा)",
-                description = "Take photos and analyze or scan them",
-                iconName = "camera",
-                isGranted = hasCamera(context),
-                manifestPermission = Manifest.permission.CAMERA
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
-                id = "contacts",
-                title = "Contacts (संपर्क)",
-                description = "Find a contact's number so you can call or message them by name",
-                iconName = "contacts",
-                isGranted = hasReadContacts(context),
-                manifestPermission = Manifest.permission.READ_CONTACTS
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
-                id = "call",
-                title = "Phone Calls (फ़ोन कॉल)",
-                description = "Place calls directly with a voice command",
-                iconName = "phone",
-                isGranted = hasCallPhone(context),
-                manifestPermission = null
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
-                id = "sms",
-                title = "SMS Messages (संदेश)",
-                description = "Send SMS messages directly",
-                iconName = "message",
-                isGranted = hasSendSms(context),
-                manifestPermission = null
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
                 id = "notification_listener",
                 title = "Notification Access (सूचना पढ़ना)",
                 description = "Read out WhatsApp and phone notifications",
@@ -191,19 +160,6 @@ object PermissionManager {
                 isSpecialSettings = true
             )
         )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            list.add(
-                PermissionItemInfo(
-                    id = "post_notifications",
-                    title = "System Notifications (सूचना भेजना)",
-                    description = "Show alerts for the live voice service and task updates",
-                    iconName = "notifications_active",
-                    isGranted = hasPostNotifications(context),
-                    manifestPermission = Manifest.permission.POST_NOTIFICATIONS
-                )
-            )
-        }
 
         return list
     }

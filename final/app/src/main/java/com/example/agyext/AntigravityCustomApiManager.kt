@@ -221,9 +221,13 @@ object AntigravityCustomApiManager {
 
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(20, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(20, TimeUnit.SECONDS)
+            .connectTimeout(45, TimeUnit.SECONDS)
+            // The old 30 s read timeout was the second reason a custom provider looked broken:
+            // a slow endpoint (or a big answer) was killed before it ever arrived.
+            .readTimeout(10, TimeUnit.MINUTES)
+            .writeTimeout(2, TimeUnit.MINUTES)
+            .callTimeout(15, TimeUnit.MINUTES)
+            .retryOnConnectionFailure(true)
             .build()
     }
 
@@ -396,7 +400,11 @@ object AntigravityCustomApiManager {
         val clean = rawBaseUrl.trim().trimEnd('/')
         if (clean.endsWith("/chat/completions", ignoreCase = true)) return clean
         val lower = clean.lowercase()
+        // A base URL that already carries a version segment must not get a second one appended.
+        // "https://host/v1" -> "https://host/v1/chat/completions" (not ".../v1/v1/...").
         val hasVersionSegment = lower.endsWith("/v1") ||
+            lower.endsWith("/v2") ||
+            lower.endsWith("/v3") ||
             lower.endsWith("/v4") ||
             lower.endsWith("/openai") ||
             lower.contains("/v1/") ||
@@ -412,6 +420,8 @@ object AntigravityCustomApiManager {
         if (clean.endsWith("/models", ignoreCase = true)) return clean
         val lower = clean.lowercase()
         val hasVersionSegment = lower.endsWith("/v1") ||
+            lower.endsWith("/v2") ||
+            lower.endsWith("/v3") ||
             lower.endsWith("/v4") ||
             lower.endsWith("/openai") ||
             lower.contains("/v1/") ||
@@ -424,6 +434,8 @@ object AntigravityCustomApiManager {
         return when {
             clean.endsWith("/messages", ignoreCase = true) -> clean
             clean.endsWith("/v1", ignoreCase = true) -> "$clean/messages"
+            // An Anthropic-compatible proxy usually lives under /v1 already, but a raw host
+            // (for example an Ollama-style gateway) still needs the version segment.
             else -> "$clean/v1/messages"
         }
     }
@@ -489,7 +501,7 @@ object AntigravityCustomApiManager {
                     val req = Request.Builder().url(url).get().build()
                     httpClient.newCall(req).execute().use { resp ->
                         val body = resp.body?.string().orEmpty()
-                        if (!resp.isSuccessful) error("HTTP ${resp.code}: ${extractApiError(body)}")
+                        if (!resp.isSuccessful) error(describeHttpFailure(resp.code, body))
                         val arr = JSONObject(body).optJSONArray("models") ?: JSONArray()
                         val list = mutableListOf<String>()
                         for (i in 0 until arr.length()) {
@@ -537,7 +549,7 @@ object AntigravityCustomApiManager {
                     profile.extraHeaders.forEach { (k, v) -> reqBuilder.header(k, v) }
                     httpClient.newCall(reqBuilder.build()).execute().use { resp ->
                         val body = resp.body?.string().orEmpty()
-                        if (!resp.isSuccessful) error("HTTP ${resp.code}: ${extractApiError(body)}")
+                        if (!resp.isSuccessful) error(describeHttpFailure(resp.code, body))
                         val json = JSONObject(body)
                         val arr = json.optJSONArray("data") ?: json.optJSONArray("models") ?: JSONArray()
                         val list = mutableListOf<String>()
@@ -627,7 +639,7 @@ object AntigravityCustomApiManager {
             httpClient.newCall(request).execute().use { response ->
                 val body = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
-                    error("Provider API error (HTTP ${response.code}): ${extractApiError(com.example.llm.KeyStoreCrypto.redact(body))}")
+                    error(describeHttpFailure(response.code, body))
                 }
                 val root = JSONObject(body)
                 val answer = when (protocol) {
@@ -715,7 +727,7 @@ object AntigravityCustomApiManager {
                 if (!resp.isSuccessful) {
                     return@withContext AgyConnectionTestResult(
                         ok = false,
-                        message = "HTTP ${resp.code}: ${extractApiError(body)}",
+                        message = describeHttpFailure(resp.code, body),
                         latencyMs = elapsed
                     )
                 }
@@ -743,10 +755,36 @@ object AntigravityCustomApiManager {
                     val err = obj.getJSONObject("error")
                     err.optString("message").ifBlank { err.toString() }
                 }
+                // Some gateways answer with {"error": "text"} instead of an object.
+                obj.opt("error") is String -> obj.optString("error")
                 obj.has("message") -> obj.optString("message")
+                obj.has("detail") -> obj.optString("detail")
+                obj.has("msg") -> obj.optString("msg")
                 else -> rawBody.take(220)
             }
         }.getOrDefault(rawBody.take(220))
+    }
+
+    /**
+     * Turns an HTTP failure into a message that tells the user what to change.
+     * The old code only showed the raw status code, which made every custom API problem look
+     * identical and impossible to debug.
+     */
+    internal fun describeHttpFailure(code: Int, body: String): String {
+        val detail = extractApiError(com.example.llm.KeyStoreCrypto.redact(body))
+        val hint = when (code) {
+            400 -> "The provider rejected the request. Check the Base URL, the model ID and that your key is valid for this endpoint."
+            401 -> "The API key was rejected. Copy the key again from your provider's dashboard."
+            403 -> "Access denied for this key. It may be blocked, expired or not allowed for this model."
+            404 -> "Endpoint not found. Check the Base URL - it should point at the API root, not at a full endpoint path."
+            408 -> "The provider timed out. Try a smaller task or a faster model."
+            413 -> "The request was too large. Shorten the prompt or attach fewer files."
+            429 -> "Rate limited or out of quota. Wait a moment, switch model, or check the provider's balance."
+            500 -> "The provider hit an internal error. This is on their side - retry shortly."
+            502, 503, 504 -> "The provider is temporarily unavailable or the gateway timed out. Retry in a moment."
+            else -> null
+        }
+        return if (hint != null) "HTTP $code - $detail. $hint" else "HTTP $code - $detail"
     }
 
     internal fun encodeStateJson(state: AgyCustomApiState): String {
