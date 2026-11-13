@@ -641,32 +641,6 @@ fun ChatHistoryDrawer(
                     }
                 }
 
-                // Workspace Folder Grouping Toggle Button
-                Surface(
-                    onClick = { onToggleGroupByWorkspace(!groupByWorkspace) },
-                    modifier = Modifier.size(36.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    color = if (groupByWorkspace) ClaudeTerracotta.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceVariant.copy(
-                        alpha = 0.5f
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        if (groupByWorkspace) ClaudeTerracotta.copy(alpha = 0.45f)
-                        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-                    )
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Folder,
-                            contentDescription = if (groupByWorkspace) "Disable Workspace Grouping" else "Group by Workspace",
-                            tint = if (groupByWorkspace) ClaudeTerracotta else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                alpha = 0.8f
-                            ),
-                            modifier = Modifier.size(17.dp)
-                        )
-                    }
-                }
-
                 // Search Toggle Button
                 Surface(
                     onClick = {
