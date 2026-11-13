@@ -71,8 +71,8 @@ object LlmClient {
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(180, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.MINUTES)
+        .writeTimeout(180, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .build()
 

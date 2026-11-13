@@ -211,6 +211,16 @@ fun ChatScreen(
     val conversationError by viewModel.conversationError.collectAsState()
     val activeInstances by viewModel.activeInstances.collectAsState()
     val isActivelyRunning by viewModel.isCurrentChatActivelyRunning.collectAsState()
+    var chatWorkServiceStarted by remember { mutableStateOf(false) }
+    LaunchedEffect(isActivelyRunning) {
+        if (isActivelyRunning && !chatWorkServiceStarted) {
+            com.example.builder.agent.BuildService.start(context, "SAIF AI", "Working on your request…")
+            chatWorkServiceStarted = true
+        } else if (!isActivelyRunning && chatWorkServiceStarted) {
+            com.example.builder.agent.BuildService.finish(context, succeeded = true)
+            chatWorkServiceStarted = false
+        }
+    }
     val isBackgroundActive by viewModel.isCurrentChatBackgroundActive.collectAsState()
     val quotaSummary by viewModel.quotaSummary.collectAsState()
     val preferredModelName by viewModel.preferredModelName.collectAsState()

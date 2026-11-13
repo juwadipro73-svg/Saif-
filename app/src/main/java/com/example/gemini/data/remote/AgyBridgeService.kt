@@ -108,8 +108,8 @@ sealed class AgyStreamEvent {
 class AgyBridgeService(
     val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.MINUTES)
+        .writeTimeout(180, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
         .addInterceptor { chain ->
             val req = chain.request().newBuilder()
