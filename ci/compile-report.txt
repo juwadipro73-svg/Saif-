@@ -1,21 +1,10 @@
 # CI compile report
 
-run: 43415820068  commit: 211794da28f360bac0a347fbdbab481c2d5f1688  exit: 1
+run: 43416664213  commit: 222688514f4819dd2230571daf130e4b4ff0457b  exit: 1
 
 ## errors by file (unique)
-final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:106:21 Unresolved reference 'setExecutable'.
-final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:107:21 Unresolved reference 'setReadable'.
-final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:110:21 Unresolved reference 'setExecutable'.
-final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:111:21 Unresolved reference 'setReadable'.
-final/app/src/main/java/com/example/saif/data/local/LocalEnvironmentManager.kt:164:50 Argument type mismatch: actual type is 'String?', but 'String' was expected.
-final/app/src/main/java/com/example/ui/components/CreditsSheet.kt:51:82 Unresolved reference 'AutoAwesome'.
-final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:118:31 Unresolved reference 'currentFrameTimeMillis'.
-final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:120:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
-final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:121:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
-final/app/src/main/java/com/example/ui/components/SaifEngineScreens.kt:194:41 Unresolved reference 'fillMaxWidth'.
-final/app/src/main/java/com/saifai/brand/DynamicAppIcon.kt:132:32 Unresolved reference 'setApplicationIconSetting'.
-final/app/src/main/java/com/saifai/brand/SaifCredits.kt:24:48 Initializer type mismatch: expected 'List<Pair<String, String>>', actual 'List<String>'.
-final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt:259:62 Suspend function 'suspend fun compileLinuxDirectoryToApk(context: Context, requestJson: JSONObject): JSONObject' can only be called from a coroutine or another suspend function.
+final/app/src/main/java/com/example/ui/components/CreditsSheet.kt:51:80 Unresolved reference 'Star'.
+final/app/src/main/java/com/saifai/brand/DynamicAppIcon.kt:134:32 Unresolved reference 'setApplicationIconSetting'.
 
 ## javac / aapt errors
 
@@ -26,6 +15,17 @@ Execution failed for task ':app:compileStandardDebugKotlin'.
 FAILURE: Build failed with an exception.
 
 ## tail
+Welcome to Gradle 9.1.0!
+
+Here are the highlights of this release:
+ - Full Java 25 support
+ - Native task graph visualization
+ - Enhanced console output
+
+For more details see https://docs.gradle.org/9.1.0/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.1.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
 
 > Configure project :app
 w: file:///home/runner/work/Saif-/Saif-/final/app/build.gradle.kts:289:45: 'fun srcDir(srcDir: Any): Any' is deprecated. Use `directories` mutable set instead.
@@ -41,13 +41,13 @@ w: file:///home/runner/work/Saif-/Saif-/final/app/build.gradle.kts:310:45: 'fun 
 > Task :apprunner:javaPreCompileDebug
 > Task :apprunner:generateDebugAssets UP-TO-DATE
 > Task :apprunner:mergeDebugAssets
-> Task :apprunner:compressDebugAssets
 > Task :apprunner:parseDebugLocalResources
+> Task :apprunner:compressDebugAssets
 > Task :apprunner:desugarDebugFileDependencies
 > Task :apprunner:checkDebugAarMetadata
 > Task :apprunner:generateDebugRFile
-> Task :apprunner:compileDebugNavigationResources
 > Task :apprunner:compileDebugKotlin NO-SOURCE
+> Task :apprunner:compileDebugNavigationResources
 
 > Task :apprunner:compileDebugJavaWithJavac
 Note: /home/runner/work/Saif-/Saif-/final/apprunner/src/main/java/com/saif/apprunner/MainActivity.java uses or overrides a deprecated API.
@@ -57,21 +57,21 @@ Note: Recompile with -Xlint:deprecation for details.
 > Task :apprunner:createDebugCompatibleScreenManifests
 > Task :apprunner:extractDeepLinksDebug
 > Task :apprunner:processDebugMainManifest
-> Task :apprunner:mergeDebugResources
 > Task :apprunner:processDebugManifest
+> Task :apprunner:mergeDebugResources
 > Task :apprunner:processDebugJavaRes NO-SOURCE
 > Task :apprunner:processDebugManifestForPackage
-> Task :apprunner:processDebugResources
 > Task :apprunner:mergeDebugJavaResource
+> Task :apprunner:checkDebugDuplicateClasses
+> Task :apprunner:processDebugResources
 > Task :apprunner:dexBuilderDebug
 > Task :apprunner:mergeDebugGlobalSynthetics
-> Task :apprunner:checkDebugDuplicateClasses
-> Task :apprunner:mergeDebugJniLibFolders
 > Task :apprunner:mergeLibDexDebug
 > Task :apprunner:mergeProjectDexDebug
+> Task :apprunner:mergeExtDexDebug
+> Task :apprunner:mergeDebugJniLibFolders
 > Task :apprunner:mergeDebugNativeLibs NO-SOURCE
 > Task :apprunner:stripDebugDebugSymbols NO-SOURCE
-> Task :apprunner:mergeExtDexDebug
 > Task :apprunner:validateSigningDebug
 > Task :apprunner:writeDebugAppMetadata
 > Task :apprunner:writeDebugSigningConfigVersions
@@ -143,19 +143,8 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:writeStandardDebugAppMetadata
 > Task :app:writeStandardDebugSigningConfigVersions
 > Task :app:compileStandardDebugKotlin
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:106:21 Unresolved reference 'setExecutable'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:107:21 Unresolved reference 'setReadable'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:110:21 Unresolved reference 'setExecutable'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/compiler/LinuxApkBuildBridge.kt:111:21 Unresolved reference 'setReadable'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/saif/data/local/LocalEnvironmentManager.kt:164:50 Argument type mismatch: actual type is 'String?', but 'String' was expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/CreditsSheet.kt:51:82 Unresolved reference 'AutoAwesome'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:118:31 Unresolved reference 'currentFrameTimeMillis'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:120:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/MorphingIconButton.kt:121:28 Assignment type mismatch: actual type is 'Double', but 'Float' was expected.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/SaifEngineScreens.kt:194:41 Unresolved reference 'fillMaxWidth'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/brand/DynamicAppIcon.kt:132:32 Unresolved reference 'setApplicationIconSetting'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/brand/SaifCredits.kt:24:48 Initializer type mismatch: expected 'List<Pair<String, String>>', actual 'List<String>'.
-e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/bridge/SaifLocalBridgeServer.kt:259:62 Suspend function 'suspend fun compileLinuxDirectoryToApk(context: Context, requestJson: JSONObject): JSONObject' can only be called from a coroutine or another suspend function.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/example/ui/components/CreditsSheet.kt:51:80 Unresolved reference 'Star'.
+e: file:///home/runner/work/Saif-/Saif-/final/app/src/main/java/com/saifai/brand/DynamicAppIcon.kt:134:32 Unresolved reference 'setApplicationIconSetting'.
 
 > Task :app:compileStandardDebugKotlin FAILED
 
@@ -174,5 +163,5 @@ Execution failed for task ':app:compileStandardDebugKotlin'.
 > Run with --scan to generate a Build Scan (Powered by Develocity).
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 3m 13s
+BUILD FAILED in 2m 32s
 69 actionable tasks: 68 executed, 1 from cache
