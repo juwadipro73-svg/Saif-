@@ -20,7 +20,7 @@ class SaifIdentityTest {
     }
 
     @Test fun creditsQuestionsPointToTheLicenceScreen() {
-        assertTrue(SaifIdentity.RULE.contains("Settings > Open-source licences & credits"))
+        assertTrue(SaifIdentity.RULE.contains("Settings > About > Credits"))
     }
 
     @Test fun ruleIsAddedToAPromptExactlyOnce() {
