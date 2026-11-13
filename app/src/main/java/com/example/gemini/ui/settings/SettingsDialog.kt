@@ -8698,13 +8698,13 @@ private fun AboutSubScreen(
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(containerColor = cardBg), border = cardBorder) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Legal notices & source", style = MaterialTheme.typography.titleMedium,
+                Text("Credits", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold)
                 Text("SAIF AI is free software under the GNU GPL v3 or later. It is built on AntiGem by Santosh Kurmi (GPLv3) and uses other open-source components. Their copyright and licence terms stay with the code, and the source of this build is available to everyone who receives the app.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 TextButton(onClick = { legalPage = "THIRD_PARTY_NOTICES.md" }) {
-                    Text("Read the licences and credits")
+                    Text("Credits and legal notices")
                 }
             }
         }

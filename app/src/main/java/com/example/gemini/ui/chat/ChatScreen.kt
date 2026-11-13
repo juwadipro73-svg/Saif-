@@ -19,6 +19,7 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -1455,9 +1456,37 @@ fun ChatScreen(
                                         Text(
                                             text = "Ask a question, brainstorm ideas, or start coding",
                                             fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
                                             textAlign = TextAlign.Center
                                         )
+                                        if (isFreshNewChat) {
+                                            Spacer(Modifier.height(22.dp))
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                listOf(
+                                                    Triple("✦  Build", "Plan and create an app", "Help me plan and build a polished mobile app for "),
+                                                    Triple("⌘  Code", "Debug or explore code", "Help me debug this code: "),
+                                                    Triple("◈  Create", "Turn an idea into a plan", "Help me turn this idea into a clear step-by-step plan: ")
+                                                ).forEach { (title, subtitle, prompt) ->
+                                                    Card(
+                                                        modifier = Modifier.width(190.dp).animateContentSize().clickable {
+                                                            textFieldValue = TextFieldValue(prompt)
+                                                        },
+                                                        shape = RoundedCornerShape(18.dp),
+                                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                                                    ) {
+                                                        Column(Modifier.padding(16.dp)) {
+                                                            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                                            Spacer(Modifier.height(6.dp))
+                                                            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

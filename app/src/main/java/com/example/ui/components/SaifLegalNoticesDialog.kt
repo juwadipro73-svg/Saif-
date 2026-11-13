@@ -42,9 +42,10 @@ fun SaifLegalNoticesDialog(
     val textScroll = remember(page) { ScrollState(0) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Open-source licences & credits") },
+        title = { Text("Credits") },
         text = {
             Column(Modifier.heightIn(max = 480.dp)) {
+                Text("SAIF AI", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Row(Modifier.horizontalScroll(rememberScrollState())) {
                     SaifLegalNotices.PAGES.forEach { (label, file) ->
                         TextButton(onClick = { page = file }) {

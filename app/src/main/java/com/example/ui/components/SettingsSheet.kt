@@ -769,15 +769,15 @@ fun SettingsSheet(
             PermissionManagerSection(glassBorderBrush = glassBorderBrush)
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionHeader("ABOUT & LICENCES")
+            SectionHeader("ABOUT & CREDITS")
             LiquidSurface(
                 color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
                 shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
                     SettingsActionRow(
-                        "Open-source licences & credits",
-                        "Everyone whose code SAIF AI uses, and the licences",
+                        "Credits",
+                        "SAIF AI and open-source acknowledgements",
                         onClick = { showLegalNotices = true }
                     )
                 }
