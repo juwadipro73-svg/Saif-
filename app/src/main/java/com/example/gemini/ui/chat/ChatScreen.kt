@@ -11,6 +11,10 @@ import android.view.WindowManager
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -19,6 +23,7 @@ import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -41,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
@@ -205,6 +211,16 @@ fun ChatScreen(
     val conversationError by viewModel.conversationError.collectAsState()
     val activeInstances by viewModel.activeInstances.collectAsState()
     val isActivelyRunning by viewModel.isCurrentChatActivelyRunning.collectAsState()
+    var chatWorkServiceStarted by remember { mutableStateOf(false) }
+    LaunchedEffect(isActivelyRunning) {
+        if (isActivelyRunning && !chatWorkServiceStarted) {
+            com.example.builder.agent.BuildService.start(context, "SAIF AI", "Working on your request…")
+            chatWorkServiceStarted = true
+        } else if (!isActivelyRunning && chatWorkServiceStarted) {
+            com.example.builder.agent.BuildService.finish(context, succeeded = true)
+            chatWorkServiceStarted = false
+        }
+    }
     val isBackgroundActive by viewModel.isCurrentChatBackgroundActive.collectAsState()
     val quotaSummary by viewModel.quotaSummary.collectAsState()
     val preferredModelName by viewModel.preferredModelName.collectAsState()
@@ -1455,9 +1471,53 @@ fun ChatScreen(
                                         Text(
                                             text = "Ask a question, brainstorm ideas, or start coding",
                                             fontSize = 14.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
                                             textAlign = TextAlign.Center
                                         )
+                                        if (isFreshNewChat) {
+                                            Spacer(Modifier.height(22.dp))
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                listOf(
+                                                    listOf("🧠", "Build Architect", "Plan and create an app", "Help me plan and build a polished mobile app for "),
+                                                    listOf("🛠️", "Code Detective", "Debug or explore code", "Help me debug this code: "),
+                                                    listOf("✨", "Idea Muse", "Turn an idea into a plan", "Help me turn this idea into a clear step-by-step plan: ")
+                                                ).forEach { character ->
+                                                    val (avatar, title, subtitle, prompt) = character
+                                                    val characterMotion = rememberInfiniteTransition(label = "welcome-character-$title")
+                                                    val avatarScale by characterMotion.animateFloat(
+                                                        initialValue = 0.96f,
+                                                        targetValue = 1.04f,
+                                                        animationSpec = infiniteRepeatable(tween(1100), RepeatMode.Reverse),
+                                                        label = "avatar-scale-$title"
+                                                    )
+                                                    Card(
+                                                        modifier = Modifier.width(190.dp).animateContentSize().clickable {
+                                                            textFieldValue = TextFieldValue(prompt)
+                                                        },
+                                                        shape = RoundedCornerShape(18.dp),
+                                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                                                    ) {
+                                                        Column(Modifier.padding(16.dp)) {
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Box(
+                                                                    Modifier.size(38.dp).scale(avatarScale)
+                                                                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                                                    contentAlignment = Alignment.Center
+                                                                ) { Text(avatar, fontSize = 20.sp) }
+                                                                Spacer(Modifier.width(10.dp))
+                                                                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                                            }
+                                                            Spacer(Modifier.height(10.dp))
+                                                            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

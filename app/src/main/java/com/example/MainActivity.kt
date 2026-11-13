@@ -43,6 +43,11 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        @Volatile var isAppForeground: Boolean = false
+            private set
+    }
+
     private val viewModel: ChatViewModel by viewModels {
         val db = SaifDatabase.getDatabase(applicationContext)
         val repository = ChatRepository(db.chatDao())
@@ -51,6 +56,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        isAppForeground = true
         LiveVoiceManager.isAppInForeground.value = true
         com.example.util.WakeWordManager.isAppInForeground = true
         // The old sign-in screen is never blocked by Linux setup. Reuse the same
@@ -76,6 +82,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
+        isAppForeground = false
         // Leaving the app after a project is finished starts the idle timer of the storage clean-up.
         com.example.storage.ModuleAutoCleaner.onAppBackgrounded(applicationContext)
         LiveVoiceManager.isAppInForeground.value = false
@@ -85,6 +92,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { splash ->
+                val icon = splash.iconView
+                if (icon == null) {
+                    splash.remove()
+                } else {
+                    icon.animate()
+                        .alpha(0f)
+                        .scaleX(0.72f)
+                        .scaleY(0.72f)
+                        .setDuration(420L)
+                        .withEndAction { splash.remove() }
+                        .start()
+                }
+            }
+        }
         AuthManager.init(applicationContext)
         com.example.gemini.data.remote.AntigravityAppBinding.init(applicationContext)
         if (com.example.gemini.BuildConfig.SAIF_CLOUD_API_BASE_URL.isNotBlank()) {

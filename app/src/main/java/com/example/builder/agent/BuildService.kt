@@ -22,7 +22,9 @@ class BuildService : Service() {
 
     companion object {
         const val CHANNEL_ID = "saif_build_agent_channel"
+        const val COMPLETE_CHANNEL_ID = "saif_work_complete_channel"
         const val NOTIF_ID = 9001
+        const val COMPLETE_NOTIF_ID = 9002
         const val ACTION_STOP = "com.example.builder.agent.ACTION_STOP"
         const val EXTRA_PROJECT_NAME = "extra_project_name"
         const val EXTRA_STATUS = "extra_status"
@@ -48,6 +50,38 @@ class BuildService : Service() {
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
             val notif = createNotification(context, status)
             nm?.notify(NOTIF_ID, notif)
+        }
+
+        /** Ends the foreground build service and alerts once only when the app is no longer visible. */
+        fun finish(context: Context, succeeded: Boolean) {
+            val app = context.applicationContext
+            app.stopService(Intent(app, BuildService::class.java))
+            isBuildRunning = false
+            if (!succeeded || com.example.MainActivity.isAppForeground) return
+            val manager = app.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                manager.createNotificationChannel(
+                    NotificationChannel(COMPLETE_CHANNEL_ID, "Completed work", NotificationManager.IMPORTANCE_DEFAULT)
+                )
+            }
+            val openIntent = Intent(app, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pending = PendingIntent.getActivity(
+                app, COMPLETE_NOTIF_ID, openIntent,
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0) or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            manager.notify(
+                COMPLETE_NOTIF_ID,
+                NotificationCompat.Builder(app, COMPLETE_CHANNEL_ID)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("SAIF AI")
+                    .setContentText("Work done sir")
+                    .setAutoCancel(true)
+                    .setOnlyAlertOnce(true)
+                    .setContentIntent(pending)
+                    .build()
+            )
         }
 
         fun stop(context: Context) {
