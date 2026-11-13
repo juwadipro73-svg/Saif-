@@ -326,7 +326,7 @@ fun GitSourceControlView(
                 // Config / Settings Button
                 MorphingIconButton(
                     onClick = {
-                        val projPath = activeProject?.path ?: return@IconButton
+                        val projPath = activeProject?.path ?: return@MorphingIconButton
                         scope.launch {
                             isLoadingConfig = true
                             val cfg = GitApiClient.getConfig(projPath)
@@ -583,7 +583,7 @@ fun GitSourceControlView(
                                     }
                                     MorphingIconButton(
                                         onClick = {
-                                            val projPath = activeProject?.path ?: return@IconButton
+                                            val projPath = activeProject?.path ?: return@MorphingIconButton
                                             scope.launch {
                                                 GitApiClient.stage(projPath, emptyList())
                                                 refreshGitData()
@@ -639,7 +639,7 @@ fun GitSourceControlView(
                                     }
                                     MorphingIconButton(
                                         onClick = {
-                                            val projPath = activeProject?.path ?: return@IconButton
+                                            val projPath = activeProject?.path ?: return@MorphingIconButton
                                             scope.launch {
                                                 GitApiClient.stage(projPath, untracked.map { it.path })
                                                 refreshGitData()
