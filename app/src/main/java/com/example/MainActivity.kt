@@ -94,13 +94,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             splashScreen.setOnExitAnimationListener { splash ->
-                splash.iconView.animate()
-                    .alpha(0f)
-                    .scaleX(0.72f)
-                    .scaleY(0.72f)
-                    .setDuration(420L)
-                    .withEndAction { splash.remove() }
-                    .start()
+                val icon = splash.iconView
+                if (icon == null) {
+                    splash.remove()
+                } else {
+                    icon.animate()
+                        .alpha(0f)
+                        .scaleX(0.72f)
+                        .scaleY(0.72f)
+                        .setDuration(420L)
+                        .withEndAction { splash.remove() }
+                        .start()
+                }
             }
         }
         AuthManager.init(applicationContext)
