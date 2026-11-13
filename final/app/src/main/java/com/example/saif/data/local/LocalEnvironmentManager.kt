@@ -158,8 +158,8 @@ object LocalEnvironmentManager {
             Thread {
                 try {
                     BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                        var line: String?
-                        while (reader.readLine().also { line = it } != null) {
+                        while (true) {
+                            val line = reader.readLine() ?: break
                             output.appendLine(line)
                             onOutputLine?.invoke(line)
                         }

@@ -102,14 +102,15 @@ object LinuxApkBuildBridge {
 
             for (binDir in binDirs) {
                 binDir.mkdirs()
-                File(binDir, "saif-build-apk").writeText(BUILD_APK_SCRIPT).apply {
-                    setExecutable(true, false)
-                    setReadable(true, false)
-                }
-                File(binDir, "saif-apk-link").writeText(APK_LINK_SCRIPT).apply {
-                    setExecutable(true, false)
-                    setReadable(true, false)
-                }
+                val buildScript = File(binDir, "saif-build-apk")
+                buildScript.writeText(BUILD_APK_SCRIPT)
+                buildScript.setExecutable(true, false)
+                buildScript.setReadable(true, false)
+
+                val linkScript = File(binDir, "saif-apk-link")
+                linkScript.writeText(APK_LINK_SCRIPT)
+                linkScript.setExecutable(true, false)
+                linkScript.setReadable(true, false)
             }
         }
     }

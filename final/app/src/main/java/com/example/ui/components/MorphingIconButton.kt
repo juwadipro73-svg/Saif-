@@ -24,7 +24,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -67,6 +66,13 @@ fun MorphingIconButton(
         targetValue = if (isPressed) -12f else 0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
         label = "morphRotation"
+    )
+    // A slow breathing zoom keeps the icon alive while the button rests.
+    val idleBreath by rememberInfiniteTransition(label = "morphBreath").animateFloat(
+        initialValue = 1f,
+        targetValue = 1.035f,
+        animationSpec = infiniteRepeatable(tween(2200, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "breath"
     )
     val container by animateColorAsState(
         targetValue = if (isPressed) accent.copy(alpha = 0.22f) else containerColor,
@@ -112,14 +118,7 @@ fun MorphingIconButton(
             modifier = Modifier
                 .size(iconSize)
                 .rotate(iconRotation)
-                .graphicsLayer {
-                    // A tiny breathing zoom keeps the icon alive while the button rests.
-                    val idle = 1f + 0.03f * kotlin.math.sin(
-                        (this.currentFrameTimeMillis / 1000f) * 1.6f
-                    )
-                    scaleX = idle
-                    scaleY = idle
-                }
+                .scale(idleBreath)
         )
     }
 }

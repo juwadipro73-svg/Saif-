@@ -133,7 +133,7 @@ class SaifLocalBridgeServer private constructor() {
         return "http://127.0.0.1:$port/download/$token/$rawName"
     }
 
-    private fun handleClientSocket(socket: Socket) {
+    private suspend fun handleClientSocket(socket: Socket) {
         try {
             socket.use { s ->
                 val input = BufferedReader(InputStreamReader(s.getInputStream()))
@@ -246,7 +246,7 @@ class SaifLocalBridgeServer private constructor() {
      *
      * @return the HTTP status code and the JSON body.
      */
-    private fun handleBuilderRequest(uri: String, body: String): Pair<Int, String> {
+    private suspend fun handleBuilderRequest(uri: String, body: String): Pair<Int, String> {
         val appContext = this.appContext ?: return 500 to
                 """{"success":false,"error":"App context is not available."}"""
 

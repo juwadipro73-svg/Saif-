@@ -1042,21 +1042,16 @@ private fun DrawerSquareButton(
     tint: Color,
     onClick: () -> Unit
 ) {
-    Surface(
+    MorphingIconButton(
+        icon = icon,
+        contentDescription = description,
         onClick = onClick,
-        shape =
-    RoundedCornerShape(16.dp),
-        color = SaifTheme.colors.surfaceCard.copy(alpha = 0.6f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, SaifTheme.colors.textSecondary.copy(alpha = 0.18f)),
-        modifier =
-    Modifier.size(46.dp)
-    ) {
-        Box(contentAlignment =
-    Alignment.Center) {
-            Icon(icon, contentDescription = description, tint = tint, modifier =
-    Modifier.size(22.dp))
-        }
-    }
+        size = 46.dp,
+        iconSize = 22.dp,
+        tint = tint,
+        containerColor = SaifTheme.colors.surfaceCard.copy(alpha = 0.6f),
+        accent = Color(0xFF9B82EC)
+    )
 }
 
 /** Small pill under "New chat": starts a video or an app project. */

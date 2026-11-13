@@ -10,7 +10,8 @@ enum class SettingsSection(val title: String, val subtitle: String) {
     WEBVIEW_EXTENSIONS("Web Extensions", "Extensions bundled with SAIF AI"),
     SLASH_COMMANDS("Slash Commands", "Commands available in the composer"),
     AI_SKILLS("AI Skills", "Saved skills you can invoke with /"),
-    MCP("Model Context Protocol (MCP)", "Local tool bridge over loopback")
+    MCP("Model Context Protocol (MCP)", "Local tool bridge over loopback"),
+    ABOUT("About & Credits", "SAIF AI and the projects it builds on")
 }
 
 val ENGINE_SETTINGS_SECTIONS: List<SettingsSection> = SettingsSection.entries

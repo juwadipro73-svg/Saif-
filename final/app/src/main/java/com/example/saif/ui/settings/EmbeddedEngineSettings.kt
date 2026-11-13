@@ -190,6 +190,28 @@ fun EmbeddedEngineSettings(
                                 )
                             }
 
+                            SettingsSection.ABOUT.name -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("About & Credits", color = textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                Text(
+                                    com.saifai.brand.SaifCredits.HEADLINE,
+                                    color = textPrimary,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 20.sp,
+                                    letterSpacing = 2.sp
+                                )
+                                Text(
+                                    com.saifai.brand.SaifCredits.HEADLINE_SUB,
+                                    color = textSecondary,
+                                    fontSize = 11.sp
+                                )
+                                Text(
+                                    com.saifai.brand.SaifCredits.thirdPartyOneLine,
+                                    color = textSecondary.copy(alpha = 0.85f),
+                                    fontSize = 9.5.sp,
+                                    lineHeight = 14.sp
+                                )
+                            }
+
                             else -> Column {
                                 Text("Appearance", color = textPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                                 Text(

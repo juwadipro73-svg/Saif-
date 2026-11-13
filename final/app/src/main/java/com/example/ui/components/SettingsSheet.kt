@@ -879,7 +879,9 @@ fun SettingsSheet(
                             SettingsSection.WEBVIEW_EXTENSIONS,
                             SettingsSection.SLASH_COMMANDS,
                             SettingsSection.AI_SKILLS,
-                            SettingsSection.MCP
+                            SettingsSection.MCP,
+                            // About & Credits has its own block below - it is not a workspace setting.
+                            SettingsSection.ABOUT
                         )
                     }.forEachIndexed { index, section ->
                         if (index > 0) HorizontalDivider(color = SaifTheme.colors.cardBorder)

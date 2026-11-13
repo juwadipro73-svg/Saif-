@@ -113,6 +113,7 @@ object DynamicAppIcon {
      * that refuses the update keeps showing the previous icon, which is perfectly acceptable.
      */
     fun applyPalette(context: Context) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) return
         val packageManager = context.packageManager
         val packageName = context.packageName
         val palette = currentPalette
@@ -129,7 +130,8 @@ object DynamicAppIcon {
                 val foreground = drawable.foreground.mutate()
                 DrawableCompat.setTint(foreground, palette.foreground)
                 drawable.setBounds(0, 0, 108, 108)
-                packageManager.setApplicationIconSetting(packageName, drawable) // API 29+
+                // API 29+: replaces the icon the launcher shows for this package.
+                packageManager.setApplicationIconSetting(packageName, drawable)
             }
         }
     }

@@ -21,7 +21,7 @@ object SaifCredits {
      * Every third-party component SAIF AI builds on, with the licence it ships under.
      * Kept as one list so the UI can render it as a single flowing line.
      */
-    val thirdParty: List<Pair<String, String>> = listOf(
+    val thirdParty: List<String> = listOf(
         "Android Jetpack (Compose, Lifecycle, Room, Navigation, WorkManager, DataStore) — Apache License 2.0",
         "Kotlin & kotlinx.coroutines, kotlinx.serialization — Apache License 2.0",
         "OkHttp & Okio — Apache License 2.0",

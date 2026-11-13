@@ -91,36 +91,38 @@ fun SaifEngineToolbar(
         ) {
             Box(Modifier.size(10.dp).background(statusColor, CircleShape))
         }
-        Box(
-            modifier =
-    Modifier.size(buttonSize).clip(shape =
-    CircleShape).clickable { onBrowserClick() },
-            contentAlignment =
-    Alignment.Center
-        ) {
-            Icon(Icons.Outlined.Language, contentDescription = "Browser", tint = c.textPrimary.copy(alpha = 0.85f), modifier =
-    Modifier.size(20.dp))
-        }
-        Box(
-            modifier =
-    Modifier.size(buttonSize).clip(shape =
-    CircleShape).clickable { onTerminalClick() },
-            contentAlignment =
-    Alignment.Center
-        ) {
-            Icon(Icons.Outlined.Terminal, contentDescription = "Terminal", tint = accent, modifier =
-    Modifier.size(20.dp))
-        }
-        Box(
-            modifier =
-    Modifier.size(buttonSize).clip(shape =
-    CircleShape).clickable { onCodeClick() },
-            contentAlignment =
-    Alignment.Center
-        ) {
-            Icon(Icons.Filled.Code, contentDescription = "Code Editor", tint = c.textPrimary.copy(alpha = 0.85f), modifier =
-    Modifier.size(19.dp))
-        }
+        // The three workspace buttons morph their shape when pressed, so the toolbar feels
+        // alive instead of snapping between states.
+        MorphingIconButton(
+            icon = Icons.Outlined.Language,
+            contentDescription = "Browser",
+            onClick = onBrowserClick,
+            size = buttonSize,
+            iconSize = 20.dp,
+            tint = c.textPrimary.copy(alpha = 0.85f),
+            containerColor = Color.Transparent,
+            accent = accent
+        )
+        MorphingIconButton(
+            icon = Icons.Outlined.Terminal,
+            contentDescription = "Terminal",
+            onClick = onTerminalClick,
+            size = buttonSize,
+            iconSize = 20.dp,
+            tint = accent,
+            containerColor = Color.Transparent,
+            accent = accent
+        )
+        MorphingIconButton(
+            icon = Icons.Filled.Code,
+            contentDescription = "Code Editor",
+            onClick = onCodeClick,
+            size = buttonSize,
+            iconSize = 19.dp,
+            tint = c.textPrimary.copy(alpha = 0.85f),
+            containerColor = Color.Transparent,
+            accent = accent
+        )
     }
 }
 

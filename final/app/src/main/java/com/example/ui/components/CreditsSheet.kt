@@ -48,7 +48,7 @@ fun CreditsSheet(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Outlined.AutoAwesome,
+                    imageVector = androidx.compose.material.icons.Icons.Filled.Star,
                     contentDescription = null,
                     tint = com.example.ui.theme.PrimaryAccent,
                     modifier = Modifier.size(18.dp)
