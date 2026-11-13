@@ -48,11 +48,14 @@ object DynamicLauncherIcon {
             pm.setComponentEnabledSettings(settings)
         } else {
             // Keep an active launcher entry throughout the switch on older package managers.
-            pm.setComponentEnabledSetting(settings[current].componentName,
+            pm.setComponentEnabledSetting(ComponentName(context, "${context.packageName}.${aliases[current]}"),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-            settings.forEachIndexed { index, setting ->
-                if (index != current) pm.setComponentEnabledSetting(setting.componentName,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            aliases.forEachIndexed { index, alias ->
+                if (index != current) pm.setComponentEnabledSetting(
+                    ComponentName(context, "${context.packageName}.$alias"),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP
+                )
             }
         }
     }
