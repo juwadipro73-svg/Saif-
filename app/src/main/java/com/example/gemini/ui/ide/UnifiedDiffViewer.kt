@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -153,7 +154,7 @@ fun UnifiedDiffViewer(
                 Spacer(modifier = Modifier.width(6.dp))
 
                 // 1. Open Current Working File (Editable)
-                IconButton(
+                MorphingIconButton(
                     onClick = onOpenCurrentFile,
                     modifier = Modifier.size(30.dp)
                 ) {
@@ -166,7 +167,7 @@ fun UnifiedDiffViewer(
                 }
 
                 // 2. Open Revision / Commit File (Read-Only)
-                IconButton(
+                MorphingIconButton(
                     onClick = onOpenHistoricalFile,
                     modifier = Modifier.size(30.dp)
                 ) {
@@ -179,7 +180,7 @@ fun UnifiedDiffViewer(
                 }
 
                 // Close Button
-                IconButton(
+                MorphingIconButton(
                     onClick = onClose,
                     modifier = Modifier.size(30.dp)
                 ) {

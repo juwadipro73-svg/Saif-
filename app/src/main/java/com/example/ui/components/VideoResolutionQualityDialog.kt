@@ -57,7 +57,7 @@ fun VideoResolutionQualityDialog(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Project Resolution & FPS", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
+                    MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFFD6D3C7), modifier = Modifier.size(18.dp))
                     }
                 }

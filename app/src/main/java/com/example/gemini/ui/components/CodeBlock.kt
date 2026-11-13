@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -304,7 +305,7 @@ fun CodeBlock(
 
                 // In Preview Mode: Reload button
                 if (selectedTab == 1) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { reloadKey++ },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -319,7 +320,7 @@ fun CodeBlock(
             }
 
             // Fullscreen Button (always present for all code blocks and preview modes)
-            IconButton(
+            MorphingIconButton(
                 onClick = { isFullscreen = true },
                 modifier = Modifier.size(28.dp)
             ) {
@@ -333,7 +334,7 @@ fun CodeBlock(
 
             // Expand / Collapse toggle for long code
             if (isLongCode && selectedTab == 0) {
-                IconButton(
+                MorphingIconButton(
                     onClick = { toggleExpand() },
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -347,7 +348,7 @@ fun CodeBlock(
             }
 
             // Copy Button
-            IconButton(
+            MorphingIconButton(
                 onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     val clip = ClipData.newPlainText("Copied Code", code)
@@ -376,7 +377,7 @@ fun CodeBlock(
 
             // Run Button (shell code only): edit the command, then run it in a terminal over the chat
             if (isShellCode) {
-                IconButton(
+                MorphingIconButton(
                     onClick = { showRunDialog = true },
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -526,7 +527,7 @@ fun CodeBlock(
                             }
                         },
                         navigationIcon = {
-                            IconButton(onClick = { isFullscreen = false }) {
+                            MorphingIconButton(onClick = { isFullscreen = false }) {
                                 Icon(Icons.Default.Close, contentDescription = "Close")
                             }
                         },
@@ -570,7 +571,7 @@ fun CodeBlock(
                                 }
 
                                 if (selectedTab == 1) {
-                                    IconButton(onClick = { reloadKey++ }) {
+                                    MorphingIconButton(onClick = { reloadKey++ }) {
                                         Icon(Icons.Default.Refresh, contentDescription = "Reload")
                                     }
                                 }
@@ -584,7 +585,7 @@ fun CodeBlock(
                                 }
                             }
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                     val clip = ClipData.newPlainText("Copied Code", code)

@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.Manifest
 import android.content.Intent
 import android.media.MediaRecorder
@@ -710,7 +711,7 @@ fun ChatInputBar(
                         Spacer(modifier = Modifier.width(4.dp))
 
                         // 2. Cancel / Discard
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { cancelAudioRecording() },
                             modifier = Modifier.size(32.dp)
                         ) {
@@ -1060,7 +1061,7 @@ fun ChatInputBar(
                                         }
 
                                         Spacer(modifier = Modifier.width(2.dp))
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = { onRemoveAttachment(att.id) },
                                             modifier = Modifier.size(24.dp).padding(end = 4.dp)
                                         ) {

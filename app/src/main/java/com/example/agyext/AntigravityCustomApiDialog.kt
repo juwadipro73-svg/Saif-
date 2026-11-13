@@ -1,5 +1,6 @@
 package com.example.agyext
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -274,7 +275,7 @@ fun AntigravityCustomApiDialog(
                             }
                         }
                     )
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(30.dp)) {
+                    MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(30.dp)) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
@@ -493,7 +494,7 @@ fun AntigravityCustomApiDialog(
                         visualTransformation = if (showApiKey) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         val pasted = clipboard.getText()?.text?.trim().orEmpty()
                                         if (pasted.isNotEmpty()) {
@@ -509,7 +510,7 @@ fun AntigravityCustomApiDialog(
                                 ) {
                                     Icon(Icons.Default.ContentPaste, contentDescription = "Paste API Key", modifier = Modifier.size(16.dp))
                                 }
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showApiKey = !showApiKey },
                                     modifier = Modifier.size(30.dp)
                                 ) {

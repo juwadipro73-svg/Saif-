@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -309,7 +308,7 @@ fun FlowAiBrowserDialog(onDismiss: () -> Unit) {
         Surface(Modifier.fillMaxSize(), color = Color(0xFF22211F)) {
             Column(Modifier.fillMaxSize().padding(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Close", tint = Color.White) }
+                    MorphingIconButton(onClick = onDismiss) { Icon(Icons.Default.Close, "Close", tint = Color.White) }
                     Icon(Icons.Default.Public, null, tint = Color(0xFF7C5CE0))
                     OutlinedTextField(url, { url = it }, Modifier.weight(1f), singleLine = true, label = { Text("URL") },
                         trailingIcon = { TextButton(onClick = { webView.loadUrl(url.trim()) }) { Text("Go", color = Color(0xFF7C5CE0)) } })
@@ -537,7 +536,7 @@ fun FlowBatchDialog(topic: String, aspect: String, style: String, onDismiss: () 
         Surface(Modifier.fillMaxSize(), color = Color(0xFF22211F)) {
             Column(Modifier.fillMaxSize().padding(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    IconButton(onClick = {
+                    MorphingIconButton(onClick = {
                         webView.evaluateJavascript("window.SaifFlowAuto && window.SaifFlowAuto.stop()", null)
                         onDismiss()
                     }) { Icon(Icons.Default.Close, "Close", tint = Color.White) }

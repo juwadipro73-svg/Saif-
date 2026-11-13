@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -112,7 +113,7 @@ fun WebViewExtensionsScreen(onChanged: () -> Unit) {
                             extension.source?.let { Text("From ${it.repo}" + (if (it.ref.isNotBlank()) "@${it.ref}" else ""), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                         if (exporting == extension.id) Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp) }
-                        else IconButton(enabled = exporting == null, onClick = {
+                        else MorphingIconButton(enabled = exporting == null, onClick = {
                             scope.launch {
                                 exporting = extension.id; error = null
                                 runCatching {
@@ -122,7 +123,7 @@ fun WebViewExtensionsScreen(onChanged: () -> Unit) {
                                 exporting = null
                             }
                         }) { Icon(Icons.Outlined.Download, "Download as ZIP") }
-                        IconButton(enabled = !busy, onClick = { removing = extension; deleteData = false }) { Icon(Icons.Outlined.Delete, "Remove", tint = MaterialTheme.colorScheme.error) }
+                        MorphingIconButton(enabled = !busy, onClick = { removing = extension; deleteData = false }) { Icon(Icons.Outlined.Delete, "Remove", tint = MaterialTheme.colorScheme.error) }
                         Switch(checked = extension.isEnabled, enabled = !busy, onCheckedChange = { enabled -> runOperation { manager.setEnabled(extension.id, enabled); null } })
                     }
                     if (extension.description.isNotBlank()) Text(extension.description, style = MaterialTheme.typography.bodySmall)

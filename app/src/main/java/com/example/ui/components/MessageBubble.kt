@@ -43,7 +43,6 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.WindowInsets
@@ -204,7 +203,7 @@ fun MessageBubble(
                                         contentDescription = "Preview",
                                         modifier = Modifier.fillMaxSize()
                                     )
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = { showPreview = false },
                                         modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).padding(top = 24.dp)
                                     ) {

@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -164,7 +165,7 @@ fun MessageBubble(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Copy Prompt
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText("Copied Prompt", message.content)
@@ -185,7 +186,7 @@ fun MessageBubble(
                         Spacer(modifier = Modifier.width(4.dp))
 
                         // Edit Prompt
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 onEdit(message)
                                 showUserActions = false
@@ -203,7 +204,7 @@ fun MessageBubble(
                         Spacer(modifier = Modifier.width(4.dp))
 
                         // Retry Prompt
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 onRetry(message)
                                 showUserActions = false
@@ -221,7 +222,7 @@ fun MessageBubble(
                         val payloadToShow = message.rawContent ?: message.rawPayload
                         if (!payloadToShow.isNullOrBlank()) {
                             Spacer(modifier = Modifier.width(4.dp))
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     onViewRawPayload?.invoke(payloadToShow)
                                     showUserActions = false
@@ -283,7 +284,7 @@ fun MessageBubble(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                     val clip = ClipData.newPlainText("Copied Response", message.content)
@@ -302,7 +303,7 @@ fun MessageBubble(
 
                             Spacer(modifier = Modifier.width(4.dp))
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { onRetry(message) },
                                 modifier = Modifier.size(28.dp)
                             ) {
@@ -317,7 +318,7 @@ fun MessageBubble(
                             val payloadToShow = message.rawContent ?: message.rawPayload
                             if (!payloadToShow.isNullOrBlank()) {
                                 Spacer(modifier = Modifier.width(4.dp))
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { onViewRawPayload?.invoke(payloadToShow) },
                                     modifier = Modifier.size(28.dp)
                                 ) {
@@ -332,7 +333,7 @@ fun MessageBubble(
 
                             if (onShowArtifacts != null && artifactsCount > 0) {
                                 Spacer(modifier = Modifier.width(4.dp))
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = onShowArtifacts,
                                     modifier = Modifier.size(28.dp)
                                 ) {
@@ -510,7 +511,7 @@ fun UserMessageBubble(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Copy Prompt
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("Copied Prompt", message.content)
@@ -530,7 +531,7 @@ fun UserMessageBubble(
 
                 // Edit Prompt
                 Spacer(modifier = Modifier.width(4.dp))
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         onEdit(message)
                         showUserActions = false
@@ -548,7 +549,7 @@ fun UserMessageBubble(
                 val payloadToShow = message.rawContent ?: message.rawPayload
                 if (isDevModeEnabled && !payloadToShow.isNullOrBlank()) {
                     Spacer(modifier = Modifier.width(4.dp))
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             onViewRawPayload?.invoke(payloadToShow)
                             showUserActions = false
@@ -601,7 +602,7 @@ fun AssistantMessageFooter(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
+            MorphingIconButton(
                 onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     val clip = ClipData.newPlainText("Copied Response", message.content)
@@ -622,7 +623,7 @@ fun AssistantMessageFooter(
 
             // the whole reply in one selection area (the feed selects one block at a time)
             var showSelectText by remember { mutableStateOf(false) }
-            IconButton(
+            MorphingIconButton(
                 onClick = { showSelectText = true },
                 modifier = Modifier.size(28.dp)
             ) {
@@ -641,7 +642,7 @@ fun AssistantMessageFooter(
 
             // a mistaken tap must not replace the reply: ask first
             var confirmRetry by remember { mutableStateOf(false) }
-            IconButton(
+            MorphingIconButton(
                 onClick = { confirmRetry = true },
                 modifier = Modifier.size(28.dp)
             ) {
@@ -675,7 +676,7 @@ fun AssistantMessageFooter(
             val payloadToShow = message.rawContent ?: message.rawPayload
             if (!payloadToShow.isNullOrBlank()) {
                 Spacer(modifier = Modifier.width(4.dp))
-                IconButton(
+                MorphingIconButton(
                     onClick = { onViewRawPayload?.invoke(payloadToShow) },
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -690,7 +691,7 @@ fun AssistantMessageFooter(
 
             if (onShowArtifacts != null && artifactsCount > 0) {
                 Spacer(modifier = Modifier.width(4.dp))
-                IconButton(
+                MorphingIconButton(
                     onClick = onShowArtifacts,
                     modifier = Modifier.size(28.dp)
                 ) {

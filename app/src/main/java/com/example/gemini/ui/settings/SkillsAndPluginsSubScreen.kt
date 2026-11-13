@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -92,7 +93,7 @@ fun SkillsAndPluginsSubScreen(
                     ) {
                         Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                         Text(text = errorMessage, fontSize = 12.5.sp, color = MaterialTheme.colorScheme.error, modifier = Modifier.weight(1f))
-                        IconButton(onClick = onClearStatus, modifier = Modifier.size(24.dp)) {
+                        MorphingIconButton(onClick = onClearStatus, modifier = Modifier.size(24.dp)) {
                             Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(16.dp))
                         }
                     }
@@ -115,7 +116,7 @@ fun SkillsAndPluginsSubScreen(
                     ) {
                         Icon(Icons.Default.CheckCircle, contentDescription = null, tint = QuotaGreen, modifier = Modifier.size(18.dp))
                         Text(text = statusMessage, fontSize = 12.5.sp, color = QuotaGreen, modifier = Modifier.weight(1f))
-                        IconButton(onClick = onClearStatus, modifier = Modifier.size(24.dp)) {
+                        MorphingIconButton(onClick = onClearStatus, modifier = Modifier.size(24.dp)) {
                             Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(16.dp))
                         }
                     }
@@ -254,7 +255,7 @@ private fun SkillsTabView(
                 )
             }
 
-            IconButton(onClick = onRefresh, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = onRefresh, modifier = Modifier.size(32.dp)) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = GeminiBlue)
                 } else {
@@ -451,7 +452,7 @@ private fun InstalledPluginsTabView(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
-            IconButton(onClick = onRefresh, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = onRefresh, modifier = Modifier.size(32.dp)) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = GeminiBlue)
                 } else {
@@ -610,7 +611,7 @@ private fun InstalledPluginCard(
                     }
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = { showDeleteConfirmDialog = true },
                     enabled = !isDeleting,
                     modifier = Modifier.size(32.dp)
@@ -690,7 +691,7 @@ private fun GooglePluginsStoreTabView(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
-            IconButton(onClick = onRefresh, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = onRefresh, modifier = Modifier.size(32.dp)) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = GeminiBlue)
                 } else {
@@ -915,7 +916,7 @@ fun SkillDetailMarkdownDialog(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    IconButton(onClick = onDismiss) {
+                    MorphingIconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 }

@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -232,7 +233,7 @@ fun FloatingSwitcherWidget(
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             // Collapse Arrow Button (Up / Down for vertical)
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     lastInteractionTimestamp = System.currentTimeMillis()
                                     isExpanded = false
@@ -361,7 +362,7 @@ fun FloatingSwitcherWidget(
                             )
 
                             // Collapse Arrow Button on the Right Side
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     lastInteractionTimestamp = System.currentTimeMillis()
                                     isExpanded = false

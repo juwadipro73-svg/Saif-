@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -84,7 +85,7 @@ fun WorkspaceFolderBrowserDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             if (parentPath.isNotBlank()) {
                                 loadDir(parentPath)
@@ -119,7 +120,7 @@ fun WorkspaceFolderBrowserDialog(
                         )
                     }
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { loadDir(currentPath) },
                         enabled = !isLoading
                     ) {
@@ -130,7 +131,7 @@ fun WorkspaceFolderBrowserDialog(
                         )
                     }
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             newFolderName = ""
                             showNewFolderDialog = true

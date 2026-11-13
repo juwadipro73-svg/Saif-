@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import com.example.gemini.ui.claude.SettingsGroupHeader
 import com.example.gemini.ui.components.ClaudeAccent
 import android.Manifest
@@ -305,7 +306,7 @@ fun SettingsDialog(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = navigateBack) {
+                    MorphingIconButton(onClick = navigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -1578,7 +1579,7 @@ private fun AppearanceSubScreen(
                                 if (isEnabled) {
                                     val itemOrderIndex = currentItems.indexOf(itemId)
                                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = {
                                                 if (itemOrderIndex > 0) {
                                                     val copy = currentItems.toMutableList()
@@ -1593,7 +1594,7 @@ private fun AppearanceSubScreen(
                                         ) {
                                             Icon(Icons.Outlined.ExpandLess, contentDescription = "Move Up", modifier = Modifier.size(16.dp))
                                         }
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = {
                                                 if (itemOrderIndex < currentItems.size - 1) {
                                                     val copy = currentItems.toMutableList()
@@ -2426,7 +2427,7 @@ private fun McpSubScreen(
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.weight(1f)
                         )
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onClearStatus,
                             modifier = Modifier.size(24.dp)
                         ) {
@@ -3157,7 +3158,7 @@ private fun McpSubScreen(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false)
                 )
-                IconButton(
+                MorphingIconButton(
                     onClick = onClearStatus,
                     modifier = Modifier.size(22.dp)
                 ) {
@@ -4889,7 +4890,7 @@ private fun BackupsSubScreen(
                         singleLine = true,
                         visualTransformation = if (showBackupPasswordText) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
-                            IconButton(onClick = { showBackupPasswordText = !showBackupPasswordText }) {
+                            MorphingIconButton(onClick = { showBackupPasswordText = !showBackupPasswordText }) {
                                 Icon(
                                     imageVector = if (showBackupPasswordText) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                     contentDescription = null,
@@ -4952,7 +4953,7 @@ private fun BackupsSubScreen(
                         placeholder = { Text("/sdcard/Download/agy_chats_backup_....zip") },
                         singleLine = true,
                         trailingIcon = {
-                            IconButton(onClick = { filePickerLauncher.launch("*/*") }) {
+                            MorphingIconButton(onClick = { filePickerLauncher.launch("*/*") }) {
                                 Icon(Icons.Outlined.FolderOpen, contentDescription = "Choose File", tint = QuotaGreen)
                             }
                         },
@@ -4966,7 +4967,7 @@ private fun BackupsSubScreen(
                         singleLine = true,
                         visualTransformation = if (showRestorePasswordText) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
-                            IconButton(onClick = { showRestorePasswordText = !showRestorePasswordText }) {
+                            MorphingIconButton(onClick = { showRestorePasswordText = !showRestorePasswordText }) {
                                 Icon(
                                     imageVector = if (showRestorePasswordText) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                     contentDescription = null,
@@ -5304,7 +5305,7 @@ private fun ProjectsBackupRestoreDialog(
                             )
                         }
                     }
-                    IconButton(onClick = onDismiss) {
+                    MorphingIconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -5684,7 +5685,7 @@ private fun ProjectsBackupRestoreDialog(
                             placeholder = { Text("/sdcard/Download/Antigem/backups/projects_backup_....zip") },
                             singleLine = true,
                             trailingIcon = {
-                                IconButton(onClick = { filePickerLauncher.launch("*/*") }) {
+                                MorphingIconButton(onClick = { filePickerLauncher.launch("*/*") }) {
                                     Icon(Icons.Outlined.FolderOpen, contentDescription = "Choose File", tint = Color(0xFF6F52D8))
                                 }
                             },
@@ -6001,7 +6002,7 @@ private fun ScriptExecutionDialog(
                     }
 
                     if (!isRunning) {
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
                             Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(18.dp))
                         }
                     }
@@ -6468,7 +6469,7 @@ private fun CommandsSubScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(
+                MorphingIconButton(
                     onClick = onRefreshSecurityAndProjects,
                     modifier = Modifier.size(36.dp)
                 ) {
@@ -6598,7 +6599,7 @@ private fun CommandsSubScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(
+            MorphingIconButton(
                 onClick = onRefreshSecurityAndProjects,
                 modifier = Modifier.size(36.dp)
             ) {
@@ -7192,7 +7193,7 @@ private fun CommandsSubScreen(
                                     )
                                 }
 
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { onRemovePermissionRule(rule.rawString) },
                                     modifier = Modifier.size(28.dp)
                                 ) {

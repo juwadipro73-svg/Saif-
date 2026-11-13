@@ -1,5 +1,6 @@
 package com.example.gemini.ui.drawer
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -84,7 +85,7 @@ fun ProfileDetailDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onDismiss,
                         modifier = Modifier.size(28.dp)
                     ) {

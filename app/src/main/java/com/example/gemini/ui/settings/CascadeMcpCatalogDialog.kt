@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -108,7 +109,7 @@ fun CascadeMcpCatalogDialog(
                             )
                         }
                     }
-                    IconButton(onClick = onDismiss) {
+                    MorphingIconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 }
@@ -129,7 +130,7 @@ fun CascadeMcpCatalogDialog(
                     },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = {
+                            MorphingIconButton(onClick = {
                                 searchQuery = ""
                                 onSearch("")
                             }) {
@@ -411,7 +412,7 @@ fun ReadmePreviewDialog(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    IconButton(onClick = onDismiss) {
+                    MorphingIconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Close")
                     }
                 }

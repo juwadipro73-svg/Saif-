@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ContentValues
 import android.content.Context
 import android.os.Build
@@ -134,7 +135,7 @@ fun MarkdownViewerDialog(title: String, markdown: String, fileName: String, onDi
             Column(Modifier.fillMaxSize()) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).padding(start = 8.dp))
-                    IconButton(onClick = { scope.launch { saveToDownloads(context, fileName, markdown) } }) { Icon(Icons.Outlined.Download, "Download") }
+                    MorphingIconButton(onClick = { scope.launch { saveToDownloads(context, fileName, markdown) } }) { Icon(Icons.Outlined.Download, "Download") }
                     TextButton(onClick = onDismiss) { Text("Close") }
                 }
                 HorizontalDivider()

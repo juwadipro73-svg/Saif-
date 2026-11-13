@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -33,7 +34,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -158,7 +158,7 @@ fun StudioAiVideoModal(
                             }
                         }
 
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onDismiss,
                             modifier = Modifier.size(28.dp)
                         ) {

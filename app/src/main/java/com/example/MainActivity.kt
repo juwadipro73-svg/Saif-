@@ -2,6 +2,7 @@
 
 package com.example
 
+import com.example.ui.components.MorphingIconButton
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -293,7 +293,7 @@ class MainActivity : ComponentActivity() {
                                     lineHeight = 16.sp,
                                     modifier = Modifier.weight(1f)
                                 )
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { isAnnouncementDismissed = true },
                                     modifier = Modifier.size(24.dp)
                                 ) {

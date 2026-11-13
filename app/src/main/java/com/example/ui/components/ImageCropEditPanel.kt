@@ -104,7 +104,7 @@ fun ImageCropEditPanel(
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x33FFFFFF)),
                         modifier = Modifier.size(44.dp)
                     ) {
-                        IconButton(onClick = onDismiss) {
+                        MorphingIconButton(onClick = onDismiss) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Cancel",
@@ -134,7 +134,7 @@ fun ImageCropEditPanel(
                         color = Color(0xFF743DD2),
                         modifier = Modifier.size(44.dp)
                     ) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val cropped = cropSquareBitmap(
                                     sourceBitmap = bitmap,
@@ -261,7 +261,7 @@ fun ImageCropEditPanel(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { userZoom = (userZoom - 0.2f).coerceAtLeast(0.5f) },
                                 modifier = Modifier.size(36.dp)
                             ) {
@@ -280,7 +280,7 @@ fun ImageCropEditPanel(
                                 )
                             )
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { userZoom = (userZoom + 0.2f).coerceAtMost(4.0f) },
                                 modifier = Modifier.size(36.dp)
                             ) {

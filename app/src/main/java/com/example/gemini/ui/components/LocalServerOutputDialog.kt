@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.compose.foundation.BorderStroke
@@ -166,7 +167,7 @@ fun LocalServerOutputDialog(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         // Restart / Start Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { LocalServerManager.restartServer(context) },
                             enabled = status !is LocalServerStatus.Stopping,
                             modifier = Modifier.size(34.dp)
@@ -181,7 +182,7 @@ fun LocalServerOutputDialog(
 
                         // Stop Button (Ctrl+C / terminate child processes)
                         if (status is LocalServerStatus.Running || status is LocalServerStatus.Starting) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { LocalServerManager.stopServer() },
                                 modifier = Modifier.size(34.dp)
                             ) {
@@ -195,7 +196,7 @@ fun LocalServerOutputDialog(
                         }
 
                         // Close Dialog Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onDismiss,
                             modifier = Modifier.size(34.dp)
                         ) {

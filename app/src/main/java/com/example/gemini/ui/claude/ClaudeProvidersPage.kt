@@ -1,5 +1,6 @@
 package com.example.gemini.ui.claude
 
+import com.example.ui.components.MorphingIconButton
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -24,7 +25,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -124,8 +124,8 @@ fun ProvidersPage(deps: ClaudeSettingsDeps) {
                     Text(p.base_url, fontSize = 11.sp, fontFamily = FontFamily.Monospace, color = muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     p.api_key_hint?.let { Text("Key $it", fontSize = 11.sp, color = muted) }
                 }
-                IconButton(onClick = { editing = p }) { Icon(Icons.Outlined.Edit, "Edit") }
-                IconButton(onClick = { toDelete = p }) { Icon(Icons.Outlined.Delete, "Remove", tint = QuotaRed.copy(alpha = 0.8f)) }
+                MorphingIconButton(onClick = { editing = p }) { Icon(Icons.Outlined.Edit, "Edit") }
+                MorphingIconButton(onClick = { toDelete = p }) { Icon(Icons.Outlined.Delete, "Remove", tint = QuotaRed.copy(alpha = 0.8f)) }
             }
             Spacer(Modifier.size(6.dp))
             Text("Models (${p.models.size})", fontWeight = FontWeight.SemiBold, fontSize = 12.5.sp)
@@ -135,7 +135,7 @@ fun ProvidersPage(deps: ClaudeSettingsDeps) {
                         Text(m.name?.takeIf { it.isNotBlank() } ?: m.id, fontSize = 13.sp)
                         if (!m.name.isNullOrBlank()) Text(m.id, fontSize = 10.5.sp, fontFamily = FontFamily.Monospace, color = muted)
                     }
-                    IconButton(onClick = { backend.saveProvider(p.copy(models = p.models - m)) }, modifier = Modifier.size(32.dp)) {
+                    MorphingIconButton(onClick = { backend.saveProvider(p.copy(models = p.models - m)) }, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Outlined.Close, "Remove model", modifier = Modifier.size(16.dp))
                     }
                 }

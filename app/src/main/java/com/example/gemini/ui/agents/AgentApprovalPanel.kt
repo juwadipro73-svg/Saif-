@@ -1,5 +1,6 @@
 package com.example.gemini.ui.agents
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +30,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -160,7 +160,7 @@ private fun ApprovalBody(item: ApprovalItem, count: Int, onAllowAll: (() -> Unit
             }
             if (count > 1 && (onAllowAll != null || onDenyAll != null)) {
                 Box {
-                    IconButton(onClick = { overflow = true }, modifier = Modifier.size(32.dp)) {
+                    MorphingIconButton(onClick = { overflow = true }, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Outlined.MoreVert, "More", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
                     }
                     DropdownMenu(expanded = overflow, onDismissRequest = { overflow = false }) {

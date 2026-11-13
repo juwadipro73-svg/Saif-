@@ -241,7 +241,7 @@ fun ConfigureProjectDialog(
                             }
                         }
 
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onDismiss,
                             modifier = Modifier
                                 .size(36.dp)

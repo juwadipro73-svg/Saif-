@@ -1,5 +1,6 @@
 package com.example.gemini.ui.models
 
+import com.example.ui.components.MorphingIconButton
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -486,7 +487,7 @@ private fun CategoryModelsSubView(
                 .padding(vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
+            MorphingIconButton(
                 onClick = onBack,
                 modifier = Modifier.size(32.dp)
             ) {

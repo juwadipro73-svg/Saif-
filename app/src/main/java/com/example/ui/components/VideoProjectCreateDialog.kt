@@ -205,7 +205,7 @@ fun VideoProjectCreateDialog(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { /* Notifications */ },
                                 modifier = Modifier.size(36.dp)
                             ) {
@@ -232,7 +232,7 @@ fun VideoProjectCreateDialog(
                                 )
                             }
                             Spacer(modifier = Modifier.width(6.dp))
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = onDismiss,
                                 modifier = Modifier
                                     .size(34.dp)
@@ -289,7 +289,7 @@ fun VideoProjectCreateDialog(
                             )
                         }
 
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { /* Editor Preferences */ },
                             modifier = Modifier
                                 .size(42.dp)
@@ -643,7 +643,7 @@ fun VideoProjectCreateDialog(
                                                 )
                                             }
                                             Spacer(modifier = Modifier.width(6.dp))
-                                            IconButton(
+                                            MorphingIconButton(
                                                 onClick = {
                                                     com.example.util.ProjectDataManager.duplicateVideoProject(context, draft.projectName)
                                                     savedProjectsList = com.example.util.ProjectDataManager.getAllVideoProjects(context)
@@ -657,7 +657,7 @@ fun VideoProjectCreateDialog(
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                             }
-                                            IconButton(
+                                            MorphingIconButton(
                                                 onClick = {
                                                     com.example.util.ProjectDataManager.deleteVideoProject(context, draft.projectName)
                                                     savedProjectsList = com.example.util.ProjectDataManager.getAllVideoProjects(context)
@@ -1013,7 +1013,7 @@ fun VideoProjectCreateDialog(
                                     }
                                 }
 
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showWorkflowChoiceModal = false },
                                     modifier = Modifier
                                         .size(30.dp)
@@ -1273,7 +1273,7 @@ fun VideoProjectCreateDialog(
                                     }
                                 }
 
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showPromptDirectorModal = false },
                                     modifier = Modifier
                                         .size(30.dp)

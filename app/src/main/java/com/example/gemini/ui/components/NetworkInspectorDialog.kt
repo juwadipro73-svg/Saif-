@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -136,7 +137,7 @@ fun NetworkInspectorDialog(
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { NetworkInspectorManager.clearLogs() },
                             modifier = Modifier.size(34.dp)
                         ) {
@@ -148,7 +149,7 @@ fun NetworkInspectorDialog(
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onDismiss,
                             modifier = Modifier.size(34.dp)
                         ) {
@@ -180,7 +181,7 @@ fun NetworkInspectorDialog(
                         },
                         trailingIcon = {
                             if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { searchQuery = "" }, modifier = Modifier.size(20.dp)) {
+                                MorphingIconButton(onClick = { searchQuery = "" }, modifier = Modifier.size(20.dp)) {
                                     Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(14.dp))
                                 }
                             }
@@ -479,7 +480,7 @@ private fun NetworkLogDetailDialog(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(18.dp))
                     }
                 }

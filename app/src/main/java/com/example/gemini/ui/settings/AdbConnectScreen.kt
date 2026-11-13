@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -75,7 +76,7 @@ fun AdbConnectScreen(cardBg: Color, cardBorder: BorderStroke) {
             ) {
                 Row(Modifier.fillMaxWidth().padding(start = 14.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(msg, fontSize = 12.5.sp, color = if (state.isError) MaterialTheme.colorScheme.error else QuotaGreen, modifier = Modifier.weight(1f))
-                    IconButton(onClick = AdbConnectManager::clearMessage) { Icon(Icons.Default.Close, "Dismiss", Modifier.size(18.dp)) }
+                    MorphingIconButton(onClick = AdbConnectManager::clearMessage) { Icon(Icons.Default.Close, "Dismiss", Modifier.size(18.dp)) }
                 }
             }
         }
@@ -208,7 +209,7 @@ fun AdbConnectScreen(cardBg: Color, cardBorder: BorderStroke) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(device.serial, fontFamily = FontFamily.Monospace, fontSize = 12.5.sp, modifier = Modifier.weight(1f))
                         Pill(device.state, if (device.state == "device") QuotaGreen else Amber)
-                        IconButton(onClick = { AdbConnectManager.disconnect(device.serial) }) {
+                        MorphingIconButton(onClick = { AdbConnectManager.disconnect(device.serial) }) {
                             Icon(Icons.Outlined.LinkOff, "Disconnect", Modifier.size(18.dp))
                         }
                     }
@@ -250,7 +251,7 @@ private fun StatusCard(state: AdbConnectManager.State, cardBg: Color, cardBorder
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
             if (state.refreshing) CircularProgressIndicator(Modifier.padding(12.dp).size(24.dp), strokeWidth = 2.dp)
-            else IconButton(onClick = { AdbConnectManager.refresh() }) { Icon(Icons.Outlined.Refresh, "Refresh") }
+            else MorphingIconButton(onClick = { AdbConnectManager.refresh() }) { Icon(Icons.Outlined.Refresh, "Refresh") }
         }
     }
 }

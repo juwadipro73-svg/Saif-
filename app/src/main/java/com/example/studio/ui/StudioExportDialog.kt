@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -29,7 +30,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -120,7 +120,7 @@ fun StudioExportDialog(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             exportJob?.cancel()
                             onDismiss()

@@ -1,5 +1,6 @@
 package com.example.gemini.ui.drawer
 
+import com.example.ui.components.MorphingIconButton
 import com.example.gemini.ui.components.accent
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -762,7 +763,7 @@ fun ChatHistoryDrawer(
                                 }
                             )
                             if (searchQuery.isNotEmpty()) {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         searchQuery = ""
                                         onSearchQueryChange("")
@@ -778,7 +779,7 @@ fun ChatHistoryDrawer(
                                 }
                             }
                             // Deep search modal button
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { showFullSearchDialog = true },
                                 modifier = Modifier.size(24.dp)
                             ) {
@@ -1633,7 +1634,7 @@ private fun ChatHistoryItemRow(
         }
 
         Box {
-            IconButton(
+            MorphingIconButton(
                 onClick = { menuExpanded = true },
                 modifier = Modifier.size(26.dp)
             ) {
@@ -1920,7 +1921,7 @@ fun SearchChatsDialog(
                         }
                     }
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onDismiss,
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -1985,7 +1986,7 @@ fun SearchChatsDialog(
                             }
                         )
                         if (query.isNotEmpty()) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { query = "" },
                                 modifier = Modifier.size(24.dp)
                             ) {

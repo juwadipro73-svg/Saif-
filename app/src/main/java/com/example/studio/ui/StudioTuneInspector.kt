@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +28,6 @@ import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -97,7 +97,7 @@ fun StudioTuneInspector(
                 )
             }
 
-            IconButton(onClick = onClose, modifier = Modifier.size(28.dp)) {
+            MorphingIconButton(onClick = onClose, modifier = Modifier.size(28.dp)) {
                 Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFFD6D3C7), modifier = Modifier.size(18.dp))
             }
         }

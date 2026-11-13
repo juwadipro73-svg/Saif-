@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FileDownload
@@ -104,7 +103,7 @@ fun MarkdownRenderer(
                     modifier = Modifier.fillMaxSize()
                 )
                 
-                IconButton(
+                MorphingIconButton(
                     onClick = { selectedImageUrl = null },
                     modifier = Modifier
                         .align(Alignment.TopEnd)

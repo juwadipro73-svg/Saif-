@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -132,7 +133,7 @@ fun ProjectPickerDialog(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (onRefresh != null) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = onRefresh,
                                 modifier = Modifier.size(32.dp)
                             ) {
@@ -145,7 +146,7 @@ fun ProjectPickerDialog(
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                         }
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onDismiss,
                             modifier = Modifier.size(32.dp)
                         ) {

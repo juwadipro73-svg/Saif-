@@ -32,8 +32,11 @@ class BuildService : Service() {
         @Volatile
         var isBuildRunning = false
             private set
+        private val taskLock = Any()
+        private var activeTaskCount = 0
 
         fun start(context: Context, appName: String, initialStatus: String) {
+            synchronized(taskLock) { activeTaskCount++ }
             val intent = Intent(context, BuildService::class.java).apply {
                 putExtra(EXTRA_PROJECT_NAME, appName)
                 putExtra(EXTRA_STATUS, initialStatus)
@@ -54,6 +57,11 @@ class BuildService : Service() {
 
         /** Ends the foreground build service and alerts once only when the app is no longer visible. */
         fun finish(context: Context, succeeded: Boolean) {
+            val shouldFinish = synchronized(taskLock) {
+                if (activeTaskCount > 0) activeTaskCount--
+                activeTaskCount == 0
+            }
+            if (!shouldFinish) return
             val app = context.applicationContext
             app.stopService(Intent(app, BuildService::class.java))
             isBuildRunning = false

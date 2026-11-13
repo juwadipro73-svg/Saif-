@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -60,7 +61,7 @@ fun DaemonLogsDialog(
                     Text("Go Daemon Status & Logs", style = MaterialTheme.typography.titleMedium)
                 }
 
-                IconButton(onClick = onDismiss) {
+                MorphingIconButton(onClick = onDismiss) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
                 }
             }

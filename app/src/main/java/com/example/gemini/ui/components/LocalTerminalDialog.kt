@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Context
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -366,7 +367,7 @@ fun LocalTerminalContent(
                             )
 
                             if (onToggleMaximize != null) {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = onToggleMaximize,
                                     modifier = Modifier.size(30.dp)
                                 ) {
@@ -381,7 +382,7 @@ fun LocalTerminalContent(
                             }
 
                             if (onRetry != null) {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = onRetry,
                                     modifier = Modifier.size(30.dp)
                                 ) {
@@ -395,7 +396,7 @@ fun LocalTerminalContent(
                                 Spacer(modifier = Modifier.width(2.dp))
                             }
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = onClose,
                                 modifier = Modifier.size(30.dp)
                             ) {
@@ -831,7 +832,7 @@ fun LocalTerminalContent(
                                             fontSize = 13.sp,
                                             modifier = Modifier.weight(1f)
                                         )
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = {
                                                 sessionToClose = sess
                                                 isTabsMenuExpanded = false
@@ -900,7 +901,7 @@ fun LocalTerminalContent(
                     }
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = { showAiCommandHelper = true },
                     modifier = Modifier.size(26.dp)
                 ) {
@@ -921,7 +922,7 @@ fun LocalTerminalContent(
                 Spacer(modifier = Modifier.width(2.dp))
 
                 // Close / Hide Button
-                IconButton(
+                MorphingIconButton(
                     onClick = onClose,
                     modifier = Modifier.size(24.dp)
                 ) {

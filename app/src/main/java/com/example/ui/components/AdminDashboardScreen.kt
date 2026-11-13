@@ -569,6 +569,11 @@ fun LiquidGlassIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val cornerRadius by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (isPressed) 12.dp else size / 2,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "btn_corner"
+    )
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.94f else 1f,
         animationSpec = spring(
@@ -582,9 +587,9 @@ fun LiquidGlassIconButton(
         modifier = modifier
             .size(size)
             .scale(scale)
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(cornerRadius))
             .background(containerColor)
-            .border(BorderStroke(1.dp, borderColor), shape = CircleShape)
+            .border(BorderStroke(1.dp, borderColor), shape = RoundedCornerShape(cornerRadius))
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -1089,7 +1094,7 @@ private fun AdminUsersTab(
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color(0xFFB3A0F2)) },
             trailingIcon = {
                 if (searchQuery.isNotBlank()) {
-                    IconButton(onClick = { searchQuery = "" }) {
+                    MorphingIconButton(onClick = { searchQuery = "" }) {
                         Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color(0xFFA8A59B))
                     }
                 }
@@ -1719,7 +1724,7 @@ private fun LiquidUserManagementCard(
                 }
 
                 // Edit Custom Limits
-                IconButton(
+                MorphingIconButton(
                     onClick = onEditLimits,
                     enabled = !isProcessing,
                     modifier = Modifier
@@ -1737,7 +1742,7 @@ private fun LiquidUserManagementCard(
                 }
 
                 // Reset Quota
-                IconButton(
+                MorphingIconButton(
                     onClick = onResetQuota,
                     enabled = !isProcessing,
                     modifier = Modifier
@@ -1755,7 +1760,7 @@ private fun LiquidUserManagementCard(
                 }
 
                 // Delete
-                IconButton(
+                MorphingIconButton(
                     onClick = onDeleteClick,
                     enabled = !isProcessing,
                     modifier = Modifier
@@ -2153,7 +2158,7 @@ private fun AdminApiGatewayTab(
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
-                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    MorphingIconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
                             imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = "Toggle Visibility",
@@ -2494,7 +2499,7 @@ private fun LiquidQuotaSelectorCard(
 
                 // Value Stepper Controls
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { if (currentValue > 1) onValueChange(currentValue - 1) },
                         modifier = Modifier
                             .size(26.dp)
@@ -2520,7 +2525,7 @@ private fun LiquidQuotaSelectorCard(
                         )
                     }
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { onValueChange(currentValue + 1) },
                         modifier = Modifier
                             .size(26.dp)

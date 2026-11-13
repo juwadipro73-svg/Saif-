@@ -1,5 +1,7 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
+import com.example.ui.components.MorphingFilledIconButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -211,7 +213,7 @@ fun FloatingVideoPlayerOverlay(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 // Collapse Button
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { isExpanded = false },
                                     modifier = Modifier.size(24.dp)
                                 ) {
@@ -224,7 +226,7 @@ fun FloatingVideoPlayerOverlay(
                                 }
 
                                 // Close / Stop Playback Button
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         isExpanded = false
                                         YouTubeMediaSessionManager.release()
@@ -264,7 +266,7 @@ fun FloatingVideoPlayerOverlay(
                             Spacer(modifier = Modifier.width(10.dp))
 
                             // Play / Pause Toggle
-                            FilledIconButton(
+                            MorphingFilledIconButton(
                                 onClick = {
                                     if (activeState.isPlaying) {
                                         YouTubeMediaSessionManager.pause()

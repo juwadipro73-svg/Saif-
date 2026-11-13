@@ -1,5 +1,6 @@
 package com.example.gemini.ui.agents
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -35,7 +36,6 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -159,7 +159,7 @@ fun AgentQuestionPanel(
                         }
                     }
                 }
-                IconButton(onClick = onCancel, modifier = Modifier.size(30.dp)) {
+                MorphingIconButton(onClick = onCancel, modifier = Modifier.size(30.dp)) {
                     Icon(Icons.Outlined.Close, "Dismiss question", tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f), modifier = Modifier.size(18.dp))
                 }
             }

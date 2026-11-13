@@ -1,5 +1,6 @@
 package com.example.gemini.ui.claude
 
+import com.example.ui.components.MorphingIconButton
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -54,7 +55,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -232,7 +232,7 @@ private fun AccountPage(deps: ClaudeSettingsDeps) {
     ClaudeCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Claude Code CLI", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            IconButton(onClick = { deps.account.refreshStatus() }) { Icon(Icons.Outlined.Refresh, "Refresh") }
+            MorphingIconButton(onClick = { deps.account.refreshStatus() }) { Icon(Icons.Outlined.Refresh, "Refresh") }
         }
         when (state) {
             ClaudeStatus.CHECKING -> Text("Checking…", fontSize = 12.5.sp)
@@ -318,7 +318,7 @@ private fun AccountPage(deps: ClaudeSettingsDeps) {
                     )
                 }
                 if (usageRefreshing) CircularProgressIndicator(Modifier.padding(12.dp).size(20.dp), strokeWidth = 2.dp, color = ClaudeAccent)
-                else IconButton(onClick = { deps.account.refreshUsage(force = true) }) { Icon(Icons.Outlined.Refresh, "Refresh usage") }
+                else MorphingIconButton(onClick = { deps.account.refreshUsage(force = true) }) { Icon(Icons.Outlined.Refresh, "Refresh usage") }
             }
             usageError?.let { Text("Could not update: $it", fontSize = 12.sp, color = QuotaRed) }
             val u = usage ?: return@ClaudeCard
@@ -507,7 +507,7 @@ private fun PermissionsPage(deps: ClaudeSettingsDeps) {
             rules.forEach { rule ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(rule, fontFamily = FontFamily.Monospace, fontSize = 12.sp, modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    IconButton(onClick = { deps.config.removeRule(b, rule) }) { Icon(Icons.Outlined.Delete, "Remove", tint = QuotaRed.copy(alpha = 0.8f)) }
+                    MorphingIconButton(onClick = { deps.config.removeRule(b, rule) }) { Icon(Icons.Outlined.Delete, "Remove", tint = QuotaRed.copy(alpha = 0.8f)) }
                 }
             }
         }
@@ -536,7 +536,7 @@ private fun McpPage(deps: ClaudeSettingsDeps) {
             Hint(if (cwd != null) "Includes servers of the open project ($cwd)." else "Open a project to also see its project-scoped servers.")
         }
         if (loading) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = ClaudeAccent)
-        else IconButton(onClick = { deps.config.loadMcp(cwd) }) { Icon(Icons.Outlined.Refresh, "Refresh") }
+        else MorphingIconButton(onClick = { deps.config.loadMcp(cwd) }) { Icon(Icons.Outlined.Refresh, "Refresh") }
     }
 
     // quick presets, like the Antigravity MCP screen
@@ -672,7 +672,7 @@ private fun McpPage(deps: ClaudeSettingsDeps) {
                 }
                 when {
                     op != null -> CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = ClaudeAccent)
-                    srv.scope in setOf("user", "project", "local") -> IconButton(onClick = { toDelete = srv }) {
+                    srv.scope in setOf("user", "project", "local") -> MorphingIconButton(onClick = { toDelete = srv }) {
                         Icon(Icons.Outlined.Delete, "Remove", tint = QuotaRed.copy(alpha = 0.8f))
                     }
                 }
@@ -990,10 +990,10 @@ private fun PluginsPage(deps: ClaudeSettingsDeps) {
                                 }
                                 if (op != null) PluginProgress(op)
                                 else {
-                                    IconButton(onClick = { deps.config.pluginAction("marketplace-update", ClaudePluginAction(name = m.name)) }) {
+                                    MorphingIconButton(onClick = { deps.config.pluginAction("marketplace-update", ClaudePluginAction(name = m.name)) }) {
                                         Icon(Icons.Outlined.Refresh, "Refresh catalog")
                                     }
-                                    IconButton(onClick = { deps.config.pluginAction("marketplace-remove", ClaudePluginAction(name = m.name)) }) {
+                                    MorphingIconButton(onClick = { deps.config.pluginAction("marketplace-remove", ClaudePluginAction(name = m.name)) }) {
                                         Icon(Icons.Outlined.Delete, "Remove", tint = QuotaRed.copy(alpha = 0.8f))
                                     }
                                 }
@@ -1086,7 +1086,7 @@ private fun MemoryPage(deps: ClaudeSettingsDeps) {
                 SectionTitle("Claude's memory · $projectName")
                 Hint("Notes Claude saved by itself while working in this project. This is what Claude checks when you ask what it remembers.")
             }
-            IconButton(onClick = { deps.config.loadAutoMemory(cwd) }) { Icon(Icons.Outlined.Refresh, "Refresh") }
+            MorphingIconButton(onClick = { deps.config.loadAutoMemory(cwd) }) { Icon(Icons.Outlined.Refresh, "Refresh") }
         }
         val a = auto
         when {
@@ -1106,7 +1106,7 @@ private fun MemoryPage(deps: ClaudeSettingsDeps) {
                             Text(f.name, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, fontFamily = FontFamily.Monospace)
                             Hint(java.text.SimpleDateFormat("d MMM yyyy, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(f.modified)))
                         }
-                        IconButton(onClick = { noteToDelete = f.name }) { Icon(Icons.Outlined.Delete, "Delete", tint = QuotaRed.copy(alpha = 0.8f)) }
+                        MorphingIconButton(onClick = { noteToDelete = f.name }) { Icon(Icons.Outlined.Delete, "Delete", tint = QuotaRed.copy(alpha = 0.8f)) }
                     }
                     if (open) {
                         Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), modifier = Modifier.fillMaxWidth()) {

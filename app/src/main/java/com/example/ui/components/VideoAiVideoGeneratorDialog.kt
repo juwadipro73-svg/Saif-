@@ -124,7 +124,7 @@ fun VideoAiVideoGeneratorDialog(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onDismiss,
                         modifier = Modifier
                             .size(36.dp)

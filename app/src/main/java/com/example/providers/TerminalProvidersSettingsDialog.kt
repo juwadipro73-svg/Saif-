@@ -1,5 +1,6 @@
 package com.example.providers
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -237,7 +238,7 @@ fun TerminalProvidersSettingsDialog(
                             Spacer(Modifier.width(4.dp))
                             Text("Add Provider", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
-                        IconButton(onClick = onDismiss) {
+                        MorphingIconButton(onClick = onDismiss) {
                             Icon(Icons.Default.Close, contentDescription = "Close", tint = colors.textPrimary)
                         }
                     }

@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -43,7 +44,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -119,7 +119,7 @@ fun SaifDirectorScreen(controller: DirectorController, onClose: () -> Unit, auto
         // Header — Round 10: premium gradient banner with the SAIF AI • AI STUDIO badge
         Box(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color(0xFF2A1650), Color(0xFF12081F), Bg)))) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back to timeline", tint = Color.White) }
+                MorphingIconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back to timeline", tint = Color.White) }
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(shape = RoundedCornerShape(6.dp), color = Purple.copy(alpha = 0.25f)) {
@@ -131,7 +131,7 @@ fun SaifDirectorScreen(controller: DirectorController, onClose: () -> Unit, auto
                     Text(wf.subtitle, color = Color(0xFFA8A59B), fontSize = 10.sp, maxLines = 1)
                 }
                 if (wf == DirectorWorkflow.ZERO_TO_VIDEO) TextButton(onClick = { scrollScope.launch { listState.animateScrollToItem(0) } }) { Text("Brief", color = Cyan, fontSize = 11.sp) }
-                IconButton(onClick = { showSettings = true }) { Icon(Icons.Default.Settings, "Research, asset sources & Flow AI", tint = Color(0xFFD6D3C7)) }
+                MorphingIconButton(onClick = { showSettings = true }) { Icon(Icons.Default.Settings, "Research, asset sources & Flow AI", tint = Color(0xFFD6D3C7)) }
             }
         }
 
@@ -224,7 +224,7 @@ fun SaifDirectorScreen(controller: DirectorController, onClose: () -> Unit, auto
             OutlinedTextField(value = input, onValueChange = { input = it }, modifier = Modifier.weight(1f), enabled = !ui.working && !checkingMusic,
                 placeholder = { Text(if (ui.script.isNotBlank() && !ui.scriptApproved) "Describe script changes…" else if (ui.readyToApply || ui.applied) "e.g. “Scene 2: make it a bar chart”" else "Message the AI Director…", fontSize = 13.sp) },
                 maxLines = 5, shape = RoundedCornerShape(16.dp))
-            IconButton(onClick = { if (input.isNotBlank()) { controller.send(input); input = "" } }, enabled = !ui.working && !checkingMusic) { Icon(Icons.AutoMirrored.Filled.Send, "Send", tint = Cyan) }
+            MorphingIconButton(onClick = { if (input.isNotBlank()) { controller.send(input); input = "" } }, enabled = !ui.working && !checkingMusic) { Icon(Icons.AutoMirrored.Filled.Send, "Send", tint = Cyan) }
         }
     }
     if (showSettings) KeysDialog(onDismiss = { showSettings = false })

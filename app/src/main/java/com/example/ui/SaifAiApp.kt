@@ -1,5 +1,6 @@
 package com.example.ui
-import androidx.compose.ui.platform.LocalContext
+
+import com.example.ui.components.MorphingIconButtonimport androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import java.io.File
 
@@ -671,7 +672,7 @@ fun SaifAiApp(
                                                     fontSize = 9.sp, color = com.example.ui.theme.SaifTheme.colors.textPrimary)
                                             }
                                         }
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = { viewModel.removeAttachment(uri) },
                                             modifier = Modifier
                                                 .align(Alignment.TopEnd)
@@ -1014,7 +1015,7 @@ fun SaifAiApp(
                     modifier = Modifier.fillMaxSize(),
                     startInSignUpMode = true
                 )
-                IconButton(
+                MorphingIconButton(
                     onClick = { showAccountUpgrade = false; accountUpgradeSourceUid = null },
                     modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(10.dp)
                 ) {

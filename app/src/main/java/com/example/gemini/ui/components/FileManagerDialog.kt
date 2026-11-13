@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
@@ -217,7 +218,7 @@ fun FileManagerDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Back / Up Navigation Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { handleNavigateBack() },
                             modifier = Modifier.size(38.dp)
                         ) {
@@ -286,7 +287,7 @@ fun FileManagerDialog(
                         }
 
                         // Refresh Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { refreshDir() },
                             enabled = !isLoading,
                             modifier = Modifier.size(38.dp)
@@ -300,7 +301,7 @@ fun FileManagerDialog(
                         }
 
                         // Close Dialog Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onDismiss,
                             modifier = Modifier.size(38.dp)
                         ) {
@@ -476,7 +477,7 @@ fun FileManagerDialog(
                                         Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(text = errorMessage ?: "", fontSize = 12.sp, color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
-                                        IconButton(onClick = { errorMessage = null }, modifier = Modifier.size(20.dp)) {
+                                        MorphingIconButton(onClick = { errorMessage = null }, modifier = Modifier.size(20.dp)) {
                                             Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(12.dp))
                                         }
                                     }
@@ -547,7 +548,7 @@ fun FileManagerDialog(
                                             }
                                         }
 
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = {
                                                 selectedItem = item
                                                 showItemOptionsSheet = item
@@ -631,7 +632,7 @@ fun FileManagerDialog(
                                     ) {
                                         Text("Paste Here", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                     }
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = { FileManagerStateHolder.clipboardPath = null },
                                         modifier = Modifier.size(24.dp)
                                     ) {

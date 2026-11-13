@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +21,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -72,12 +72,12 @@ fun StudioTransportBar(
             horizontalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             // Jump Start
-            IconButton(onClick = { clock.jumpStart() }, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = { clock.jumpStart() }, modifier = Modifier.size(32.dp)) {
                 Icon(Icons.Default.FirstPage, contentDescription = "Jump Start", tint = Color.White, modifier = Modifier.size(18.dp))
             }
 
             // Step -1s
-            IconButton(onClick = { clock.stepSeconds(-1f) }, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = { clock.stepSeconds(-1f) }, modifier = Modifier.size(32.dp)) {
                 Icon(Icons.Default.FastRewind, contentDescription = "-1s", tint = Color(0xFFD0BEEF), modifier = Modifier.size(16.dp))
             }
 
@@ -99,12 +99,12 @@ fun StudioTransportBar(
             }
 
             // Step +1s
-            IconButton(onClick = { clock.stepSeconds(1f) }, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = { clock.stepSeconds(1f) }, modifier = Modifier.size(32.dp)) {
                 Icon(Icons.Default.FastForward, contentDescription = "+1s", tint = Color(0xFFD0BEEF), modifier = Modifier.size(16.dp))
             }
 
             // Jump End
-            IconButton(onClick = { clock.jumpEnd() }, modifier = Modifier.size(32.dp)) {
+            MorphingIconButton(onClick = { clock.jumpEnd() }, modifier = Modifier.size(32.dp)) {
                 Icon(Icons.AutoMirrored.Filled.LastPage, contentDescription = "Jump End", tint = Color.White, modifier = Modifier.size(18.dp))
             }
         }
@@ -115,7 +115,7 @@ fun StudioTransportBar(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             // Loop Toggle
-            IconButton(onClick = { clock.toggleLoop() }, modifier = Modifier.size(28.dp)) {
+            MorphingIconButton(onClick = { clock.toggleLoop() }, modifier = Modifier.size(28.dp)) {
                 Icon(
                     imageVector = Icons.Default.Repeat,
                     contentDescription = "Loop",

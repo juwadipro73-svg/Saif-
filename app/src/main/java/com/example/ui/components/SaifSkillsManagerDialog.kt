@@ -93,7 +93,7 @@ fun SaifSkillsManagerDialog(
                             color = SaifTheme.colors.textSecondary
                         )
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = SaifTheme.colors.textSecondary)
                     }
                 }
@@ -253,7 +253,7 @@ fun SaifSkillsManagerDialog(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                     }
-                                    IconButton(onClick = { SavedAiSkills.delete(skill.name) }) {
+                                    MorphingIconButton(onClick = { SavedAiSkills.delete(skill.name) }) {
                                         Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color(0xFFEF4444))
                                     }
                                 }

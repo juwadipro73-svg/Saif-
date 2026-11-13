@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Context
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -165,7 +166,7 @@ fun IdeExecutionRunnerSheet(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     // Re-run / Restart
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             closeWithChildren(ptySession)
                             sessionKey = UUID.randomUUID().toString()
@@ -181,7 +182,7 @@ fun IdeExecutionRunnerSheet(
                     }
 
                     // Stop / Interrupt (Ctrl+C)
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             if (!isExited) {
                                 ptySession.write("\u0003")
@@ -200,7 +201,7 @@ fun IdeExecutionRunnerSheet(
                     }
 
                     // Clear Screen
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             try {
                                 ptySession.terminalSession.reset()
@@ -218,7 +219,7 @@ fun IdeExecutionRunnerSheet(
                     }
 
                     // Close
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onClose,
                         modifier = Modifier.size(32.dp)
                     ) {

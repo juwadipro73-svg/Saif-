@@ -26,7 +26,6 @@ import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -346,7 +345,7 @@ fun SaifHeader(
                         label = "ThemeRotation"
                     )
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onToggleTheme,
                         interactionSource = themeInteractionSource,
                         modifier = Modifier
@@ -386,7 +385,7 @@ fun SaifHeader(
                         label = "SettingsRotation"
                     )
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onOpenSettings,
                         interactionSource = settingsInteraction,
                         modifier = Modifier

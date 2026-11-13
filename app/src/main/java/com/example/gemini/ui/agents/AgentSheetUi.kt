@@ -1,5 +1,6 @@
 package com.example.gemini.ui.agents
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -67,7 +67,7 @@ fun AgentSheetHeader(
                 rememberInfiniteTransition(label = "sheet_refresh")
                     .animateFloat(0f, 360f, infiniteRepeatable(tween(800, easing = LinearEasing), RepeatMode.Restart), label = "sheet_refresh_angle").value
             } else 0f
-            IconButton(onClick = onRefresh, enabled = !refreshing, modifier = Modifier.size(38.dp)) {
+            MorphingIconButton(onClick = onRefresh, enabled = !refreshing, modifier = Modifier.size(38.dp)) {
                 Icon(Icons.Outlined.Refresh, "Refresh", tint = agent.accent(), modifier = Modifier.size(20.dp).rotate(angle))
             }
         }

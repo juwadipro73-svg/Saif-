@@ -231,7 +231,7 @@ fun GitHubConnectDialog(
                             color = SaifTheme.colors.textSecondary
                         )
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
@@ -372,7 +372,7 @@ fun GitHubConnectDialog(
                                     singleLine = true,
                                     visualTransformation = if (showTokenPlain) VisualTransformation.None else PasswordVisualTransformation(),
                                     trailingIcon = {
-                                        IconButton(onClick = { showTokenPlain = !showTokenPlain }) {
+                                        MorphingIconButton(onClick = { showTokenPlain = !showTokenPlain }) {
                                             Icon(
                                                 imageVector = if (showTokenPlain) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
                                                 contentDescription = "Toggle token visibility"
@@ -574,7 +574,7 @@ fun GitHubConnectDialog(
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.weight(1f)
                         )
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { scope.launch { GitHubIntegrationManager.refreshRepositories(context) } },
                             enabled = !state.isBusy
                         ) {

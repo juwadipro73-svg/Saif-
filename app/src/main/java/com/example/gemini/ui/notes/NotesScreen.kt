@@ -1,5 +1,6 @@
 package com.example.gemini.ui.notes
 
+import com.example.ui.components.MorphingIconButton
 import android.text.format.DateUtils
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -169,7 +170,7 @@ private fun NotesList(
                     Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { if (searching) { searching = false; query = "" } else onClose() }) {
+                    MorphingIconButton(onClick = { if (searching) { searching = false; query = "" } else onClose() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                     if (searching) {
@@ -182,10 +183,10 @@ private fun NotesList(
                             singleLine = true,
                             modifier = Modifier.weight(1f).focusRequester(searchFocus)
                         )
-                        if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Outlined.Close, contentDescription = "Clear search") }
+                        if (query.isNotEmpty()) MorphingIconButton(onClick = { query = "" }) { Icon(Icons.Outlined.Close, contentDescription = "Clear search") }
                     } else {
                         Text("Notes", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f).padding(start = 4.dp))
-                        IconButton(onClick = { searching = true }) { Icon(Icons.Outlined.Search, contentDescription = "Search") }
+                        MorphingIconButton(onClick = { searching = true }) { Icon(Icons.Outlined.Search, contentDescription = "Search") }
                     }
                 }
                 Row(
@@ -372,9 +373,9 @@ private fun NoteEditor(note: Note, onBack: () -> Unit, onDelete: () -> Unit) {
                 Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 4.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                MorphingIconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { NotesRepository.update(id) { it.copy(pinned = !it.pinned) } }) {
+                MorphingIconButton(onClick = { NotesRepository.update(id) { it.copy(pinned = !it.pinned) } }) {
                     Icon(
                         Icons.Outlined.PushPin,
                         contentDescription = if (note.pinned) "Unpin" else "Pin",
@@ -382,7 +383,7 @@ private fun NoteEditor(note: Note, onBack: () -> Unit, onDelete: () -> Unit) {
                     )
                 }
                 Box {
-                    IconButton(onClick = { showMenu = true }) { Icon(Icons.Outlined.MoreVert, contentDescription = "More") }
+                    MorphingIconButton(onClick = { showMenu = true }) { Icon(Icons.Outlined.MoreVert, contentDescription = "More") }
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         if (note.kind == NoteKind.TODO) {
                             DropdownMenuItem(
@@ -544,7 +545,7 @@ private fun TodoRow(
             onImeAction = onNext,
             modifier = Modifier.weight(1f).focusRequester(focusRequester)
         )
-        IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
+        MorphingIconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
             Icon(Icons.Outlined.Close, contentDescription = "Remove item", tint = muted, modifier = Modifier.size(18.dp))
         }
     }

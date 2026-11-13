@@ -1,5 +1,6 @@
 package com.example.agents
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -103,7 +104,7 @@ fun SaifAgentsManagerDialog(
                             Spacer(Modifier.width(4.dp))
                             Text("New Agent", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
-                        IconButton(onClick = onDismiss) {
+                        MorphingIconButton(onClick = onDismiss) {
                             Icon(Icons.Default.Close, contentDescription = "Close", tint = colors.textPrimary)
                         }
                     }

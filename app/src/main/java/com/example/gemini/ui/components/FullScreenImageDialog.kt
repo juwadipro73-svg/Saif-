@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -165,7 +166,7 @@ fun FullScreenImageDialog(
                     .align(Alignment.TopCenter),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
+                MorphingIconButton(
                     onClick = onDismiss,
                     modifier = Modifier
                         .size(38.dp)
@@ -192,7 +193,7 @@ fun FullScreenImageDialog(
                 )
 
                 if (scale != 1f) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             scale = 1f
                             offset = Offset.Zero
@@ -212,7 +213,7 @@ fun FullScreenImageDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         ImageDownloadHelper.downloadImage(
                             context = context,

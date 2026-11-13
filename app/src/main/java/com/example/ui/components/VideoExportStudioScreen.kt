@@ -93,7 +93,7 @@ fun VideoExportStudioScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onBack,
                         modifier = Modifier
                             .size(38.dp)
@@ -117,10 +117,10 @@ fun VideoExportStudioScreen(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = {}, modifier = Modifier.size(34.dp)) {
+                    MorphingIconButton(onClick = {}, modifier = Modifier.size(34.dp)) {
                         Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, tint = Color(0xFFD6D3C7), modifier = Modifier.size(18.dp))
                     }
-                    IconButton(onClick = {}, modifier = Modifier.size(34.dp)) {
+                    MorphingIconButton(onClick = {}, modifier = Modifier.size(34.dp)) {
                         Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = null, tint = Color(0xFFD6D3C7), modifier = Modifier.size(18.dp))
                     }
                 }

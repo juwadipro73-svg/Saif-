@@ -1,5 +1,6 @@
 package com.example.gemini.ui.settings
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -57,8 +58,8 @@ fun PluginRepositoriesTab(busy: Boolean, runOperation: (suspend () -> String?) -
                     Text("Host your own repository", style = MaterialTheme.typography.titleSmall)
                     Text("How to lay out a GitHub repo and its ${PluginRepositories.INDEX}", style = MaterialTheme.typography.bodySmall)
                 }
-                IconButton(onClick = { guide = runCatching { readBundledGuide(context) }.getOrElse { "Guide not found: ${it.message}" } }) { Icon(Icons.Outlined.Visibility, "View guide") }
-                IconButton(onClick = { scope.launch { saveToDownloads(context, "antigem-plugin-repository.md", readBundledGuide(context)) } }) { Icon(Icons.Outlined.Download, "Download guide") }
+                MorphingIconButton(onClick = { guide = runCatching { readBundledGuide(context) }.getOrElse { "Guide not found: ${it.message}" } }) { Icon(Icons.Outlined.Visibility, "View guide") }
+                MorphingIconButton(onClick = { scope.launch { saveToDownloads(context, "antigem-plugin-repository.md", readBundledGuide(context)) } }) { Icon(Icons.Outlined.Download, "Download guide") }
             }
         }
         Card(Modifier.fillMaxWidth()) {
@@ -67,7 +68,7 @@ fun PluginRepositoriesTab(busy: Boolean, runOperation: (suspend () -> String?) -
                     Text("Plugin SDK for PC", style = MaterialTheme.typography.titleSmall)
                     Text("All plugin docs and examples as a ZIP. Copy it to your PC to build plugins there; start with pc-development.md.", style = MaterialTheme.typography.bodySmall)
                 }
-                IconButton(onClick = { scope.launch { saveToDownloads(context, "antigem-plugin-sdk.zip", bundledSdkZip(context), "application/zip") } }) { Icon(Icons.Outlined.FolderZip, "Download plugin SDK ZIP") }
+                MorphingIconButton(onClick = { scope.launch { saveToDownloads(context, "antigem-plugin-sdk.zip", bundledSdkZip(context), "application/zip") } }) { Icon(Icons.Outlined.FolderZip, "Download plugin SDK ZIP") }
             }
         }
         OutlinedTextField(value = input, onValueChange = { input = it; addError = null }, label = { Text("GitHub repository") },
@@ -90,8 +91,8 @@ fun PluginRepositoriesTab(busy: Boolean, runOperation: (suspend () -> String?) -
                             if (listing?.title != null && listing.title != repo.label) Text(repo.label, style = MaterialTheme.typography.bodySmall)
                         }
                         if (repo.label in PluginRepositories.loading) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                        else IconButton(onClick = { scope.launch { PluginRepositories.refresh(repo) } }) { Icon(Icons.Outlined.Refresh, "Check for updates") }
-                        IconButton(onClick = { PluginRepositories.remove(repo) }) { Icon(Icons.Outlined.Delete, "Remove repository") }
+                        else MorphingIconButton(onClick = { scope.launch { PluginRepositories.refresh(repo) } }) { Icon(Icons.Outlined.Refresh, "Check for updates") }
+                        MorphingIconButton(onClick = { PluginRepositories.remove(repo) }) { Icon(Icons.Outlined.Delete, "Remove repository") }
                     }
                     PluginRepositories.errors[repo.label]?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                     if (listing != null && listing.plugins.isEmpty()) Text("This repository lists no plugins.", style = MaterialTheme.typography.bodySmall)

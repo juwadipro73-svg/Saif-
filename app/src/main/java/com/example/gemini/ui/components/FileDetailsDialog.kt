@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -312,7 +313,7 @@ private fun DetailRow(
             }
 
             if (actionIcon != null && onActionClick != null) {
-                IconButton(
+                MorphingIconButton(
                     onClick = onActionClick,
                     modifier = Modifier.size(28.dp)
                 ) {

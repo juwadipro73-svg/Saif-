@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import android.net.Uri
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -28,7 +29,6 @@ import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -294,7 +294,7 @@ fun StudioPreviewPanel(
                         .background(Color(0x88000000), CircleShape)
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
-                    IconButton(onClick = onToggleSafeZone, modifier = Modifier.size(28.dp)) {
+                    MorphingIconButton(onClick = onToggleSafeZone, modifier = Modifier.size(28.dp)) {
                         Icon(
                             imageVector = Icons.Default.Crop,
                             contentDescription = "Safe Zone",
@@ -303,7 +303,7 @@ fun StudioPreviewPanel(
                         )
                     }
 
-                    IconButton(onClick = onToggleThirds, modifier = Modifier.size(28.dp)) {
+                    MorphingIconButton(onClick = onToggleThirds, modifier = Modifier.size(28.dp)) {
                         Icon(
                             imageVector = Icons.Default.GridOn,
                             contentDescription = "Grid",
@@ -312,7 +312,7 @@ fun StudioPreviewPanel(
                         )
                     }
 
-                    IconButton(onClick = onToggleFocus, modifier = Modifier.size(28.dp)) {
+                    MorphingIconButton(onClick = onToggleFocus, modifier = Modifier.size(28.dp)) {
                         Icon(
                             imageVector = Icons.Default.Visibility,
                             contentDescription = "Focus Mode",
@@ -321,7 +321,7 @@ fun StudioPreviewPanel(
                         )
                     }
 
-                    IconButton(onClick = onToggleFullscreen, modifier = Modifier.size(28.dp)) {
+                    MorphingIconButton(onClick = onToggleFullscreen, modifier = Modifier.size(28.dp)) {
                         Icon(
                             imageVector = Icons.Default.Fullscreen,
                             contentDescription = "Fullscreen",

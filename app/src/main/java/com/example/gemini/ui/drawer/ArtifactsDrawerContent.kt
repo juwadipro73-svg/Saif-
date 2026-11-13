@@ -1,5 +1,6 @@
 package com.example.gemini.ui.drawer
 
+import com.example.ui.components.MorphingIconButton
 import android.content.Context
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
@@ -114,7 +115,7 @@ fun ArtifactsDrawerContent(
                 )
             }
 
-            IconButton(
+            MorphingIconButton(
                 onClick = onClose,
                 modifier = Modifier.size(32.dp)
             ) {
@@ -324,7 +325,7 @@ private fun ArtifactCardItem(
                 }
 
                 // Download Button
-                IconButton(
+                MorphingIconButton(
                     onClick = onDownload,
                     modifier = Modifier
                         .size(34.dp)

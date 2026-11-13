@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -25,7 +26,6 @@ import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.ZoomOut
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -251,7 +251,7 @@ fun ImageAssetViewer(
                 // Controls Section
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Background Canvas Switcher
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { bgMode = (bgMode + 1) % 3 },
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -266,7 +266,7 @@ fun ImageAssetViewer(
                             modifier = Modifier.size(18.dp)
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { scale = (scale - 0.25f).coerceAtLeast(0.25f) },
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -277,7 +277,7 @@ fun ImageAssetViewer(
                             modifier = Modifier.size(18.dp)
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             scale = 1f
                             offsetX = 0f
@@ -292,7 +292,7 @@ fun ImageAssetViewer(
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { scale = (scale + 0.25f).coerceAtMost(10f) },
                         modifier = Modifier.size(32.dp)
                     ) {
@@ -305,7 +305,7 @@ fun ImageAssetViewer(
                     }
                     if (isSvg && onToggleXmlSource != null) {
                         Spacer(modifier = Modifier.width(4.dp))
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onToggleXmlSource,
                             modifier = Modifier.size(32.dp)
                         ) {

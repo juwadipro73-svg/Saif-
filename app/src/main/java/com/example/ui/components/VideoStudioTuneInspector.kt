@@ -159,7 +159,7 @@ fun VideoStudioTuneInspector(
                     )
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = onClose,
                     modifier = Modifier.size(26.dp)
                 ) {

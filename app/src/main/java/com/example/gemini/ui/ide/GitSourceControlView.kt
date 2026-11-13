@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -241,7 +242,7 @@ fun GitSourceControlView(
 
                 if (status?.isGitRepo != false) {
                     // Pull Button
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { showPullDialog = true },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -251,7 +252,7 @@ fun GitSourceControlView(
                     // Push Button with Unpushed Commit Count Badge
                     val unpushedCount = status?.unpushedCount ?: status?.ahead ?: 0
                     Box {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showPushDialog = true },
                             modifier = Modifier.size(28.dp)
                         ) {
@@ -283,7 +284,7 @@ fun GitSourceControlView(
 
                     // Stash Menu
                     Box {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showStashMenu = true },
                             modifier = Modifier.size(28.dp)
                         ) {
@@ -323,7 +324,7 @@ fun GitSourceControlView(
                 }
 
                 // Config / Settings Button
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         val projPath = activeProject?.path ?: return@IconButton
                         scope.launch {
@@ -345,7 +346,7 @@ fun GitSourceControlView(
                 }
 
                 // Refresh Button
-                IconButton(
+                MorphingIconButton(
                     onClick = { refreshGitData() },
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -534,7 +535,7 @@ fun GitSourceControlView(
                             isExpanded = stagedExpanded,
                             onToggle = { stagedExpanded = !stagedExpanded },
                             actions = {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showUnstageAllDialog = true },
                                     modifier = Modifier.size(24.dp)
                                 ) {
@@ -574,13 +575,13 @@ fun GitSourceControlView(
                             onToggle = { changesExpanded = !changesExpanded },
                             actions = {
                                 Row {
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = { showDiscardAllDialog = true },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(imageVector = Icons.Default.Undo, contentDescription = "Discard All", modifier = Modifier.size(13.dp), tint = Color(0xFFE57373))
                                     }
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = {
                                             val projPath = activeProject?.path ?: return@IconButton
                                             scope.launch {
@@ -630,13 +631,13 @@ fun GitSourceControlView(
                             onToggle = { untrackedExpanded = !untrackedExpanded },
                             actions = {
                                 Row {
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = { showDiscardAllUntrackedDialog = true },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(imageVector = Icons.Default.Undo, contentDescription = "Discard All Untracked", modifier = Modifier.size(13.dp), tint = Color(0xFFE57373))
                                     }
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = {
                                             val projPath = activeProject?.path ?: return@IconButton
                                             scope.launch {
@@ -1536,7 +1537,7 @@ private fun GitFileRow(
         }
 
         if (onDiscard != null) {
-            IconButton(
+            MorphingIconButton(
                 onClick = onDiscard,
                 modifier = Modifier.size(24.dp)
             ) {
@@ -1549,7 +1550,7 @@ private fun GitFileRow(
             }
         }
 
-        IconButton(
+        MorphingIconButton(
             onClick = onAction,
             modifier = Modifier.size(24.dp)
         ) {

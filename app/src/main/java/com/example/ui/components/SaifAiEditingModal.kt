@@ -176,7 +176,7 @@ fun SaifAiEditingModal(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { showHowItWorksDialog = true },
                         modifier = Modifier
                             .size(32.dp)
@@ -191,7 +191,7 @@ fun SaifAiEditingModal(
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onDismiss,
                         modifier = Modifier
                             .size(32.dp)

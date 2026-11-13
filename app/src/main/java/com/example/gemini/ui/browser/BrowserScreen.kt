@@ -1,5 +1,6 @@
 package com.example.gemini.ui.browser
 
+import com.example.ui.components.MorphingIconButton
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Bitmap
@@ -340,7 +341,7 @@ fun BrowserScreen(
                         // 1. DevTools / Eruda Web Inspector Button (Left 1)
                         val hasActivePage = activeTab != null && activeTab.url.isNotBlank() && activeTab.url != "about:blank"
                         val isDevToolsOn = activeTab?.isDevToolsEnabled == true
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 if (activeTab != null) {
                                     val wv = activeTab.webView ?: sessionManager.ensureWebViewAttached(context, activeTab, isDarkTheme)
@@ -364,7 +365,7 @@ fun BrowserScreen(
 
                         // 2. Desktop / Phone UA Mode Toggle Button (Left 2)
                         val isDesktopMode = activeTab?.isDesktopMode == true
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 sessionManager.toggleDesktopMode(activeTab, context)
                             },
@@ -477,7 +478,7 @@ fun BrowserScreen(
                                 )
 
                                 if (textFieldValue.text.isNotEmpty()) {
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = {
                                             textFieldValue = TextFieldValue("")
                                             focusRequester.requestFocus()
@@ -496,7 +497,7 @@ fun BrowserScreen(
                         }
 
                         // 4. Refresh / Stop Loading Button (Right 1)
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 if (activeTab?.isLoading == true) {
                                     activeTab.stopLoading(sessionManager.getMainHandler())
@@ -515,7 +516,7 @@ fun BrowserScreen(
                         }
 
                         // 5. Close / Exit to Chat Button (Right 2)
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 onClose()
                             },
@@ -559,7 +560,7 @@ fun BrowserScreen(
                     val canGoForward = activeTab?.webView?.canGoForward() == true
 
                     // 1. Back in WebView (<)
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             if (activeTab?.webView?.canGoBack() == true) {
                                 activeTab.webView?.goBack()
@@ -577,7 +578,7 @@ fun BrowserScreen(
                     }
 
                     // 2. Forward in WebView (>)
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             if (activeTab?.webView?.canGoForward() == true) {
                                 activeTab.webView?.goForward()
@@ -595,7 +596,7 @@ fun BrowserScreen(
                     }
 
                     // 3. Home Button (🏠)
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             sessionManager.openUrl("about:blank", tabId = activeTabId, newTab = false)
                             textFieldValue = TextFieldValue("")
@@ -639,7 +640,7 @@ fun BrowserScreen(
 
                     // 5. More Menu Button (⋮)
                     Box {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showMoreMenu = true },
                             modifier = Modifier.size(44.dp)
                         ) {
@@ -1089,7 +1090,7 @@ private fun SearchHistoryOverlay(
                                 }
 
                                 // Copy into input button
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { onInsertHistory(item.query) },
                                     modifier = Modifier.size(26.dp)
                                 ) {
@@ -1106,7 +1107,7 @@ private fun SearchHistoryOverlay(
                                 Spacer(modifier = Modifier.width(4.dp))
 
                                 // Remove individual item
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { onRemoveHistory(item.id) },
                                     modifier = Modifier.size(26.dp)
                                 ) {
@@ -1439,7 +1440,7 @@ private fun TabOverviewScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    IconButton(onClick = onCloseOverview) {
+                    MorphingIconButton(onClick = onCloseOverview) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -1710,7 +1711,7 @@ private fun TabCardView(
                     )
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = onClose,
                     modifier = Modifier.size(24.dp)
                 ) {

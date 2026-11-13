@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -434,7 +435,7 @@ fun IdeScreen(
             topBar = {
                 TopAppBar(
                     navigationIcon = {
-                        IconButton(onClick = {
+                        MorphingIconButton(onClick = {
                             coroutineScope.launch {
                                 if (drawerState.isClosed) drawerState.open() else drawerState.close()
                             }
@@ -463,7 +464,7 @@ fun IdeScreen(
                         // Three-Dot More Options Menu (Word Wrap, Find in file, SVG toggle)
                         if (isTextFile) {
                             Box {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showMoreOptionsMenu = true },
                                     modifier = Modifier.size(36.dp)
                                 ) {
@@ -544,7 +545,7 @@ fun IdeScreen(
 
                         // Undo & Redo Buttons
                         if (isTextFile) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { currentEditorView?.undo() },
                                 enabled = canUndo && isTextEditable,
                                 modifier = Modifier.size(36.dp)
@@ -557,7 +558,7 @@ fun IdeScreen(
                                 )
                             }
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { currentEditorView?.redo() },
                                 enabled = canRedo && isTextEditable,
                                 modifier = Modifier.size(36.dp)
@@ -574,7 +575,7 @@ fun IdeScreen(
                         // Save Button
                         if (activeTab != null && !activeTab.isReadOnly && (!isImageFile || (isSvgFile && showSvgSource))) {
                             val isExternal = activeTab.isExternal || activeTab.path.startsWith("content://") || activeTab.path.startsWith("android.resource://")
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     if (isExternal) {
                                         // Externally opened file has no location on the daemon server filesystem yet -> prompt where to save
@@ -630,7 +631,7 @@ fun IdeScreen(
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(if (isCustomMode) GeminiBlue.copy(alpha = 0.18f) else Color(0xFF4CAF50).copy(alpha = 0.14f))
                             ) {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         if (isCustomMode && customProfile != null) {
                                             executeRun(customProfile)
@@ -679,7 +680,7 @@ fun IdeScreen(
                                     }
                                 }
 
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         refreshRunConfigurations()
                                         showRunMenu = true
@@ -876,7 +877,7 @@ fun IdeScreen(
                         }
 
                         // AI Chat Drawer Toggle Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = onNavigateToChat,
                             modifier = Modifier.size(36.dp)
                         ) {
@@ -1061,7 +1062,7 @@ fun IdeScreen(
                                         }
                                     )
                                     if (findQuery.isNotEmpty()) {
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = {
                                                 findQuery = ""
                                                 currentEditorView?.stopSearch()
@@ -1098,7 +1099,7 @@ fun IdeScreen(
                             }
 
                             // Previous Match
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { currentEditorView?.findPrevious() },
                                 enabled = searchMatchCount > 0,
                                 modifier = Modifier.size(32.dp)
@@ -1112,7 +1113,7 @@ fun IdeScreen(
                             }
 
                             // Next Match
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { currentEditorView?.findNext() },
                                 enabled = searchMatchCount > 0,
                                 modifier = Modifier.size(32.dp)
@@ -1126,7 +1127,7 @@ fun IdeScreen(
                             }
 
                             // Case Sensitive Toggle
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     val newCase = !isCaseSensitive
                                     isCaseSensitive = newCase
@@ -1143,7 +1144,7 @@ fun IdeScreen(
                             }
 
                             // Close Find Bar
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     showFindBar = false
                                     findQuery = ""

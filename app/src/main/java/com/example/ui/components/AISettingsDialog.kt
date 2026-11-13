@@ -55,7 +55,7 @@ fun AISettingsDialog(
                         fontSize = 18.sp,
                         color = if (isDarkTheme) Color.White else Color.Black
                     )
-                    IconButton(onClick = {
+                    MorphingIconButton(onClick = {
                         onConfigSaved()
                         onDismiss()
                     }) {

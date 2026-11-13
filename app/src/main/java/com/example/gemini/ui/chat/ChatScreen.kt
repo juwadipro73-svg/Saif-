@@ -1,5 +1,6 @@
 package com.example.gemini.ui.chat
 
+import com.example.ui.components.MorphingIconButton
 import com.example.gemini.ui.components.ChatToast
 import com.example.gemini.ui.components.ChatToastType
 import com.example.gemini.ui.components.AppToastHelper
@@ -1213,7 +1214,7 @@ fun ChatScreen(
                     },
                     navigationIcon = {
                         if (conversationBackStack.isNotEmpty()) {
-                            IconButton(onClick = navigateBackConversation) {
+                            MorphingIconButton(onClick = navigateBackConversation) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back",
@@ -1221,7 +1222,7 @@ fun ChatScreen(
                                 )
                             }
                         } else {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            MorphingIconButton(onClick = { scope.launch { drawerState.open() } }) {
                                 Icon(
                                     imageVector = Icons.Default.Menu,
                                     contentDescription = "Open Drawer",
@@ -1232,14 +1233,14 @@ fun ChatScreen(
                     },
                     actions = {
                         if (isInFloatingWindow) {
-                            IconButton(onClick = onMinimizeWindow) {
+                            MorphingIconButton(onClick = onMinimizeWindow) {
                                 Icon(
                                     imageVector = Icons.Default.Remove,
                                     contentDescription = "Minimize to Bubble",
                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                                 )
                             }
-                            IconButton(onClick = onOpenFullScreen) {
+                            MorphingIconButton(onClick = onOpenFullScreen) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                                     contentDescription = "Open Full Screen",
@@ -1254,14 +1255,14 @@ fun ChatScreen(
                                 onOpenServerLogs = { showLocalServerOutputDialog = true }
                             )
                         }
-                        IconButton(onClick = onNavigateToBrowser) {
+                        MorphingIconButton(onClick = onNavigateToBrowser) {
                             Icon(
                                 imageVector = Icons.Outlined.Language,
                                 contentDescription = "Web Browser Preview",
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                             )
                         }
-                        IconButton(onClick = {
+                        MorphingIconButton(onClick = {
                             if (useSshTerminal || (isLocalToolsInstalled && isLocalToolsEnabled)) {
                                 onNavigateToTerminal()
                             } else if (isLocalToolsInstalled) {
@@ -1277,7 +1278,7 @@ fun ChatScreen(
                                 tint = if (useSshTerminal || (isLocalToolsInstalled && isLocalToolsEnabled)) ClaudeTerracotta else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
                             )
                         }
-                        IconButton(onClick = onNavigateToIde) {
+                        MorphingIconButton(onClick = onNavigateToIde) {
                             Icon(
                                 imageVector = Icons.Default.Code,
                                 contentDescription = "Code Editor IDE",
@@ -1285,7 +1286,7 @@ fun ChatScreen(
                             )
                         }
                         if (isDevModeEnabled) {
-                            IconButton(onClick = { showChatTelemetryDialog = true }) {
+                            MorphingIconButton(onClick = { showChatTelemetryDialog = true }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Analytics,
                                     contentDescription = "Chat Telemetry & Tokens",
@@ -2993,7 +2994,7 @@ fun ChatToastBanner(
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(
+            MorphingIconButton(
                 onClick = onDismiss,
                 modifier = Modifier.size(24.dp)
             ) {

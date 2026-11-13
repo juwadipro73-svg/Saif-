@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -770,7 +771,7 @@ fun MermaidDiagramView(
 
                 Spacer(modifier = Modifier.width(6.dp))
 
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("Mermaid Diagram", code)
@@ -799,7 +800,7 @@ fun MermaidDiagramView(
 
                 Spacer(modifier = Modifier.width(2.dp))
 
-                IconButton(
+                MorphingIconButton(
                     onClick = { isFullscreen = true },
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -911,7 +912,7 @@ fun MermaidFullscreenDialog(
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onDismiss,
                         modifier = Modifier.size(36.dp)
                     ) {
@@ -975,7 +976,7 @@ fun MermaidFullscreenDialog(
 
                     // Zoom Controls (when in Diagram mode)
                     if (selectedTab == 0) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { webViewRef?.zoomOut() },
                             modifier = Modifier.size(32.dp)
                         ) {
@@ -987,7 +988,7 @@ fun MermaidFullscreenDialog(
                             )
                         }
 
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { webViewRef?.zoomIn() },
                             modifier = Modifier.size(32.dp)
                         ) {
@@ -999,7 +1000,7 @@ fun MermaidFullscreenDialog(
                             )
                         }
 
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 webViewRef?.loadDataWithBaseURL("https://cdn.jsdelivr.net", htmlContent, "text/html", "UTF-8", null)
                             },
@@ -1017,7 +1018,7 @@ fun MermaidFullscreenDialog(
                     }
 
                     // Copy Button
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                             val clip = ClipData.newPlainText("Mermaid Diagram", code)
@@ -1393,7 +1394,7 @@ fun AgentErrorCard(
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val copyText = buildString {
@@ -1839,7 +1840,7 @@ fun MarkdownVideoView(
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)
             ) {
-                IconButton(onClick = togglePlayback, modifier = Modifier.size(32.dp)) {
+                MorphingIconButton(onClick = togglePlayback, modifier = Modifier.size(32.dp)) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
@@ -1865,7 +1866,7 @@ fun MarkdownVideoView(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(start = 6.dp)
                 )
-                IconButton(
+                MorphingIconButton(
                     onClick = { ImageDownloadHelper.downloadVideo(context, video.url, video.alt, coroutineScope) },
                     modifier = Modifier.size(32.dp)
                 ) {
@@ -2056,7 +2057,7 @@ fun YouTubeVideoView(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isPlaying) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 com.example.gemini.data.media.YouTubeMediaSessionManager.release()
                             },
@@ -2073,7 +2074,7 @@ fun YouTubeVideoView(
                     }
 
                     // Open in External App / Browser
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             try {
                                 uriHandler.openUri(videoUrl)

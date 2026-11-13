@@ -134,7 +134,7 @@ fun LiveAgentBar(
                     Spacer(modifier = Modifier.width(6.dp))
 
                     // Stop Button
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onStop,
                         modifier = Modifier.size(28.dp)
                     ) {

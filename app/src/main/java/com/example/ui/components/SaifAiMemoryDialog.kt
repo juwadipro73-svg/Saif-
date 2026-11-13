@@ -180,7 +180,7 @@ fun SaifAiMemoryDialog(
                                 }
                             ),
                             trailingIcon = {
-                                IconButton(onClick = { isPinVisible = !isPinVisible }) {
+                                MorphingIconButton(onClick = { isPinVisible = !isPinVisible }) {
                                     Icon(
                                         imageVector = if (isPinVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                         contentDescription = if (isPinVisible) "Hide PIN" else "Show PIN",
@@ -310,7 +310,7 @@ fun SaifAiMemoryDialog(
                                 }
                             }
 
-                            IconButton(onClick = onDismiss) {
+                            MorphingIconButton(onClick = onDismiss) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Close",
@@ -614,7 +614,7 @@ fun SaifAiMemoryDialog(
                         visualTransformation = if (isNewPinVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         trailingIcon = {
-                            IconButton(onClick = { isNewPinVisible = !isNewPinVisible }) {
+                            MorphingIconButton(onClick = { isNewPinVisible = !isNewPinVisible }) {
                                 Icon(
                                     imageVector = if (isNewPinVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                     contentDescription = if (isNewPinVisible) "Hide PIN" else "Show PIN",
@@ -822,7 +822,7 @@ fun MemoryCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            IconButton(
+            MorphingIconButton(
                 onClick = onDelete,
                 modifier = Modifier.size(32.dp)
             ) {

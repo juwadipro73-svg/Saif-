@@ -239,7 +239,7 @@ fun AppRunnerDialog(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     // Refresh / Restart button
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = {
                                             reloadCount++
                                             activeWebView?.reload()
@@ -257,7 +257,7 @@ fun AppRunnerDialog(
 
                                     // Build standalone APK
                                     if (onBuildApk != null) {
-                                        IconButton(
+                                        MorphingIconButton(
                                             onClick = onBuildApk,
                                             modifier = Modifier.size(28.dp)
                                         ) {
@@ -271,7 +271,7 @@ fun AppRunnerDialog(
                                     }
 
                                     // Export ZIP
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = {
                                             val zipFile = AppCompilerEngine.exportProjectAsZip(context, project)
                                             if (zipFile != null && zipFile.exists()) {
@@ -302,7 +302,7 @@ fun AppRunnerDialog(
                                     }
 
                                     // Close
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = onDismiss,
                                         modifier = Modifier.size(28.dp)
                                     ) {
@@ -433,7 +433,7 @@ fun AppRunnerDialog(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 // Back Button ◀
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         if (activeWebView?.canGoBack() == true) {
                                             activeWebView?.goBack()
@@ -464,7 +464,7 @@ fun AppRunnerDialog(
                                 )
 
                                 // Recents / Apps Button ▢
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         reloadCount++
                                         activeWebView?.reload()
@@ -1350,7 +1350,7 @@ private fun LiveInteractiveLayoutView(projectDir: File, project: ProjectData) {
                                 fontSize = 14.sp,
                                 modifier = Modifier.weight(1f)
                             )
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { dynamicList.remove(item); activeToast = "Removed: $item" },
                                 modifier = Modifier.size(28.dp)
                             ) {

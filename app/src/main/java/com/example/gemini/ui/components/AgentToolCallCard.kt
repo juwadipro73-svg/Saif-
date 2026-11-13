@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -443,7 +444,7 @@ fun AgentToolCallCard(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { showFullScreenViewer = true },
                                 modifier = Modifier.size(26.dp)
                             ) {
@@ -457,7 +458,7 @@ fun AgentToolCallCard(
 
                             val snackbarHostState = LocalSnackbarHostState.current
                             val coroutineScope = rememberCoroutineScope()
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     ImageDownloadHelper.downloadImage(
                                         context = context,
@@ -538,7 +539,7 @@ fun AgentToolCallCard(
                             )
                         }
 
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText("Tool Output", toolCall.output)

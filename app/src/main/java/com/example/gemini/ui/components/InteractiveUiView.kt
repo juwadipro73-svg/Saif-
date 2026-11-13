@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -202,7 +203,7 @@ fun InteractiveUiView(
                     Spacer(modifier = Modifier.width(6.dp))
 
                     // Reload Button
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { reloadKey++ },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -215,7 +216,7 @@ fun InteractiveUiView(
                     }
 
                     // Fullscreen / Expand Button
-                    IconButton(
+                    MorphingIconButton(
                         onClick = { isFullscreen = true },
                         modifier = Modifier.size(28.dp)
                     ) {
@@ -317,14 +318,14 @@ fun InteractiveUiView(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { reloadKey++ }) {
+                            MorphingIconButton(onClick = { reloadKey++ }) {
                                 Icon(
                                     imageVector = Icons.Default.Refresh,
                                     contentDescription = "Restart App",
                                     tint = MaterialTheme.colorScheme.onSurface
                                 )
                             }
-                            IconButton(onClick = { isFullscreen = false }) {
+                            MorphingIconButton(onClick = { isFullscreen = false }) {
                                 Icon(
                                     imageVector = Icons.Default.FullscreenExit,
                                     contentDescription = "Exit Fullscreen",

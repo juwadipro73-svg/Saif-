@@ -513,7 +513,7 @@ fun BuildAIScreen(
                             .padding(horizontal = 8.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 ProjectChatHistoryManager.saveMessages(context, project.appName, messages)
                                 onBack()
@@ -583,7 +583,7 @@ fun BuildAIScreen(
                         }
 
                         // Run Live App Preview Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showAppRunnerDialog = true }
                         ) {
                             Icon(
@@ -595,7 +595,7 @@ fun BuildAIScreen(
                         }
 
                         // Build & Install APK Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showBuildProgress = true }
                         ) {
                             Icon(
@@ -607,7 +607,7 @@ fun BuildAIScreen(
                         }
 
                         // Clear Chat Button
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 ProjectChatHistoryManager.clearMessages(context, project.appName)
                                 messages = listOf(

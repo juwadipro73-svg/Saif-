@@ -136,7 +136,7 @@ fun VideoAiDirectorChatScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onBack,
                         modifier = Modifier
                             .size(38.dp)
@@ -233,7 +233,7 @@ fun VideoAiDirectorChatScreen(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             android.widget.Toast.makeText(context, "AI Director latency: 12ms (Cloud Neural Engine)", android.widget.Toast.LENGTH_SHORT).show()
                         },
@@ -729,7 +729,7 @@ fun VideoAiDirectorChatScreen(
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             android.widget.Toast.makeText(context, "Attach reference clip", android.widget.Toast.LENGTH_SHORT).show()
                         },
@@ -738,7 +738,7 @@ fun VideoAiDirectorChatScreen(
                         Icon(Icons.Default.AddCircle, contentDescription = null, tint = Color(0xFFD6D3C7), modifier = Modifier.size(20.dp))
                     }
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             android.widget.Toast.makeText(context, "Voice input ready", android.widget.Toast.LENGTH_SHORT).show()
                         },
@@ -761,7 +761,7 @@ fun VideoAiDirectorChatScreen(
                         modifier = Modifier.weight(1f)
                     )
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             val prompt = inputText.trim()
                             if (prompt.isNotBlank()) {

@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -231,7 +232,7 @@ private fun TerminalInspectorDialogContent(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                IconButton(
+                MorphingIconButton(
                     onClick = onDismiss,
                     modifier = Modifier.size(30.dp)
                 ) {
@@ -362,7 +363,7 @@ private fun TerminalInspectorDialogContent(
 
                     // Clear commands in active tab
                     if (activeTab.commands.isNotEmpty()) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { onClearTab(activeTab.id) },
                             modifier = Modifier.size(24.dp)
                         ) {
@@ -464,7 +465,7 @@ private fun TerminalInspectorDialogContent(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             val cmd = commandInput.trim()
                             if (cmd.isNotEmpty() && !isExecutingManual) {
@@ -582,7 +583,7 @@ private fun TerminalCommandCard(
                 }
 
                 if (isRunning) {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onKill,
                         modifier = Modifier.size(22.dp)
                     ) {
@@ -595,7 +596,7 @@ private fun TerminalCommandCard(
                     }
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         val clip = ClipData.newPlainText("Output", command.output)

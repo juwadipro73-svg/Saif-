@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.animation.expandVertically
@@ -110,7 +111,7 @@ fun ActiveContextSummaryCard(
                 }
 
                 // Edit Button
-                IconButton(
+                MorphingIconButton(
                     onClick = { showEditDialog = true },
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -123,7 +124,7 @@ fun ActiveContextSummaryCard(
                 }
 
                 // Delete Button
-                IconButton(
+                MorphingIconButton(
                     onClick = onDeleteSummary,
                     modifier = Modifier.size(28.dp)
                 ) {

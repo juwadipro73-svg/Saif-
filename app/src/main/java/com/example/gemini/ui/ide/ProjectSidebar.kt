@@ -1,5 +1,6 @@
 package com.example.gemini.ui.ide
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -171,7 +172,7 @@ fun ProjectSidebar(
                                             )
                                         }
                                         if (proj.isCustom) {
-                                            IconButton(
+                                            MorphingIconButton(
                                                 onClick = {
                                                     onRemoveProject(proj)
                                                 },
@@ -310,7 +311,7 @@ fun ProjectSidebar(
                 )
 
                 Row {
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             val rootPath = activeProject?.path ?: ""
                             if (rootPath.isNotBlank()) {
@@ -327,7 +328,7 @@ fun ProjectSidebar(
                             modifier = Modifier.size(15.dp)
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             val rootPath = activeProject?.path ?: ""
                             if (rootPath.isNotBlank()) {
@@ -344,7 +345,7 @@ fun ProjectSidebar(
                             modifier = Modifier.size(15.dp)
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = {
                             val rootPath = activeProject?.path ?: ""
                             onOpenTerminal(rootPath)
@@ -358,7 +359,7 @@ fun ProjectSidebar(
                             modifier = Modifier.size(15.dp)
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onOpenFileManager,
                         modifier = Modifier.size(26.dp)
                     ) {
@@ -369,7 +370,7 @@ fun ProjectSidebar(
                             modifier = Modifier.size(15.dp)
                         )
                     }
-                    IconButton(
+                    MorphingIconButton(
                         onClick = onRefreshTree,
                         modifier = Modifier.size(26.dp)
                     ) {
@@ -721,7 +722,7 @@ fun FileTreeNodeItem(
 
             // Context Menu Button
             Box {
-                IconButton(
+                MorphingIconButton(
                     onClick = { menuExpanded = true },
                     modifier = Modifier.size(24.dp)
                 ) {

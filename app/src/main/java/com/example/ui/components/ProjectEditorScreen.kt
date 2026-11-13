@@ -316,7 +316,7 @@ fun ProjectEditorScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // 1. HAMBURGER MENU (Opens Sidebar Project Tree)
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = {
                                     coroutineScope.launch { drawerState.open() }
                                 },
@@ -377,7 +377,7 @@ fun ProjectEditorScreen(
 
                                 // Close file tab 'X' button
                                 if (activeFile != null) {
-                                    IconButton(
+                                    MorphingIconButton(
                                         onClick = { editorViewModel.closeActiveFile(context) },
                                         modifier = Modifier.size(20.dp)
                                     ) {
@@ -392,7 +392,7 @@ fun ProjectEditorScreen(
                             }
 
                             // 3. UNDO BUTTON
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { editorViewModel.undo() },
                                 enabled = canUndo,
                                 modifier = Modifier.size(38.dp)
@@ -406,7 +406,7 @@ fun ProjectEditorScreen(
                             }
 
                             // 4. REDO BUTTON
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { editorViewModel.redo() },
                                 enabled = canRedo,
                                 modifier = Modifier.size(38.dp)
@@ -420,7 +420,7 @@ fun ProjectEditorScreen(
                             }
 
                             // 5. FLOPPY DISK SAVE BUTTON (Rewrites file on device storage on Dispatchers.IO)
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { editorViewModel.saveCurrentFile(context) },
                                 modifier = Modifier.size(38.dp)
                             ) {
@@ -469,7 +469,7 @@ fun ProjectEditorScreen(
                             Spacer(modifier = Modifier.width(2.dp))
 
                             // 7. AI ENGINE SETTINGS BUTTON
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { showAiSettingsDialog = true },
                                 modifier = Modifier.size(38.dp)
                             ) {
@@ -483,7 +483,7 @@ fun ProjectEditorScreen(
 
                             // 8. THREE DOTS OVERFLOW MENU (Includes "Open File Tree" option)
                             Box {
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showOverflowMenu = true },
                                     modifier = Modifier.size(38.dp)
                                 ) {
@@ -688,7 +688,7 @@ fun ProjectEditorScreen(
                                 color = textPrimary
                             )
                         }
-                        IconButton(onClick = { showAiAssistDialog = false }, enabled = !isAiLoading) {
+                        MorphingIconButton(onClick = { showAiAssistDialog = false }, enabled = !isAiLoading) {
                             Icon(Icons.Default.Close, contentDescription = "Close", tint = gutterText)
                         }
                     }

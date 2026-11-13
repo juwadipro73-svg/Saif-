@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -199,7 +200,7 @@ fun GitCloneDialog(
                         }
                     }
                     if (!isRunning) {
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
                             Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(18.dp))
                         }
                     }

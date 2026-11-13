@@ -1,5 +1,6 @@
 package com.example.cloud
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -26,7 +27,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -83,7 +83,7 @@ fun CloudBuildStatusCard(modifier: Modifier = Modifier) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(6.dp))
                 }
-                IconButton(onClick = { SaifAiCloudManager.dismiss() }, modifier = Modifier.size(24.dp)) {
+                MorphingIconButton(onClick = { SaifAiCloudManager.dismiss() }, modifier = Modifier.size(24.dp)) {
                     Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(16.dp))
                 }
             }
@@ -174,7 +174,7 @@ private fun LocalApkBuildCardContent(state: LocalApkBuildState, modifier: Modifi
                 if (isBusy) {
                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                 } else {
-                    IconButton(onClick = { OnDeviceApkBuildManager.dismiss() }, modifier = Modifier.size(24.dp)) {
+                    MorphingIconButton(onClick = { OnDeviceApkBuildManager.dismiss() }, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Dismiss", modifier = Modifier.size(16.dp))
                     }
                 }

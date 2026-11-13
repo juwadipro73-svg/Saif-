@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -293,12 +294,12 @@ fun MarkdownDocViewerModal(
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = onDismiss) {
+                        MorphingIconButton(onClick = onDismiss) {
                             Icon(Icons.Default.Close, contentDescription = "Close")
                         }
                     },
                     actions = {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 cm.setPrimaryClip(ClipData.newPlainText("Markdown Content", content))
@@ -307,7 +308,7 @@ fun MarkdownDocViewerModal(
                         ) {
                             Icon(Icons.Outlined.ContentCopy, contentDescription = "Copy Content")
                         }
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 onDismiss()
                                 onOpenInIde(filePath)

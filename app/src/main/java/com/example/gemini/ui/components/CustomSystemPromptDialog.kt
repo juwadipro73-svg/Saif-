@@ -1,5 +1,6 @@
 package com.example.gemini.ui.components
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -177,7 +178,7 @@ Available slash commands: /goal, /schedule, /browser, /plan, /grill-me, /teamwor
                     }
 
                     if (selectedTab == 0) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText("Antigravity System Prompt", defaultSystemPrompt)

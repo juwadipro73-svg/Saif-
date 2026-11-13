@@ -885,7 +885,7 @@ fun VideoTimelineStudioScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 isPlaying = false
                                 com.example.utils.TTSManager.stop()
@@ -932,7 +932,7 @@ fun VideoTimelineStudioScreen(
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { handleUndo() },
                             modifier = Modifier.size(32.dp)
                         ) {
@@ -943,7 +943,7 @@ fun VideoTimelineStudioScreen(
                                 modifier = Modifier.size(18.dp)
                             )
                         }
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { handleRedo() },
                             modifier = Modifier.size(32.dp)
                         ) {
@@ -958,7 +958,7 @@ fun VideoTimelineStudioScreen(
                         Spacer(modifier = Modifier.width(6.dp))
 
                         // AI DIRECTOR BUTTON
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showPromptDirectorDialog = true },
                             modifier = Modifier
                                 .size(34.dp)
@@ -1207,7 +1207,7 @@ fun VideoTimelineStudioScreen(
                                 }
 
                                 // Top right fullscreen toggle
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { showFullscreenPlayer = true },
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
@@ -1275,7 +1275,7 @@ fun VideoTimelineStudioScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         // Jump to Start (|<<)
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 currentProject = currentProject.copy(currentPositionSeconds = 0f)
                                 Toast.makeText(context, "|<< Start", Toast.LENGTH_SHORT).show()
@@ -1286,7 +1286,7 @@ fun VideoTimelineStudioScreen(
                         }
 
                         // Replay -5s
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val next = (currentProject.currentPositionSeconds - 5f).coerceAtLeast(0f)
                                 currentProject = currentProject.copy(currentPositionSeconds = next)
@@ -1333,7 +1333,7 @@ fun VideoTimelineStudioScreen(
                         }
 
                         // Forward +5s
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 val next = (currentProject.currentPositionSeconds + 5f).coerceAtMost(currentProject.totalDurationSeconds)
                                 currentProject = currentProject.copy(currentPositionSeconds = next)
@@ -1344,7 +1344,7 @@ fun VideoTimelineStudioScreen(
                         }
 
                         // Jump to End (>>|)
-                        IconButton(
+                        MorphingIconButton(
                             onClick = {
                                 currentProject = currentProject.copy(currentPositionSeconds = currentProject.totalDurationSeconds)
                                 Toast.makeText(context, ">>| End", Toast.LENGTH_SHORT).show()
@@ -1360,7 +1360,7 @@ fun VideoTimelineStudioScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        IconButton(
+                        MorphingIconButton(
                             onClick = { showFullscreenPlayer = true },
                             modifier = Modifier.size(28.dp)
                         ) {
@@ -1487,7 +1487,7 @@ fun VideoTimelineStudioScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 // Chat Bubble Director Shortcut
-                IconButton(
+                MorphingIconButton(
                     onClick = { activeSubView = VideoStudioSubView.AI_DIRECTOR_CHAT },
                     modifier = Modifier
                         .size(42.dp)
@@ -1567,7 +1567,7 @@ fun VideoTimelineStudioScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { timelineZoom = (timelineZoom - 0.25f).coerceAtLeast(0.5f) },
                                 modifier = Modifier.size(24.dp)
                             ) {
@@ -1588,7 +1588,7 @@ fun VideoTimelineStudioScreen(
                                 )
                             )
 
-                            IconButton(
+                            MorphingIconButton(
                                 onClick = { timelineZoom = (timelineZoom + 0.25f).coerceAtMost(3.5f) },
                                 modifier = Modifier.size(24.dp)
                             ) {
@@ -2828,7 +2828,7 @@ fun VideoTimelineStudioScreen(
                                         Text("Research topic & synthesize video", color = Color(0xFF7C5CE0), fontSize = 11.sp)
                                     }
                                 }
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = { if (!isGeneratingFromPrompt) showPromptDirectorDialog = false },
                                     modifier = Modifier
                                         .size(28.dp)

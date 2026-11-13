@@ -1,5 +1,6 @@
 package com.example.compiler
 
+import com.example.ui.components.MorphingIconButton
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -33,7 +34,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -212,7 +212,7 @@ fun BuildProgressDialog(
                     if (isBuilding) {
                         CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = accent)
                     } else {
-                        IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        MorphingIconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
                             Icon(Icons.Default.Close, contentDescription = "Close", tint = subColor)
                         }
                     }

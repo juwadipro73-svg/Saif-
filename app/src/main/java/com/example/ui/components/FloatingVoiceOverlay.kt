@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -116,7 +115,7 @@ fun FloatingVoiceOverlay(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                IconButton(
+                MorphingIconButton(
                     onClick = onClose,
                     modifier = Modifier
                         .size(64.dp)

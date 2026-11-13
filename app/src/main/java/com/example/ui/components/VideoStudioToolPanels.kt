@@ -122,7 +122,7 @@ fun VideoStudioToolContainer(
                     )
                 }
 
-                IconButton(
+                MorphingIconButton(
                     onClick = onCloseTab,
                     modifier = Modifier.size(28.dp)
                 ) {
@@ -810,7 +810,7 @@ fun AudioToolSheet(
                                 Surface(shape = RoundedCornerShape(4.dp), color = Color(0xFF22C55E).copy(alpha = 0.2f)) {
                                     Text(track.genre, color = Color(0xFF22C55E), fontSize = 8.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
                                 }
-                                IconButton(
+                                MorphingIconButton(
                                     onClick = {
                                         previewingTrack = if (previewingTrack == track.id) null else track.id
                                     },

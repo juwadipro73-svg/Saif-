@@ -1,5 +1,6 @@
 package com.example.studio.ui
 
+import com.example.ui.components.MorphingIconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,7 +60,7 @@ fun StudioTopBar(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
+            MorphingIconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
@@ -116,7 +116,7 @@ fun StudioTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            IconButton(
+            MorphingIconButton(
                 onClick = onUndo,
                 enabled = state.canUndo,
                 modifier = Modifier.size(36.dp)
@@ -128,7 +128,7 @@ fun StudioTopBar(
                 )
             }
 
-            IconButton(
+            MorphingIconButton(
                 onClick = onRedo,
                 enabled = state.canRedo,
                 modifier = Modifier.size(36.dp)
