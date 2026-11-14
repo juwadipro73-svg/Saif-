@@ -16,6 +16,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.ensureActive
@@ -52,7 +54,9 @@ class AntigravityCustomApiAgentEngine(
         val thought: String?,
         val toolInvocations: List<AgentToolInvocation>,
         val promptTokens: Int = 0,
-        val outputTokens: Int = 0
+        val outputTokens: Int = 0,
+        /** True when the provider cut the answer off at its output limit (finish/stop reason). */
+        val truncated: Boolean = false
     )
 
     data class AgentToolInvocation(
@@ -78,6 +82,12 @@ class AntigravityCustomApiAgentEngine(
      */
     @Volatile
     private var lastBuiltDownload: Pair<String, String>? = null
+
+    /** Active turn's model profile + temperature, so the delegate_parallel tool can spawn workers. */
+    @Volatile
+    private var activeTurnProfile: AgyCustomApiProfile? = null
+    @Volatile
+    private var activeTurnTemperature: Float = 0.7f
 
     fun consumeLastBuiltDownload(): Pair<String, String>? {
         val pending = lastBuiltDownload
@@ -189,6 +199,8 @@ class AntigravityCustomApiAgentEngine(
         stopRequested = false
         sessionAllowAll = false
         lastBuiltDownload = null
+        activeTurnProfile = profile
+        activeTurnTemperature = temperature
         ensureWorkspaceDirectories()
 
         val priorLoaded = if (store.messages.value.isNotEmpty() &&
@@ -235,7 +247,7 @@ class AntigravityCustomApiAgentEngine(
         var stepCounter = 0
         var forceXmlToolFallback = false
 
-        val maxAgentSteps = 30
+        val maxAgentSteps = MAX_AGENT_STEPS
         while (stepCounter < maxAgentSteps) {
             currentCoroutineContext().ensureActive()
             stepCounter++
@@ -457,6 +469,7 @@ class AntigravityCustomApiAgentEngine(
             "grep_search" -> "grep \"${args.optString("pattern")}\" ${args.optString("path", "/root/workspace")}"
             "read_url" -> "fetch ${args.optString("url")}"
             "build_android_apk" -> "saif-build-apk ${args.optString("project_dir")} --name \"${args.optString("app_name")}\""
+            "delegate_parallel" -> "subagents x${args.optJSONArray("subtasks")?.length() ?: 0}"
             else -> "$toolName ${args.toString().take(120)}"
         }
     }
@@ -477,7 +490,8 @@ class AntigravityCustomApiAgentEngine(
                 "grep_search" -> grepWorkspace(args)
                 "read_url" -> fetchWebUrl(args)
                 "build_android_apk" -> buildAndroidApkTool(args)
-                else -> Triple(false, "Unknown tool: $name. Use exactly one of: run_command, view_file, write_file, edit_file, list_dir, grep_search, read_url, build_android_apk.", 1)
+                "delegate_parallel" -> delegateParallelSubtasks(args)
+                else -> Triple(false, "Unknown tool: $name. Use exactly one of: run_command, view_file, write_file, edit_file, list_dir, grep_search, read_url, build_android_apk, delegate_parallel.", 1)
             }
         } catch (e: Exception) {
             Triple(false, "Tool error: ${e.localizedMessage ?: e.javaClass.simpleName}", 1)
@@ -703,6 +717,71 @@ class AntigravityCustomApiAgentEngine(
         return Triple(true, summary.trim(), 0)
     }
 
+    /**
+     * Fans one heavy task out to up to [MAX_PARALLEL_SUBAGENTS] specialist subagents that run
+     * at the same time in this chat, then returns their combined results for the main agent
+     * to merge into the final answer. Each worker gets the shared `context` plus its own
+     * subtask and answers in full detail (single-shot, no tools).
+     */
+    private suspend fun delegateParallelSubtasks(args: JSONObject): Triple<Boolean, String, Int?> =
+        withContext(Dispatchers.IO) {
+            val profile = activeTurnProfile
+                ?: return@withContext Triple(false, "No active model profile for subagents.", 1)
+            val rawTasks = args.optJSONArray("subtasks")
+                ?: return@withContext Triple(false, "Missing 'subtasks' array.", 1)
+            if (rawTasks.length() == 0) return@withContext Triple(false, "Empty 'subtasks' array.", 1)
+            val sharedContext = args.optString("context").trim().take(4_000)
+            val tasks = (0 until minOf(rawTasks.length(), MAX_PARALLEL_SUBAGENTS)).mapNotNull { idx ->
+                val fallbackId = "part${idx + 1}"
+                val asObj = rawTasks.optJSONObject(idx)
+                val pair = if (asObj != null) {
+                    asObj.optString("id").ifBlank { fallbackId } to asObj.optString("task").trim()
+                } else {
+                    fallbackId to rawTasks.optString(idx).trim()
+                }
+                pair.takeIf { it.second.isNotBlank() }
+            }
+            if (tasks.isEmpty()) return@withContext Triple(false, "No valid subtasks found.", 1)
+
+            val workerResults = tasks.map { (id, task) ->
+                async {
+                    val workerHistory = JSONArray().put(
+                        JSONObject().put("role", "user").put(
+                            "content",
+                            buildString {
+                                if (sharedContext.isNotBlank()) {
+                                    append("Shared background:\n").append(sharedContext).append("\n\n")
+                                }
+                                append("Your subtask (ID $id) - solve it completely and in full detail:\n").append(task)
+                            }
+                        )
+                    )
+                    runCatching {
+                        callCustomProvider(
+                            profile = profile,
+                            conversationHistory = workerHistory,
+                            temperature = activeTurnTemperature,
+                            usePromptToolFallback = false,
+                            onFallbackTriggered = {},
+                            systemOverride = WORKER_SYSTEM_PROMPT,
+                            includeTools = false,
+                            continuationsLeft = 1
+                        ).text
+                    }.getOrElse { e -> "SUBAGENT_FAILED: ${e.localizedMessage ?: e.javaClass.simpleName}" }
+                }
+            }.awaitAll()
+
+            val merged = buildString {
+                appendLine("PARALLEL_SUBAGENTS_DONE=${workerResults.size}")
+                tasks.forEachIndexed { i, (id, task) ->
+                    appendLine("--- Subagent ${i + 1}/${tasks.size} [$id]: ${task.take(160)} ---")
+                    appendLine(workerResults[i].take(MAX_SUBAGENT_CHARS).ifBlank { "(empty result)" })
+                }
+                append("Merge these specialist results into your final answer now; keep every detail.")
+            }
+            Triple(true, merged.trim(), 0)
+        }
+
     private fun buildInitialHistoryJson(
         priorMessages: List<ChatMessage>,
         expandedPrompt: String,
@@ -742,8 +821,11 @@ Workspace paths:
 - `/root/workspace` is your persistent project & code workspace.
 - `/root/uploads` contains any files, videos, APKs, ZIPs, PDFs, or media attached by the user.
 - For greetings, casual chat, and general-knowledge questions, answer directly and concisely in plain text without calling tools.
-- For coding, inspecting attached files in `/root/uploads`, Linux commands, git/GitHub tasks, web lookups, or building Android APKs, use your workspace tools (`view_file`, `write_file`, `edit_file`, `list_dir`, `grep_search`, `run_command`, `read_url`, `build_android_apk`).
+- For coding, inspecting attached files in `/root/uploads`, Linux commands, git/GitHub tasks, web lookups, or building Android APKs, use your workspace tools (`view_file`, `write_file`, `edit_file`, `list_dir`, `grep_search`, `run_command`, `read_url`, `build_android_apk`, `delegate_parallel`).
 - When asked to build an Android app or APK: create clean project files inside `/root/workspace/<app-slug>` (either a mobile HTML5/CSS/JS app with `index.html` or a Java Android layout under `app/src/main/{AndroidManifest.xml,java,res}`), then call `build_android_apk` (or `saif-build-apk` via `run_command`) and include the returned `DOWNLOAD_URL` as a clickable Markdown link `[Download App APK](DOWNLOAD_URL)`.
+- NEVER paste a whole app's code in the chat as text: always do the work with your tools (write files, then build). The user wants a finished, downloadable result - not a code dump.
+- Quality rule: do every task in full detail with no shortcuts, no placeholders and no TODOs. For heavy or complex multi-part tasks, split the work with `delegate_parallel` (up to 4 specialists at once, one subtask each), then merge every detail of their results into your final answer and files.
+- Format rule: deliver the download in exactly the format the user asked for (APK, ZIP, HTML, MP4, PDF...). If they asked for a ZIP, zip the project and publish it with `saif-apk-link`; if they asked for a single HTML/video/file, publish that file - then end with the `⬇️ **Download link:**` line.
 - Download-link rule (applies to EVERY successful build — APK, video, ZIP or any file): if no DOWNLOAD_URL was returned for a produced file, publish it with `saif-apk-link <absolute-path>` via `run_command`, and ALWAYS end your final answer with a last line `⬇️ **Download link:** [Download <file-name>](URL)` using the real URL. The user must never have to ask for the link.
 """.trimIndent()
         if (!useXmlToolMode) return base
@@ -759,6 +841,7 @@ Available tools:
 - `grep_search`: `{"pattern": "...", "path": "/root/workspace"}`
 - `read_url`: `{"url": "https://..."}`
 - `build_android_apk`: `{"project_dir": "/root/workspace/app", "app_name": "My App", "package_name": "com.saifai.myapp"}`
+- `delegate_parallel`: `{"subtasks": [{"id": "ui", "task": "Design..."}, {"id": "logic", "task": "Write..."}], "context": "shared background"}`
 """.trimIndent()
     }
 
@@ -860,6 +943,16 @@ Available tools:
                         .put("app_name", prop("string", "Display name of the Android app"))
                         .put("package_name", prop("string", "Android package name, e.g. com.saifai.calculator")),
                     listOf("project_dir", "app_name")
+                )
+            )
+            .put(
+                fn(
+                    "delegate_parallel",
+                    "Fan heavy multi-part work out to up to 4 specialist subagents that run AT THE SAME TIME in this chat; returns their combined detailed results for you to merge into the final answer.",
+                    JSONObject()
+                        .put("subtasks", prop("array", "2 to 4 subtasks, each {\"id\": \"short-id\", \"task\": \"full detailed instructions\"}"))
+                        .put("context", prop("string", "Shared background every subagent needs (goal, paths, conventions)")),
+                    listOf("subtasks")
                 )
             )
     }
@@ -983,14 +1076,38 @@ Available tools:
         conversationHistory: JSONArray,
         temperature: Float,
         usePromptToolFallback: Boolean,
-        onFallbackTriggered: () -> Unit
+        onFallbackTriggered: () -> Unit,
+        systemOverride: String? = null,
+        includeTools: Boolean = true,
+        continuationsLeft: Int = MAX_OUTPUT_CONTINUATIONS
     ): ParsedModelTurn {
         val protocol = AntigravityCustomApiManager.resolveProtocol(profile)
-        return when (protocol) {
-            AgyApiProtocol.ANTHROPIC -> callAnthropic(profile, conversationHistory, temperature, usePromptToolFallback, onFallbackTriggered)
-            AgyApiProtocol.GEMINI_NATIVE -> callGeminiNative(profile, conversationHistory, temperature, usePromptToolFallback, onFallbackTriggered)
-            else -> callOpenAiCompatible(profile, conversationHistory, temperature, usePromptToolFallback, onFallbackTriggered)
+        val parsed = when (protocol) {
+            AgyApiProtocol.ANTHROPIC -> callAnthropic(profile, conversationHistory, temperature, usePromptToolFallback, onFallbackTriggered, OUTPUT_MAX_TOKENS, systemOverride, includeTools)
+            AgyApiProtocol.GEMINI_NATIVE -> callGeminiNative(profile, conversationHistory, temperature, usePromptToolFallback, onFallbackTriggered, true, systemOverride, includeTools)
+            else -> callOpenAiCompatible(profile, conversationHistory, temperature, usePromptToolFallback, onFallbackTriggered, OUTPUT_MAX_TOKENS, systemOverride, includeTools)
         }
+        // Truncated mid-answer with no tool calls: keep going instead of stopping half-way.
+        if (!parsed.truncated || parsed.toolInvocations.isNotEmpty() || continuationsLeft <= 0) {
+            return parsed
+        }
+        val extended = JSONArray()
+        for (i in 0 until conversationHistory.length()) {
+            extended.put(conversationHistory.opt(i))
+        }
+        extended.put(JSONObject().put("role", "assistant").put("content", parsed.text))
+        extended.put(JSONObject().put("role", "user").put("content", CONTINUE_PROMPT))
+        val rest = callCustomProvider(
+            profile, extended, temperature, usePromptToolFallback, onFallbackTriggered,
+            systemOverride, includeTools, continuationsLeft - 1
+        )
+        return parsed.copy(
+            text = parsed.text + rest.text,
+            toolInvocations = rest.toolInvocations,
+            promptTokens = parsed.promptTokens + rest.promptTokens,
+            outputTokens = parsed.outputTokens + rest.outputTokens,
+            truncated = rest.truncated
+        )
     }
 
     private fun callOpenAiCompatible(
@@ -998,13 +1115,16 @@ Available tools:
         history: JSONArray,
         temperature: Float,
         useXmlFallback: Boolean,
-        onFallbackTriggered: () -> Unit
+        onFallbackTriggered: () -> Unit,
+        maxTokens: Int = OUTPUT_MAX_TOKENS,
+        systemOverride: String? = null,
+        includeTools: Boolean = true
     ): ParsedModelTurn {
         val url = AntigravityCustomApiManager.buildOpenAiChatCompletionsUrl(profile.baseUrl)
         val mediaType = "application/json; charset=utf-8".toMediaType()
 
         val messagesArr = JSONArray()
-        messagesArr.put(JSONObject().put("role", "system").put("content", buildSystemPrompt(useXmlFallback)))
+        messagesArr.put(JSONObject().put("role", "system").put("content", systemOverride ?: buildSystemPrompt(useXmlFallback)))
 
         for (i in 0 until history.length()) {
             val item = history.optJSONObject(i) ?: continue
@@ -1044,7 +1164,8 @@ Available tools:
             .put("model", profile.selectedModel)
             .put("messages", messagesArr)
             .put("temperature", temperature.toDouble())
-        if (!useXmlFallback) {
+            .put("max_tokens", maxTokens)
+        if (!useXmlFallback && includeTools) {
             payload.put("tools", openAiToolDefinitions())
         }
 
@@ -1067,7 +1188,12 @@ Available tools:
                     (lower.contains("tool") || lower.contains("function") || lower.contains("unsupported"))
                 ) {
                     onFallbackTriggered()
-                    return callOpenAiCompatible(profile, history, temperature, true, onFallbackTriggered)
+                    return callOpenAiCompatible(profile, history, temperature, true, onFallbackTriggered, maxTokens, systemOverride, includeTools)
+                }
+                if (resp.code == 400 && maxTokens > OUTPUT_MIN_TOKENS &&
+                    (lower.contains("max_tokens") || lower.contains("max tokens") || lower.contains("too large") || lower.contains("maximum"))
+                ) {
+                    return callOpenAiCompatible(profile, history, temperature, useXmlFallback, onFallbackTriggered, (maxTokens / 2).coerceAtLeast(OUTPUT_MIN_TOKENS), systemOverride, includeTools)
                 }
                 error(friendlyApiError(profile.name, resp.code, AntigravityCustomApiManager.extractApiError(body)))
             }
@@ -1148,12 +1274,14 @@ Available tools:
         if (invocations.isEmpty() && xmlTools.isNotEmpty()) {
             invocations.addAll(xmlTools)
         }
+        val truncated = choice.optString("finish_reason").equals("length", ignoreCase = true)
         return ParsedModelTurn(
             text = cleanText,
             thought = combinedThought,
             toolInvocations = invocations,
             promptTokens = promptTok,
-            outputTokens = completionTok
+            outputTokens = completionTok,
+            truncated = truncated
         )
     }
 
@@ -1162,7 +1290,10 @@ Available tools:
         history: JSONArray,
         temperature: Float,
         useXmlFallback: Boolean,
-        onFallbackTriggered: () -> Unit
+        onFallbackTriggered: () -> Unit,
+        maxTokens: Int = OUTPUT_MAX_TOKENS,
+        systemOverride: String? = null,
+        includeTools: Boolean = true
     ): ParsedModelTurn {
         val url = AntigravityCustomApiManager.buildAnthropicMessagesUrl(profile.baseUrl)
         val mediaType = "application/json; charset=utf-8".toMediaType()
@@ -1245,12 +1376,12 @@ Available tools:
 
         val payload = JSONObject()
             .put("model", profile.selectedModel)
-            .put("max_tokens", 8192)
-            .put("system", buildSystemPrompt(useXmlFallback))
+            .put("max_tokens", maxTokens)
+            .put("system", systemOverride ?: buildSystemPrompt(useXmlFallback))
             .put("temperature", temperature.toDouble().coerceIn(0.0, 1.0))
             .put("messages", anthroMessages)
 
-        if (!useXmlFallback) {
+        if (!useXmlFallback && includeTools) {
             val anthroTools = JSONArray()
             val oaTools = openAiToolDefinitions()
             for (idx in 0 until oaTools.length()) {
@@ -1278,12 +1409,17 @@ Available tools:
             if (!resp.isSuccessful) {
                 if (!useXmlFallback && resp.code == 400 && body.contains("tool", ignoreCase = true)) {
                     onFallbackTriggered()
-                    return callAnthropic(profile, history, temperature, true, onFallbackTriggered)
+                    return callAnthropic(profile, history, temperature, true, onFallbackTriggered, maxTokens, systemOverride, includeTools)
+                }
+                // Small models reject a big max_tokens: halve and retry instead of failing the turn.
+                if (resp.code == 400 && maxTokens > OUTPUT_MIN_TOKENS && body.contains("token", ignoreCase = true)) {
+                    return callAnthropic(profile, history, temperature, useXmlFallback, onFallbackTriggered, (maxTokens / 2).coerceAtLeast(OUTPUT_MIN_TOKENS), systemOverride, includeTools)
                 }
                 error(friendlyApiError(profile.name, resp.code, AntigravityCustomApiManager.extractApiError(body)))
             }
             val root = JSONObject(body)
             val usage = root.optJSONObject("usage")
+            val truncated = root.optString("stop_reason").equals("max_tokens", ignoreCase = true)
             val contentArr = root.optJSONArray("content") ?: JSONArray()
             val textParts = mutableListOf<String>()
             val thoughtParts = mutableListOf<String>()
@@ -1312,7 +1448,8 @@ Available tools:
                 thought = thoughtParts.joinToString("\n\n").takeIf { it.isNotBlank() },
                 toolInvocations = invocations,
                 promptTokens = usage?.optInt("input_tokens", 0) ?: 0,
-                outputTokens = usage?.optInt("output_tokens", 0) ?: 0
+                outputTokens = usage?.optInt("output_tokens", 0) ?: 0,
+                truncated = truncated
             )
         }
     }
@@ -1322,7 +1459,10 @@ Available tools:
         history: JSONArray,
         temperature: Float,
         useXmlFallback: Boolean,
-        onFallbackTriggered: () -> Unit
+        onFallbackTriggered: () -> Unit,
+        includeMaxOutput: Boolean = true,
+        systemOverride: String? = null,
+        includeTools: Boolean = true
     ): ParsedModelTurn {
         val url = AntigravityCustomApiManager.buildGeminiGenerateContentUrl(
             profile.baseUrl,
@@ -1408,15 +1548,17 @@ Available tools:
             }
         }
 
+        val genConfig = JSONObject().put("temperature", temperature.toDouble())
+        if (includeMaxOutput) genConfig.put("maxOutputTokens", OUTPUT_MAX_TOKENS)
         val payload = JSONObject()
             .put(
                 "systemInstruction",
-                JSONObject().put("parts", JSONArray().put(JSONObject().put("text", buildSystemPrompt(useXmlFallback))))
+                JSONObject().put("parts", JSONArray().put(JSONObject().put("text", systemOverride ?: buildSystemPrompt(useXmlFallback))))
             )
             .put("contents", contents)
-            .put("generationConfig", JSONObject().put("temperature", temperature.toDouble()))
+            .put("generationConfig", genConfig)
 
-        if (!useXmlFallback) {
+        if (!useXmlFallback && includeTools) {
             val decls = JSONArray()
             val oaTools = openAiToolDefinitions()
             for (idx in 0 until oaTools.length()) {
@@ -1442,14 +1584,18 @@ Available tools:
             if (!resp.isSuccessful) {
                 if (!useXmlFallback && resp.code == 400 && body.contains("tool", ignoreCase = true)) {
                     onFallbackTriggered()
-                    return callGeminiNative(profile, history, temperature, true, onFallbackTriggered)
+                    return callGeminiNative(profile, history, temperature, true, onFallbackTriggered, includeMaxOutput, systemOverride, includeTools)
+                }
+                if (resp.code == 400 && includeMaxOutput && body.contains("token", ignoreCase = true)) {
+                    return callGeminiNative(profile, history, temperature, useXmlFallback, onFallbackTriggered, false, systemOverride, includeTools)
                 }
                 error(friendlyApiError(profile.name, resp.code, AntigravityCustomApiManager.extractApiError(body)))
             }
             val root = JSONObject(body)
             val usage = root.optJSONObject("usageMetadata")
-            val parts = root.optJSONArray("candidates")
-                ?.optJSONObject(0)
+            val firstCandidate = root.optJSONArray("candidates")?.optJSONObject(0)
+            val truncated = firstCandidate?.optString("finishReason").equals("MAX_TOKENS", ignoreCase = true)
+            val parts = firstCandidate
                 ?.optJSONObject("content")
                 ?.optJSONArray("parts") ?: JSONArray()
 
@@ -1482,7 +1628,8 @@ Available tools:
                 thought = thoughts.joinToString("\n\n").takeIf { it.isNotBlank() },
                 toolInvocations = invocations,
                 promptTokens = usage?.optInt("promptTokenCount", 0) ?: 0,
-                outputTokens = usage?.optInt("candidatesTokenCount", 0) ?: 0
+                outputTokens = usage?.optInt("candidatesTokenCount", 0) ?: 0,
+                truncated = truncated
             )
         }
     }
@@ -1490,7 +1637,29 @@ Available tools:
     companion object {
         private const val MAX_HTTP_RETRIES = 4
         private const val MAX_RETRY_WAIT_MS = 60_000L
-        private const val MAX_TOOL_RESULT_CHARS = 12_000
+        private const val MAX_TOOL_RESULT_CHARS = 24_000
+
+        /** High-detail output budget per model call; halved automatically for small models. */
+        const val OUTPUT_MAX_TOKENS = 16384
+        private const val OUTPUT_MIN_TOKENS = 2048
+
+        /** Extra "continue where you stopped" rounds when an answer is cut off mid-way. */
+        private const val MAX_OUTPUT_CONTINUATIONS = 3
+        private const val CONTINUE_PROMPT =
+            "Continue exactly where you stopped. Output ONLY the remaining content - do not repeat " +
+                "anything, no intro, no summary, no commentary."
+
+        /** Agent loop budget: heavy builds get twice the room they had before. */
+        private const val MAX_AGENT_STEPS = 60
+
+        /** Parallel helper subagents (delegate_parallel tool). */
+        private const val MAX_PARALLEL_SUBAGENTS = 4
+        private const val MAX_SUBAGENT_CHARS = 8_000
+        private const val WORKER_SYSTEM_PROMPT =
+            "You are a specialist subagent of SAIF AI running inside the user's own chat. Solve ONLY the subtask " +
+                "given to you. Be thorough, detailed and precise - no shortcuts, no placeholders, no TODOs. You have " +
+                "no tools: return your complete deliverable as text (code, research, plan or content). Never ask " +
+                "questions; make sensible assumptions and state them in one line."
         private const val OLD_TOOL_RESULT_CHARS = 1_500
         private const val OLD_ARGS_CHARS = 1_200
         private val THINK_BLOCK_REGEX = Regex("""<think>([\s\S]*?)</think>""", RegexOption.IGNORE_CASE)

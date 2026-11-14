@@ -673,7 +673,7 @@ fun SaifAiApp(
                                     val chipLabel = antigravityModels.firstOrNull { it.id == selectedAntigravityModel }?.displayName
                                         ?: "Model"
                                     val chipQuota = antigravityQuotas.firstOrNull { it.modelId == selectedAntigravityModel }
-                                        ?.remainingFraction?.let { (it * 100f).toInt().coerceIn(0, 100) }
+                                        ?.effectiveRemaining?.let { (it * 100f).toInt().coerceIn(0, 100) }
                                     com.example.ui.components.SaifModelChip(
                                         label = chipLabel,
                                         quotaPercent = chipQuota,

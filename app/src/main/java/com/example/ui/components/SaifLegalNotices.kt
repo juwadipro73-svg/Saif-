@@ -7,7 +7,7 @@ package com.example.ui.components
 
 /** The licence and credit texts bundled in `assets/legal`, and where the source code lives. */
 object SaifLegalNotices {
-    const val SOURCE_URL = "https://github.com/juwadipro73-svg/claude-saif-ai"
+    const val SOURCE_URL = "https://github.com/juwadipro73-svg/Saif-"
     const val CREDITS_PAGE = "THIRD_PARTY_NOTICES.md"
     const val LICENSE_PAGE = "LICENSE"
 

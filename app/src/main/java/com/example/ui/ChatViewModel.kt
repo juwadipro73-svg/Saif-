@@ -691,6 +691,8 @@ class ChatViewModel(
                     finalDeliveredResult
                 }
                 repository.insertMessage(ChatMessageEntity(sessionId = sessionId, role = "model", content = deliveredWithLink))
+                // Keep the chatbox quota % live: a finished turn just consumed quota.
+                runCatching { engine.agyBackend.refreshQuotas(force = true) }
                 workCompleted = true
                 com.example.util.SaifMemoryCore.learn(com.example.util.SaifMemoryCore.Features.CHAT, prompt, finalDeliveredResult)
                 val prefs = context.getSharedPreferences("SettingsPrefs", android.content.Context.MODE_PRIVATE)

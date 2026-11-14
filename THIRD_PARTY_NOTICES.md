@@ -17,7 +17,7 @@ later version** (`GPL-3.0-or-later`), the same licence as the project it is buil
     for more details.
 
 **Source code.** The complete source of SAIF AI, including every change made to the projects below, is published at
-<https://github.com/juwadipro73-svg/claude-saif-ai>. Each APK shows its build number and commit in
+<https://github.com/juwadipro73-svg/Saif->. Each APK shows its version and build code in
 Settings (bottom of the screen); the source of that exact build is the repository at that commit.
 
 The same notices are inside the app: **Settings > About SAIF AI > Credits**.

@@ -273,6 +273,33 @@ data class ModelQuota(
 ) {
     val percentage: Int
         get() = remainingFraction?.let { (it * 100).toInt() } ?: 0
+
+    /**
+     * The binding quota: whichever window (5-hour or weekly) runs out first is what the
+     * user actually feels, so the chatbox chip shows the minimum of the two.
+     */
+    val effectiveRemaining: Float?
+        get() {
+            val five = remainingFraction
+            val week = weeklyRemainingFraction
+            return when {
+                five != null && week != null -> minOf(five, week)
+                five != null -> five
+                else -> week
+            }
+        }
+}
+
+/**
+ * Pure helper for [ModelQuota.effectiveRemaining] (kept testable without Android).
+ * Returns the binding remaining fraction across the 5-hour and weekly windows.
+ */
+fun bindingQuotaFraction(fiveHour: Float?, weekly: Float?): Float? {
+    return when {
+        fiveHour != null && weekly != null -> minOf(fiveHour, weekly)
+        fiveHour != null -> fiveHour
+        else -> weekly
+    }
 }
 
 @Serializable
