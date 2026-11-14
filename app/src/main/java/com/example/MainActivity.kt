@@ -24,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,6 +96,13 @@ class MainActivity : ComponentActivity() {
             }
         }
         com.example.data.local.AdminConfigManager.init(applicationContext)
+        // Tamper guard: repackaged / debugger-attached / hooked installs die here, before any UI.
+        // Must run after AdminConfigManager.init so the admin-panel report path has a context.
+        com.example.security.SaifTamperGuard.startupCheck(applicationContext)
+        // Download/active-user analytics heartbeat (fire-and-forget; never blocks startup).
+        lifecycleScope.launch {
+            runCatching { com.example.data.local.AdminConfigManager.recordInstallAndHeartbeat() }
+        }
         com.example.data.local.ProviderSettingsManager.init(applicationContext)
         ThemeManager.init(applicationContext)
         com.example.utils.TTSManager.init(applicationContext)
@@ -105,6 +113,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            // Remote kill switch: block entry for every non-admin while the admin's
+            // force-update switch is on. Admins always bypass it so they can turn it off.
+            val gateConfig by com.example.data.local.AdminConfigManager.globalConfig.collectAsState()
+            val gateUser by AuthManager.currentUser.collectAsState()
+            val activityContext = LocalContext.current
+            val gateBlocked = remember(gateConfig, gateUser) {
+                com.example.ui.components.ForceUpdateGate.shouldBlock(
+                    config = gateConfig,
+                    installedVersionCode = com.example.ui.components.ForceUpdateGate.installedVersionCode(activityContext),
+                    isAdmin = gateUser?.isAdmin == true
+                )
+            }
+            if (gateBlocked) {
+                SaifAiTheme(isLightMode = false) {
+                    com.example.ui.components.ForceUpdateGateScreen(
+                        downloadUrl = gateConfig.forceUpdateDownloadUrl
+                    )
+                }
+                return@setContent
+            }
+
             // Request runtime notification permission on Android 13+
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 val notifLauncher = androidx.activity.compose.rememberLauncherForActivityResult(

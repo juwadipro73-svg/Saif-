@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [ChatSessionEntity::class, ChatMessageEntity::class, UserAccountEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class SaifDatabase : RoomDatabase() {
@@ -25,6 +25,14 @@ abstract class SaifDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Additive only: existing accounts, chats and projects are untouched.
+                db.execSQL("ALTER TABLE user_accounts ADD COLUMN lastActiveAt INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE user_accounts ADD COLUMN isGuest INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         @Volatile
         private var INSTANCE: SaifDatabase? = null
 
@@ -35,7 +43,7 @@ abstract class SaifDatabase : RoomDatabase() {
                     SaifDatabase::class.java,
                     "saif_ai_database_v2"
                 )
-                    .addMigrations(MIGRATION_4_5)
+                    .addMigrations(MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                 INSTANCE = instance

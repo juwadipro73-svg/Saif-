@@ -800,7 +800,7 @@ fun SettingsSheet(
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "SAIF AI ${com.example.gemini.BuildConfig.VERSION_NAME} \u2022 ${com.example.gemini.BuildConfig.BUILD_STAMP}",
+                text = "SAIF AI ${com.example.gemini.BuildConfig.VERSION_NAME.substringBeforeLast("-b")} \u2022 Build ${com.example.gemini.BuildConfig.VERSION_CODE}",
                 fontSize = 11.sp,
                 color = SubtextMuted,
                 modifier = Modifier.fillMaxWidth(),

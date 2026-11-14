@@ -39,6 +39,21 @@ data class LocalApkBuildState(
  */
 object OnDeviceApkBuildManager {
 
+    /**
+     * Hub-chat build guard (the own-API engine has its own native-capable system prompt and must
+     * NOT receive this). Tools-only on purpose: the model must build with its workspace tools and
+     * never write app code in the chat. The `<saif-apk>` marker path stays in the app purely as a
+     * fallback compiler for blocks the model emits on its own — it is deliberately NOT advertised
+     * here, because advertising it deroutes native builds into HTML and code dumps.
+     */
+    const val CHAT_APK_BUILD_RULE =
+        "Build rule: when the user asks for an app or APK, NEVER write its code in the chat as plain text " +
+            "- no HTML, no Java, no Kotlin dumps. ALWAYS do the work with your tools: write the project files, " +
+            "then build with `build_android_apk` (or `saif-build-apk` via `run_command`). A NATIVE Android request " +
+            "means a native Java/Kotlin project with AndroidManifest.xml under app/src/main - never substitute HTML. " +
+            "Deliver the exact format asked (APK, ZIP, HTML, video) and always finish with the real download link " +
+            "on its own last line - never invent a link."
+
     private val _current = MutableStateFlow<LocalApkBuildState?>(null)
     val current: StateFlow<LocalApkBuildState?> = _current.asStateFlow()
 
@@ -46,8 +61,46 @@ object OnDeviceApkBuildManager {
         """<saif-apk(?:\s+[^>]*)?>([\s\S]*?)</saif-apk>""",
         setOf(RegexOption.IGNORE_CASE)
     )
+    private val saifApkOpenTagRegex = Regex("""<saif-apk(?:\s[^>]*)?>""", RegexOption.IGNORE_CASE)
     private val nameAttrRegex = Regex("""name\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
     private val pkgAttrRegex = Regex("""package\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    private val formatAttrRegex = Regex("""format\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+    /**
+     * Extracts the `<saif-apk>` build block as (fullTag, headerPart, rawBody). Tolerates a
+     * missing closing tag (answer cut off mid-way): everything after the opening tag is then
+     * treated as the body and healed, so a truncated build still compiles instead of dumping
+     * raw code into the chat.
+     */
+    internal fun extractSaifApkBlock(text: String): Triple<String, String, String>? {
+        val closed = saifApkBlockRegex.find(text)
+        if (closed != null) {
+            val full = closed.value
+            return Triple(full, full.substringBefore(">"), closed.groupValues[1])
+        }
+        val open = saifApkOpenTagRegex.find(text) ?: return null
+        val full = text.substring(open.range.first)
+        val body = text.substring(open.range.last + 1)
+        if (body.isBlank()) return null
+        return Triple(full, open.value.substringBefore(">"), body)
+    }
+
+    /**
+     * Output format the user asked for: explicit `format="zip|html|apk"` wins, otherwise the
+     * user's own words decide (zip / html), defaulting to apk.
+     */
+    internal fun resolveBuildFormat(userPrompt: String, headerPart: String): String {
+        val attr = formatAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim()?.lowercase().orEmpty()
+        if (attr == "zip" || attr == "html" || attr == "htm" || attr == "apk") {
+            return if (attr == "htm") "html" else attr
+        }
+        val lower = userPrompt.lowercase()
+        return when {
+            lower.contains("zip") -> "zip"
+            lower.contains(".html") || lower.contains("html file") || lower.contains("web page") || lower.contains("webpage") -> "html"
+            else -> "apk"
+        }
+    }
 
     private val fillerWords = setOf(
         "a", "an", "the", "my", "me", "for", "of", "to", "in", "on", "with", "and", "or",
@@ -260,13 +313,22 @@ object OnDeviceApkBuildManager {
         assistantReply: String,
         sessionTitle: String? = null
     ): String = withContext(Dispatchers.IO) {
-        val match = saifApkBlockRegex.find(assistantReply) ?: return@withContext assistantReply
-        val fullTag = match.value
-        val headerPart = fullTag.substringBefore(">")
-        val rawBody = match.groupValues[1]
+        val block = extractSaifApkBlock(assistantReply) ?: return@withContext assistantReply
+        val fullTag = block.first
+        val headerPart = block.second
+        val rawBody = block.third
         val html = AutonomousAppBuilder.extractHtmlDocument(rawBody)
             ?: AutonomousAppBuilder.healTruncatedHtml(rawBody)
-            ?: return@withContext assistantReply
+        if (html == null) {
+            // The block is not compilable (e.g. native code pasted into an HTML marker): strip it so
+            // the user NEVER sees a raw code dump, and say how to get the real build instead.
+            val stripped = assistantReply.replace(fullTag, "").trim()
+            if (stripped.isBlank()) {
+                return@withContext "⚠️ That build block was not compilable, so I removed it instead of dumping code " +
+                    "here. Reply **build it again** and I'll construct it with the full workspace tools."
+            }
+            return@withContext stripped
+        }
 
         val explicitName = nameAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim()
         val appName = explicitName?.takeIf { it.isNotBlank() } ?: inferAppName(userPrompt, emptyList(), sessionTitle)
@@ -290,9 +352,50 @@ object OnDeviceApkBuildManager {
             .let { File(it, "index.html").writeText(html) }
         ProjectDataManager.saveProject(context, project)
 
-        val (_, summaryMarkdown) = compileAndPublishProject(context, UUID.randomUUID().toString(), project)
+        // Deliver exactly the format the user asked for: apk (default), zip or single html.
+        val summaryMarkdown = when (resolveBuildFormat(userPrompt, headerPart)) {
+            "zip" -> exportProjectZipFromChat(context, userPrompt, sessionTitle).second
+            "html" -> publishSingleHtmlFromChat(context, project, projectDir)
+            else -> compileAndPublishProject(context, UUID.randomUUID().toString(), project).second
+        }
         val cleanedReply = assistantReply.replace(fullTag, "").trim()
         if (cleanedReply.isBlank()) summaryMarkdown else "$cleanedReply\n\n---\n$summaryMarkdown"
+    }
+
+    /**
+     * Publishes the built `index.html` as a one-tap browser download when the user asked for
+     * an HTML file instead of an installable APK.
+     */
+    private suspend fun publishSingleHtmlFromChat(
+        context: Context,
+        project: ProjectData,
+        projectDir: File
+    ): String = withContext(Dispatchers.IO) {
+        val htmlFile = File(projectDir, "index.html")
+        val cleanName = project.appName
+            .replace(Regex("[^a-zA-Z0-9_]"), "_")
+            .trim('_')
+            .ifBlank { "App" } + ".html"
+        val directUrl = com.example.gemini.data.remote.AndroidLocalBridgeServer.instance
+            .registerDownloadFile(context, htmlFile, cleanName)
+        _current.value = LocalApkBuildState(
+            id = UUID.randomUUID().toString(),
+            kind = "HTML",
+            appName = project.appName,
+            packageName = project.packageName,
+            status = "ready",
+            message = "$cleanName ready (${formatSize(htmlFile.length())})",
+            progress = 1f,
+            artifactFile = htmlFile,
+            downloadsFile = htmlFile,
+            directDownloadUrl = directUrl,
+            sizeBytes = htmlFile.length()
+        )
+        buildString {
+            append("### 🌐 Web File Ready: **${project.appName}**\n\n")
+            append("- **Direct Download Link:** [$cleanName]($directUrl)\n")
+            append("- **Size:** ${formatSize(htmlFile.length())}")
+        }
     }
 
     /**

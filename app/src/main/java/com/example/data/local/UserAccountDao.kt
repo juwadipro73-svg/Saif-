@@ -13,6 +13,12 @@ interface UserAccountDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUser(user: UserAccountEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertUser(user: UserAccountEntity)
+
+    @Query("UPDATE user_accounts SET lastActiveAt = :timestamp WHERE LOWER(email) = LOWER(:email)")
+    suspend fun updateLastActive(email: String, timestamp: Long)
+
     @Query("SELECT COUNT(*) FROM user_accounts")
     suspend fun getUserCount(): Int
 

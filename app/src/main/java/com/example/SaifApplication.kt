@@ -28,6 +28,16 @@ class SaifApplication : Application() {
         com.example.icon.TimeAwareIcon.sync(this)
         com.example.icon.TimeAwareIcon.schedule(this)
 
+        // Advance Auto-Builder supervisor: always-on background continuation of
+        // unfinished project work (startup resume + periodic worker). No button needed.
+        try { com.example.autobuild.AutoBuildSupervisor.onAppStart(this) } catch (_: Throwable) {}
+
+        // Permanent /video editing skill: seed the bundled reference-style-matcher files
+        // onto the device in the background (tiny copy, skipped when up to date).
+        try {
+            Thread { com.example.skills.VideoSkillInstaller.ensureInstalled(this) }.start()
+        } catch (_: Throwable) {}
+
         // The live voice conversation (purple microphone) is SAIF AI's own engine, see com.example.live.SaifLive.
         // It needs no set-up here: it reads the provider key, the voice, the memory and the language setting from
         // the app when a session starts.

@@ -321,8 +321,8 @@ class LiveTurnLoop(
                 }
             )
             if (result.isSuccess) break
-            val kind = com.example.studio.director.ProviderRegistry.classifyFailure(result.exceptionOrNull()?.message)
-            if (kind != com.example.studio.director.FailureKind.QUOTA && kind != com.example.studio.director.FailureKind.AUTH) break
+            val kind = ProviderFailure.classify(result.exceptionOrNull()?.message)
+            if (kind != ProviderFailureKind.QUOTA && kind != ProviderFailureKind.AUTH) break
         }
         currentCoroutineContext().ensureActive()
         if (!isCurrent(token)) return

@@ -165,8 +165,10 @@ object LlmClient {
         // Active limits for self-healing adjustments
         var currentLimits = ModelLimitsStore.get(profile.id, cleanModel)
         val isBuildOrCoding = request.mode == "coding" || request.mode == "build"
+        // Build/coding calls use the model's full learned output limit — no artificial clamp.
+        // (TokenBudgetManager still clamps to the provider's live rate window when needed.)
         var maxTokensToUse = request.maxTokens ?: if (isBuildOrCoding) {
-            min(currentLimits.maxOutputTokens, 16384)
+            currentLimits.maxOutputTokens
         } else {
             min(currentLimits.maxOutputTokens, 4096)
         }

@@ -28,10 +28,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -49,6 +51,8 @@ import androidx.compose.ui.draw.blur
 @Composable
 fun UpgradeDialog(onDismiss: () -> Unit) {
     var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val adminConfig by com.example.data.local.AdminConfigManager.globalConfig.collectAsState()
 
     // Water bubble interaction state for unlock button
     val interactionSource = remember { MutableInteractionSource() }
@@ -209,26 +213,39 @@ fun UpgradeDialog(onDismiss: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Contact Us Link Button
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable { /* Open Contact link */ }
-                            .padding(8.dp)
-                    ) {
-                        Text(
-                            text = "Contact Us",
-                            color = Color(0xFFA07CDE), // Light Blue Link Color
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                            contentDescription = "Open Link",
-                            tint = Color(0xFFA07CDE),
-                            modifier = Modifier.size(16.dp)
-                        )
+                    // Contact Us Link Button (URL is set by the admin; hidden when empty)
+                    val contactLink = adminConfig.contactUrl.trim()
+                    if (contactLink.isNotEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clickable {
+                                    runCatching {
+                                        val fixed = if (contactLink.startsWith("http://") || contactLink.startsWith("https://")) contactLink else "https://$contactLink"
+                                        context.startActivity(
+                                            android.content.Intent(
+                                                android.content.Intent.ACTION_VIEW,
+                                                android.net.Uri.parse(fixed)
+                                            ).apply { addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK) }
+                                        )
+                                    }
+                                }
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = "Contact Us",
+                                color = Color(0xFFA07CDE), // Light Blue Link Color
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+                                contentDescription = "Open Link",
+                                tint = Color(0xFFA07CDE),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }

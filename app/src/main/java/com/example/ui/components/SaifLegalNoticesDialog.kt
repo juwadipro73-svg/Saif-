@@ -36,7 +36,7 @@ fun SaifLegalNoticesDialog(
     var page by remember { mutableStateOf(initialPage) }
     val content = remember(page) {
         runCatching { context.assets.open("legal/$page").bufferedReader().use { it.readText() } }
-            .getOrElse { "This text could not be loaded. It is in the source code at ${SaifLegalNotices.SOURCE_URL}" }
+            .getOrElse { "This text could not be loaded from inside the app. Please reinstall SAIF AI and try again." }
     }
     // A new page starts at its top.
     val textScroll = remember(page) { ScrollState(0) }

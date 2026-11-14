@@ -228,35 +228,6 @@ class ChatViewModel(
     private val _isGenerating = MutableStateFlow(false)
     val isGenerating: StateFlow<Boolean> = _isGenerating.asStateFlow()
 
-    private val _pendingOpenVideoProject = MutableStateFlow<com.example.ui.components.VideoProjectData?>(null)
-    val pendingOpenVideoProject: StateFlow<com.example.ui.components.VideoProjectData?> = _pendingOpenVideoProject.asStateFlow()
-
-    fun consumePendingVideoProject() {
-        _pendingOpenVideoProject.value = null
-    }
-
-    fun triggerVideoProjectOpen(project: com.example.ui.components.VideoProjectData) {
-        _pendingOpenVideoProject.value = project
-    }
-
-    private fun isVideoCreationPrompt(prompt: String): Boolean {
-        if (_currentMode.value == "video" || _currentMode.value == "video_project") return true
-        val p = prompt.lowercase().trim()
-        if (p.contains("grow on youtube") || p.contains("how to grow on youtube") || p.contains("grow channel")) return true
-        if (p.contains("promt se video") || p.contains("prompt se video") || p.contains("prompt to video") || p.contains("script to video")) return true
-        val videoKeywords = listOf(
-            "video", "reel", "short", "clip", "movie", "animat", "timeline", "edl",
-            "youtube", "render", "director", "editor", "sfx", "b-roll", "broll", "voiceover"
-        )
-        val actionKeywords = listOf(
-            "bana", "create", "make", "generate", "render", "edit", "chahiye", "ready karo",
-            "karo", "do", "produce", "synthesize", "likho", "write", "bna", "dikhao", "play"
-        )
-        val hasVideo = videoKeywords.any { p.contains(it) }
-        val hasAction = actionKeywords.any { p.contains(it) }
-        return hasVideo && (hasAction || p.split(Regex("\\s+")).size <= 6)
-    }
-
     private val _selectedAttachments = MutableStateFlow<List<Uri>>(emptyList())
     val selectedAttachments: StateFlow<List<Uri>> = _selectedAttachments.asStateFlow()
 
@@ -445,30 +416,6 @@ class ChatViewModel(
         }
     }
 
-    fun createVideoProjectSession(
-        videoProject: com.example.ui.components.VideoProjectData,
-        context: android.content.Context
-    ) {
-        viewModelScope.launch {
-            // Save video project persistently
-            com.example.util.ProjectDataManager.saveVideoProject(context, videoProject)
-
-            val sessionTitle = videoProject.projectName.trim().ifBlank { "Video Project" }
-            val existing = allSessions.value.firstOrNull { it.title.equals(sessionTitle, ignoreCase = true) && (it.mode == "video_project" || it.mode == "project") }
-            if (existing != null) {
-                _activeSessionId.value = existing.id
-            } else {
-                val newSession = repository.createSession(
-                    title = sessionTitle,
-                    mode = "video_project"
-                )
-                _activeSessionId.value = newSession.id
-            }
-            _currentMode.value = "general"
-            _isFilterBookmarked.value = false
-        }
-    }
-
     private fun safeUriToBase64(context: android.content.Context, uri: android.net.Uri, maxDim: Int = 1024): String? {
         return try {
             val boundsOptions = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -599,6 +546,8 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
+                        // NOTE: no build-marker rule here on purpose. The custom-API engine carries its own
+                        // native-capable build instructions; an extra marker rule deroutes it into HTML/code dumps.
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")
@@ -659,6 +608,7 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
+                        append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")
@@ -733,7 +683,17 @@ class ChatViewModel(
                 } else {
                     result
                 }
-                repository.insertMessage(ChatMessageEntity(sessionId = sessionId, role = "model", content = finalDeliveredResult))
+                // Safety net: when this turn built an APK but the final answer forgot the link,
+                // append it so every build ends with a download link without the user asking.
+                val pendingDownload = runCatching { customApiEngine.consumeLastBuiltDownload() }.getOrNull()
+                val deliveredWithLink = if (pendingDownload != null && !finalDeliveredResult.contains(pendingDownload.second)) {
+                    finalDeliveredResult.trimEnd() + "\n\n⬇️ **Download link:** [Download ${pendingDownload.first} APK](${pendingDownload.second})"
+                } else {
+                    finalDeliveredResult
+                }
+                repository.insertMessage(ChatMessageEntity(sessionId = sessionId, role = "model", content = deliveredWithLink))
+                // Keep the chatbox quota % live: a finished turn just consumed quota.
+                runCatching { engine.agyBackend.refreshQuotas(force = true) }
                 workCompleted = true
                 com.example.util.SaifMemoryCore.learn(com.example.util.SaifMemoryCore.Features.CHAT, prompt, finalDeliveredResult)
                 val prefs = context.getSharedPreferences("SettingsPrefs", android.content.Context.MODE_PRIVATE)
@@ -835,13 +795,7 @@ class ChatViewModel(
         viewModelScope.launch {
             val target = allSessions.value.firstOrNull { it.id == sessionId }
             if (target != null && context != null) {
-                if (target.mode == "video_project" || com.example.util.ProjectDataManager.hasVideoProject(context, target.title)) {
-                    val oldProj = com.example.util.ProjectDataManager.getVideoProject(context, target.title)
-                    if (oldProj != null) {
-                        com.example.util.ProjectDataManager.deleteVideoProject(context, target.title)
-                        com.example.util.ProjectDataManager.saveVideoProject(context, oldProj.copy(projectName = newTitle.trim()))
-                    }
-                } else if (target.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, target.title)) {
+                if (target.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, target.title)) {
                     val oldProj = com.example.util.ProjectDataManager.getProject(context, target.title)
                     if (oldProj != null) {
                         com.example.util.ProjectDataManager.renameProject(context, target.title, newTitle.trim(), oldProj.copy(appName = newTitle.trim()))
@@ -860,8 +814,6 @@ class ChatViewModel(
                 if (target.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, target.title)) {
                     com.example.util.ProjectDataManager.deleteProject(context, target.title)
                     com.example.util.ProjectChatHistoryManager.clearMessages(context, target.title)
-                } else if (target.mode == "video_project" || com.example.util.ProjectDataManager.hasVideoProject(context, target.title)) {
-                    com.example.util.ProjectDataManager.deleteVideoProject(context, target.title)
                 }
             }
             repository.deleteSession(sessionId)
