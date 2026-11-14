@@ -4,6 +4,7 @@ import com.example.agyext.AntigravityCustomApiAgentEngine
 import com.example.compiler.OnDeviceApkBuildManager
 import com.example.gemini.domain.model.bindingQuotaFraction
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -83,10 +84,13 @@ class PowerUnitTest {
     }
 
     @Test
-    fun buildRuleBansCodeDumpsAndTeachesFormats() {
+    fun buildRuleIsToolsOnlyAndNativeAware() {
         val rule = OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE
-        assertTrue(rule.contains("NEVER paste", ignoreCase = true))
-        assertTrue(rule.contains("format=\"zip\"", ignoreCase = true))
-        assertTrue(rule.contains("<saif-apk", ignoreCase = true))
+        assertTrue(rule.contains("NEVER write", ignoreCase = true))
+        assertTrue(rule.contains("build_android_apk", ignoreCase = true))
+        assertTrue(rule.contains("NATIVE", ignoreCase = true))
+        assertTrue(rule.contains("never substitute HTML", ignoreCase = true))
+        // The marker path is a silent fallback now: advertising it deroutes builds into code dumps.
+        assertFalse(rule.contains("<saif-apk", ignoreCase = true))
     }
 }

@@ -5,9 +5,8 @@
  */
 package com.example.ui.components
 
-/** The licence and credit texts bundled in `assets/legal`, and where the source code lives. */
+/** The licence and credit texts bundled in `assets/legal`. */
 object SaifLegalNotices {
-    const val SOURCE_URL = "https://github.com/juwadipro73-svg/Saif-"
     const val CREDITS_PAGE = "THIRD_PARTY_NOTICES.md"
     const val LICENSE_PAGE = "LICENSE"
 
@@ -34,7 +33,7 @@ object SaifLegalNotices {
     /** The first credit line on the About screen. SAIF AI always comes first. */
     const val OWN_CREDIT =
         "SAIF AI \u2022 Copyright (C) 2026 SAIF AI and contributors \u2022 Free software under the GNU GPL v3 or later, with " +
-            "ABSOLUTELY NO WARRANTY \u2022 Source code of every build: $SOURCE_URL"
+            "ABSOLUTELY NO WARRANTY"
 
     /**
      * Everyone else, as a few long lines of small text for the About screen. Keep this in step with section 1 to 4 of

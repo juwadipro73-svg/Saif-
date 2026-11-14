@@ -546,7 +546,8 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
-                        append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
+                        // NOTE: no build-marker rule here on purpose. The custom-API engine carries its own
+                        // native-capable build instructions; an extra marker rule deroutes it into HTML/code dumps.
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")

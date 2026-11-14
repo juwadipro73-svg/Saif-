@@ -97,10 +97,11 @@ class AdminSecurityUnitTest {
     // --- Prompt wiring (compile-time constants, no class init) ---
 
     @Test
-    fun chatApkBuildRuleTeachesTheMarker() {
+    fun chatApkBuildRuleIsToolsOnly() {
         val rule = OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE
-        assertTrue(rule.contains("<saif-apk", ignoreCase = true))
-        assertTrue(rule.contains("name=", ignoreCase = true))
+        assertTrue(rule.contains("NEVER write", ignoreCase = true))
+        assertTrue(rule.contains("build_android_apk", ignoreCase = true))
+        assertFalse(rule.contains("<saif-apk", ignoreCase = true))
     }
 
     @Test

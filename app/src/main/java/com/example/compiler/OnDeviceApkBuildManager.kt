@@ -40,18 +40,19 @@ data class LocalApkBuildState(
 object OnDeviceApkBuildManager {
 
     /**
-     * Appended to the main-chat system prompt: teaches the model the `<saif-apk>` marker that
-     * triggers the on-device compiler. The compiler always appends the download link itself,
-     * so the model must only emit the marker — the user never has to ask for the link.
+     * Hub-chat build guard (the own-API engine has its own native-capable system prompt and must
+     * NOT receive this). Tools-only on purpose: the model must build with its workspace tools and
+     * never write app code in the chat. The `<saif-apk>` marker path stays in the app purely as a
+     * fallback compiler for blocks the model emits on its own — it is deliberately NOT advertised
+     * here, because advertising it deroutes native builds into HTML and code dumps.
      */
     const val CHAT_APK_BUILD_RULE =
-        "App-build rule: when the user asks you to build, create or make an Android app or APK, ALWAYS " +
-            "wrap the COMPLETE single-file mobile HTML5 app (inline CSS/JS, no external files) in exactly one block " +
-            "`<saif-apk name=\"App Name\">...full HTML...</saif-apk>`. Put nothing inside the block except the HTML, " +
-            "and NEVER paste the app's code in the chat as plain text - ONLY the <saif-apk> block. " +
-            "If the user asked for a ZIP, add format=\"zip\"; if they asked for a plain HTML file, add format=\"html\" " +
-            "(default is a signed APK). Build in full detail with no placeholders. " +
-            "The phone compiles it automatically and appends the download link - never invent a link yourself."
+        "Build rule: when the user asks for an app or APK, NEVER write its code in the chat as plain text " +
+            "- no HTML, no Java, no Kotlin dumps. ALWAYS do the work with your tools: write the project files, " +
+            "then build with `build_android_apk` (or `saif-build-apk` via `run_command`). A NATIVE Android request " +
+            "means a native Java/Kotlin project with AndroidManifest.xml under app/src/main - never substitute HTML. " +
+            "Deliver the exact format asked (APK, ZIP, HTML, video) and always finish with the real download link " +
+            "on its own last line - never invent a link."
 
     private val _current = MutableStateFlow<LocalApkBuildState?>(null)
     val current: StateFlow<LocalApkBuildState?> = _current.asStateFlow()
@@ -318,7 +319,16 @@ object OnDeviceApkBuildManager {
         val rawBody = block.third
         val html = AutonomousAppBuilder.extractHtmlDocument(rawBody)
             ?: AutonomousAppBuilder.healTruncatedHtml(rawBody)
-            ?: return@withContext assistantReply
+        if (html == null) {
+            // The block is not compilable (e.g. native code pasted into an HTML marker): strip it so
+            // the user NEVER sees a raw code dump, and say how to get the real build instead.
+            val stripped = assistantReply.replace(fullTag, "").trim()
+            if (stripped.isBlank()) {
+                return@withContext "⚠️ That build block was not compilable, so I removed it instead of dumping code " +
+                    "here. Reply **build it again** and I'll construct it with the full workspace tools."
+            }
+            return@withContext stripped
+        }
 
         val explicitName = nameAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim()
         val appName = explicitName?.takeIf { it.isNotBlank() } ?: inferAppName(userPrompt, emptyList(), sessionTitle)

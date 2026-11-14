@@ -43,7 +43,8 @@ class LegalNoticesBundleTest {
         assertTrue(license.contains("Version 3, 29 June 2007"))
         val notices = file("THIRD_PARTY_NOTICES.md").readText()
         assertTrue(notices.contains("GPL-3.0-or-later"))
-        assertTrue(notices.contains(SaifLegalNotices.SOURCE_URL))
+        // The owner's repository link is deliberately NOT shown in the credits or the notices.
+        assertFalse(notices.contains("github.com/juwadipro73-svg"))
         // The GPL text itself uses the word "proprietary", so look for the title of a closed-source licence.
         assertFalse("no proprietary licence on GPL code", license.contains("PROPRIETARY SOFTWARE LICENSE", ignoreCase = true))
         assertFalse(license.contains("All rights reserved", ignoreCase = true))

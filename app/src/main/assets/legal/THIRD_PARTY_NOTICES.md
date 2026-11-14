@@ -16,9 +16,8 @@ later version** (`GPL-3.0-or-later`), the same licence as the project it is buil
     implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
     for more details.
 
-**Source code.** The complete source of SAIF AI, including every change made to the projects below, is published at
-<https://github.com/juwadipro73-svg/Saif->. Each APK shows its version and build code in
-Settings (bottom of the screen); the source of that exact build is the repository at that commit.
+**Source code.** SAIF AI is free software under the GNU GPL v3 or later. Each APK shows its version and build code in
+Settings (bottom of the screen).
 
 The same notices are inside the app: **Settings > About SAIF AI > Credits**.
 
