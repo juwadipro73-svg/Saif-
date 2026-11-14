@@ -6,12 +6,18 @@ import com.example.builder.safety.EnvelopeItem
 import com.example.builder.safety.EnvelopeParser
 import com.example.builder.safety.HtmlGuard
 import com.example.builder.safety.PatchApplier
+import com.example.autobuild.BuildCheckpointStore
 import com.example.builder.safety.VersionManager
 import com.example.data.local.ProviderSettingsManager
 import com.example.llm.*
 import com.example.ui.components.ProjectData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -35,6 +41,9 @@ object BuildAgent {
         prompt: String,
         qualityMode: QualityMode = QualityMode.MAX,
         base64Images: List<String> = emptyList(),
+        parallelAgents: Int = 1,
+        frozenFiles: Set<String> = emptySet(),
+        briefGuidance: String = "",
         onEvent: suspend (BuildEvent) -> Unit
     ): Result<String> = withContext(Dispatchers.IO) {
         val sanitizedAppName = project.appName.replace(Regex("[^a-zA-Z0-9_]"), "_").ifBlank { "Project" }
@@ -54,11 +63,26 @@ object BuildAgent {
 
         val jobId = "job_${System.currentTimeMillis()}"
 
+        // Advance Auto-Builder: every stage is checkpointed to disk so an interrupted
+        // build (app kill, reboot, days of gap) can resume exactly where it stopped.
+        suspend fun trackPhase(phase: BuildPhase, index: Int, total: Int) {
+            try {
+                BuildCheckpointStore.update(projectDir) {
+                    it.copy(
+                        status = BuildCheckpointStore.STATUS_RUNNING,
+                        lastPhase = phase.name,
+                        lastActiveAt = System.currentTimeMillis()
+                    )
+                }
+            } catch (_: Exception) {}
+            onEvent(BuildEvent.PhaseStarted(phase, index, total))
+        }
+
         try {
             // -------------------------------------------------------------
             // STAGE S0: INTAKE & LANGUAGE/INTENT CLASSIFICATION
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S0_INTAKE, 1, 10))
+            trackPhase(BuildPhase.S0_INTAKE, 1, 10)
             val intent = classifyIntent(prompt, isExistingApp)
             saveJobState(saifDir, BuildJob(
                 jobId = jobId,
@@ -83,11 +107,11 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S1: SPECIFICATION ("Product Brain")
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S1_SPEC, 2, 10))
+            trackPhase(BuildPhase.S1_SPEC, 2, 10)
             onEvent(BuildEvent.Thought("Architecting comprehensive product spec with feature rubrics..."))
 
             val archetypeRules = loadArchetypeRules(context, prompt)
-            val spec = generateSpec(project.appName, distilledPrompt, intent, archetypeRules, provider, activeKey, activeModel)
+            val spec = generateSpec(project.appName, distilledPrompt, intent, archetypeRules, provider, activeKey, activeModel, briefGuidance)
             File(saifDir, "spec.json").writeText(specToJson(spec).toString(2))
 
             onEvent(BuildEvent.Thought("Spec ready: ${spec.features.size} features defined across ${spec.screens.size} screens"))
@@ -95,7 +119,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S2: TASK PLANNING & INTERFACE CONTRACT
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S2_PLAN, 3, 10))
+            trackPhase(BuildPhase.S2_PLAN, 3, 10)
             onEvent(BuildEvent.Thought("Splitting spec into budget-conscious modules and interface manifest..."))
 
             val plan = generatePlan(spec, qualityMode, provider, activeModel)
@@ -107,7 +131,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S3: PARALLEL/INCREMENTAL CODE GENERATION
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S3_GENERATE, 4, 10))
+            trackPhase(BuildPhase.S3_GENERATE, 4, 10)
             val moduleFiles = mutableMapOf<String, String>()
 
             // Load existing module files if available
@@ -120,22 +144,35 @@ object BuildAgent {
             }
 
             val tasksToExecute = plan.tasks
-            for ((idx, task) in tasksToExecute.withIndex()) {
-                onEvent(BuildEvent.TaskStarted(task.id, task.title, task.targetFiles.firstOrNull() ?: ""))
+            // Advance Auto-Builder: continue-forward rule injected into every coder call.
+            val frozenInstruction = if (frozenFiles.isEmpty()) {
+                ""
+            } else {
+                "STRICT CONTINUE-FORWARD RULE: keep every existing feature working. " +
+                    "Do NOT rewrite, remove or redesign these existing files unless this task explicitly requires it: " +
+                    frozenFiles.sorted().joinToString(", ") + "."
+            }
+            // Serializes progress events when several agents report at once.
+            val eventMutex = Mutex()
+            suspend fun emit(event: BuildEvent) = eventMutex.withLock { onEvent(event) }
+
+            suspend fun executeTask(task: BuildTask) {
+                emit(BuildEvent.TaskStarted(task.id, task.title, task.targetFiles.firstOrNull() ?: ""))
 
                 val generatedCode = generateTaskModules(
                     spec = spec,
                     manifest = manifest,
                     task = task,
-                    existingModules = moduleFiles,
+                    existingModules = synchronized(moduleFiles) { moduleFiles.toMap() },
                     provider = provider,
                     apiKey = activeKey,
                     model = activeModel,
+                    frozenInstruction = frozenInstruction,
                     onChunk = { snippet ->
-                        onEvent(BuildEvent.Writing(task.targetFiles.firstOrNull() ?: "", snippet.length, snippet.takeLast(60)))
+                        emit(BuildEvent.Writing(task.targetFiles.firstOrNull() ?: "", snippet.length, snippet.takeLast(60)))
                     },
                     onWaiting = { reason, sec ->
-                        onEvent(BuildEvent.Waiting(reason, sec))
+                        emit(BuildEvent.Waiting(reason, sec))
                     }
                 )
 
@@ -144,22 +181,47 @@ object BuildAgent {
                 for (item in envelopeResult.items) {
                     when (item) {
                         is EnvelopeItem.FileEnvelope -> {
-                            moduleFiles[item.path] = item.content
+                            synchronized(moduleFiles) { moduleFiles[item.path] = item.content }
                             // Save to disk work cache
                             val workFile = File(workDir, item.path.replace('/', '_'))
-                            workFile.writeText(item.content)
+                            try {
+                                workFile.writeText(item.content)
+                            } catch (_: Exception) {}
                         }
                         is EnvelopeItem.PatchEnvelope -> {
-                            val original = moduleFiles[item.path] ?: ""
+                            val original = synchronized(moduleFiles) { moduleFiles[item.path] ?: "" }
                             val patchRes = PatchApplier.apply(original, item.patchContent)
                             if (patchRes.success) {
-                                moduleFiles[item.path] = patchRes.updatedText
-                                onEvent(BuildEvent.Editing(item.path, patchRes.appliedHunks))
+                                synchronized(moduleFiles) { moduleFiles[item.path] = patchRes.updatedText }
+                                emit(BuildEvent.Editing(item.path, patchRes.appliedHunks))
                             } else {
                                 Log.w(TAG, "Patch failed for ${item.path}: ${patchRes.failedHunks.size} hunks failed")
                             }
                         }
                     }
+                }
+                try {
+                    BuildCheckpointStore.update(projectDir) {
+                        it.copy(
+                            completedTaskIds = (it.completedTaskIds + task.id).distinct(),
+                            lastActiveAt = System.currentTimeMillis()
+                        )
+                    }
+                } catch (_: Exception) {}
+            }
+
+            if (parallelAgents > 1) {
+                // Advance Auto-Builder: run independent module tasks on parallel agents.
+                emit(BuildEvent.Thought("Advance mode: ${tasksToExecute.size} tasks across $parallelAgents parallel agents..."))
+                val lanes = parallelAgents.coerceIn(1, 6)
+                for (chunk in tasksToExecute.chunked(lanes)) {
+                    supervisorScope {
+                        chunk.map { task -> async { executeTask(task) } }.awaitAll()
+                    }
+                }
+            } else {
+                for (task in tasksToExecute) {
+                    executeTask(task)
                 }
             }
 
@@ -175,7 +237,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S4: ASSEMBLE & STATIC CHECKS
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S4_ASSEMBLE, 5, 10))
+            trackPhase(BuildPhase.S4_ASSEMBLE, 5, 10)
             onEvent(BuildEvent.Thought("Assembling modules into self-contained HTML document..."))
 
             var assembledHtml = Assembler.assemble(project.appName, spec, moduleFiles)
@@ -185,7 +247,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S5: SANDBOX TEST
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S5_SANDBOX, 6, 10))
+            trackPhase(BuildPhase.S5_SANDBOX, 6, 10)
             onEvent(BuildEvent.Thought("Launching headless WebView sandbox and running DOM probes..."))
 
             var testReport = SandboxRunner.testHtml(context, assembledHtml, spec)
@@ -195,7 +257,7 @@ object BuildAgent {
             // STAGE S6: SELF-FIX LOOP (Up to 3 rounds)
             // -------------------------------------------------------------
             if (!testReport.passed && qualityMode != QualityMode.QUICK) {
-                onEvent(BuildEvent.PhaseStarted(BuildPhase.S6_FIX, 7, 10))
+                trackPhase(BuildPhase.S6_FIX, 7, 10)
                 var fixRound = 0
                 val maxFixRounds = 3
 
@@ -226,7 +288,7 @@ object BuildAgent {
             // STAGE S7: POLISH PASS (Balanced & Max modes)
             // -------------------------------------------------------------
             if (qualityMode == QualityMode.MAX && testReport.passed) {
-                onEvent(BuildEvent.PhaseStarted(BuildPhase.S7_POLISH, 8, 10))
+                trackPhase(BuildPhase.S7_POLISH, 8, 10)
                 onEvent(BuildEvent.Thought("Running visual polish, animation timing, and contrast check..."))
                 delay(300)
             }
@@ -234,7 +296,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S8: ATOMIC COMMIT TO DISK
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S8_COMMIT, 9, 10))
+            trackPhase(BuildPhase.S8_COMMIT, 9, 10)
             val commitResult = VersionManager.commitAtomic(
                 projectDir = projectDir,
                 htmlContent = assembledHtml,
@@ -251,7 +313,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S9: SUMMARY REPORT & NEXT FEATURE IDEAS
             // -------------------------------------------------------------
-            onEvent(BuildEvent.PhaseStarted(BuildPhase.S9_REPORT, 10, 10))
+            trackPhase(BuildPhase.S9_REPORT, 10, 10)
             val nextIdeas = generateNextFeatureIdeas(spec, prompt)
             val summaryText = buildSummaryReport(spec, testReport, versionNum)
 
@@ -330,8 +392,14 @@ object BuildAgent {
         archetypeRules: String,
         provider: String,
         key: String,
-        model: String
+        model: String,
+        briefGuidance: String = ""
     ): AppSpec {
+        val briefSection = if (briefGuidance.isNotBlank()) {
+            "\nADVANCE BRIEF (follow it strictly, exceed it where possible):\n$briefGuidance"
+        } else {
+            ""
+        }
         val systemPrompt = """
             You are the Lead Product Architect for Saif AI.
             Create a complete, rich product spec in JSON format.
@@ -339,7 +407,7 @@ object BuildAgent {
             - At least 12 distinct user-visible features across at least 4 screens/tabs.
             - Include first-run guidance, empty states, error states, and local persistence.
             - Specify exact designSystem colors with contrast >= 4.5:1.
-            $archetypeRules
+            $archetypeRules$briefSection
             Return ONLY valid JSON matching this schema:
             {
               "appName": "$appName",
@@ -477,6 +545,7 @@ object BuildAgent {
         provider: String,
         apiKey: String,
         model: String,
+        frozenInstruction: String = "",
         onChunk: suspend (String) -> Unit,
         onWaiting: suspend (String, Int) -> Unit
     ): String {
@@ -492,12 +561,13 @@ object BuildAgent {
             No alert(), confirm(), or prompt(). 44px min touch targets.
         """.trimIndent()
 
+        val frozenSection = if (frozenInstruction.isNotBlank()) "\n$frozenInstruction" else ""
         val prompt = """
             APP: ${spec.appName} - ${spec.vision}
             TASK: ${task.title}
             TARGET FILES: $targetFilesStr
             DESIGN: ${spec.designSystem.primaryColor} on ${spec.designSystem.backgroundColor}
-            Write complete, production-quality code for: $targetFilesStr.
+            Write complete, production-quality code for: $targetFilesStr.$frozenSection
         """.trimIndent()
 
         val req = LlmRequest(

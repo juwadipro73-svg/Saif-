@@ -167,6 +167,30 @@ fun BuildAIScreen(
         if (loaded.isNotEmpty() && loaded.size >= messages.size) {
             messages = loaded
         }
+        // Advance Auto-Builder: if earlier work was interrupted (even days ago), continue it
+        // automatically from the checkpoint — no button needed, old features stay intact.
+        try {
+            if (com.example.autobuild.AutoBuildSupervisor.hasPendingWork(context, project.appName)) {
+                val resumeNote = BuildAiMessage(
+                    sender = "assistant",
+                    content = "⏳ Pichla kaam adhura reh gaya tha — use wahin se aage badha raha hoon. Pehle ke features bilkul nahi bigadenge. Thodi der me poora result dunga...",
+                    timestamp = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
+                )
+                messages = messages + resumeNote
+                ProjectChatHistoryManager.saveMessages(context, project.appName, messages)
+                coroutineScope.launch(Dispatchers.IO) {
+                    val summary = com.example.autobuild.AutoBuildSupervisor.continueProjectNow(context, project)
+                    withContext(Dispatchers.Main) {
+                        messages = messages + BuildAiMessage(
+                            sender = "assistant",
+                            content = summary,
+                            timestamp = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
+                        )
+                    }
+                }
+            }
+        } catch (_: Exception) {
+        }
     }
 
     // Auto-save messages to persistent storage

@@ -17,6 +17,19 @@ A native Android AI workspace: chat with your own API key (or, optionally, Googl
 - Chat keeps small text/photos under 3 MB inside the app. Attaching an APK, ZIP or video (or a supported >=3 MB photo/document) starts **one private website upload**, not an unsupported Antigravity binary attachment: stream to signed GCS, verify checksum, save to private Drive, then display a one-time download link in SAIF AI. Prompted project ZIPs can also be generated in the cloud. These features require the authenticated gateway, website routing, App Check and builder deployment in [cloud/README.md](cloud/README.md); the supplied demo URL is not verified as a live upload API. The app does not secretly send attached binary bytes to an AI model.
 - Chat text, code snippets and **small images/text attachments (3 MB combined max)** stay in the app. Explicit APK/game compilation and MP4 renders are routed to `SaifAiCloudManager` and an authenticated backend. Project Studio and Video Studio build/export buttons no longer invoke the local APK compiler or full video renderer. A job card listens to Firebase RTDB and shows a private **SAIF AI DOWNLOADS** button when an artifact is ready. Cloud builds require separate service deployment; an unconfigured debug build fails closed and tells you what is missing.
 
+## Advance Auto-Builder (always-on)
+
+Every project build runs through the Advance Auto-Builder (`com.example.autobuild`) with no button needed:
+
+- **Idea expansion** — a one-line idea becomes an ambitious brief (10+ must-features, wow delights, extra screens). Works offline via built-in heuristic briefs when no key/network is available.
+- **Parallel agents** — independent code modules generate on up to 3 agents at once.
+- **Quality gates** — each result is re-tested in the headless sandbox and scored 0-100; anything under 82/100 is automatically improved in rounds (max 3 per session).
+- **Continue-forward rule** — files you didn't ask to touch stay frozen; if a new pass breaks older checks, the previous good version is restored automatically.
+- **Checkpoints + resume** — prompts, file hashes, scores and findings persist per project, so interrupted work continues days later: on app start, every 6 hours in the background, or instantly when you reopen the project chat.
+- **Auto app icon** — a category-matched launcher icon is AI-generated with your own provider key, or drawn procedurally offline. Manually set icons are never overwritten.
+
+Background continuation only runs when a provider key is saved, and announces completion with the standard "Work done" notification when you are away from the app.
+
 ## Cloud/Drive/Firebase setup
 
 See **[cloud/README.md](cloud/README.md)** for the complete backend, builder workflow, Firebase RTDB rules, GCS input staging, private Drive delivery, sponsor-placeholder website, one-time download claim, deployment secrets and known template limitations. The separate public `SaifAI-Builder` repository is readable, but its draft PR #2 still uses placeholder artifacts and is **not** merged, modified from this checkout, or deployed; see the concrete contract gaps in [cloud/README.md](cloud/README.md).

@@ -45,7 +45,8 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
         isGlitchFix: Boolean = false,
         errorInfo: CompilerErrorInfo? = null,
         base64Images: List<String> = emptyList(),
-        onProgressUpdate: suspend (statusText: String, stage: Int) -> Unit = { _, _ -> }
+        onProgressUpdate: suspend (statusText: String, stage: Int) -> Unit = { _, _ -> },
+        advanceMode: Boolean = true
     ): AutonomousBuildResult = withContext(Dispatchers.IO) {
         val sanitizedAppName = project.appName.replace(Regex("[^a-zA-Z0-9_]"), "_").ifBlank { "Project" }
         val projectDir = File(context.filesDir, "projects/$sanitizedAppName").apply { mkdirs() }
@@ -60,13 +61,9 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
         var latestSummary = ""
         val updatedFiles = mutableListOf<String>()
 
-        val result = com.example.builder.agent.BuildAgent.run(
-            context = context,
-            project = project,
-            prompt = fullPrompt,
-            qualityMode = if (isGlitchFix) com.example.builder.agent.QualityMode.BALANCED else com.example.builder.agent.QualityMode.MAX,
-            base64Images = base64Images,
-            onEvent = { event ->
+        // Advance Auto-Builder: shared progress mapping for both the classic pipeline
+        // and the always-on orchestrator (idea expansion, parallel agents, quality gates).
+        val handleEvent: suspend (com.example.builder.agent.BuildEvent) -> Unit = { event ->
                 when (event) {
                     is com.example.builder.agent.BuildEvent.PhaseStarted -> {
                         val stageNum = when (event.phase) {
@@ -121,10 +118,41 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
                     is com.example.builder.agent.BuildEvent.Failed -> {
                         onProgressUpdate("  Build failed: ${event.userMessage}", 4)
                     }
+                    is com.example.builder.agent.BuildEvent.QualityGate -> {
+                        onProgressUpdate(
+                            "  Quality gate: ${event.score}/100" + if (event.passed) " ✓" else " — auto-improving...",
+                            3
+                        )
+                    }
                     else -> {}
                 }
             }
-        )
+
+        // Advance mode is ON by default everywhere (studio chat, AI chat, background
+        // continuation): no button needed. Pass advanceMode=false for the classic path.
+        val result: Result<*> = if (advanceMode) {
+            try {
+                com.example.autobuild.AutoBuildOrchestrator.runAdvancedBuild(
+                    context = context,
+                    project = project,
+                    prompt = fullPrompt,
+                    qualityMode = if (isGlitchFix) com.example.builder.agent.QualityMode.BALANCED else com.example.builder.agent.QualityMode.MAX,
+                    base64Images = base64Images,
+                    onEvent = handleEvent
+                )
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        } else {
+            com.example.builder.agent.BuildAgent.run(
+                context = context,
+                project = project,
+                prompt = fullPrompt,
+                qualityMode = if (isGlitchFix) com.example.builder.agent.QualityMode.BALANCED else com.example.builder.agent.QualityMode.MAX,
+                base64Images = base64Images,
+                onEvent = handleEvent
+            )
+        }
 
         if (result.isSuccess) {
             val rootHtml = File(projectDir, "index.html")

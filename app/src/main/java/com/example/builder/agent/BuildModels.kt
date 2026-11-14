@@ -46,6 +46,7 @@ sealed interface BuildEvent {
     data class Waiting(val reason: String, val seconds: Int) : BuildEvent
     data class ModelSwitch(val from: String, val to: String, val reason: String) : BuildEvent
     data class Retrying(val reason: String) : BuildEvent
+    data class QualityGate(val score: Int, val passed: Boolean) : BuildEvent
     data class Committed(val version: Int) : BuildEvent
     data class ReportReady(val summary: String, val nextIdeas: List<NextFeatureIdea>, val qualityScore: Int) : BuildEvent
     data class Failed(val userMessage: String, val canResume: Boolean) : BuildEvent
