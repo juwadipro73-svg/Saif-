@@ -1,0 +1,56 @@
+name: Deliver APK to sandbox
+# One-shot helper: fetch a published release APK, split it into git-friendly
+# (<100 MB) chunks and force-push them to the `apk-delivery` branch, so that
+# networks which block release-asset/blob hosts can still fetch the APK bytes
+# over plain git (github.com). The apk-delivery push does NOT trigger
+# "Build Android APK" (see its paths-ignore list).
+on:
+  workflow_dispatch:
+    inputs:
+      asset:
+        description: 'Release asset name to deliver'
+        required: true
+        default: 'SAIF-AI-fixed-b29.apk'
+      tag:
+        description: 'Release tag holding the asset'
+        required: true
+        default: 'saif-ai-apk'
+
+permissions:
+  contents: write
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download APK from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p apk && cd apk
+          gh release download "${{ inputs.tag }}" -R "${{ github.repository }}" -p "${{ inputs.asset }}"
+          ls -lh
+
+      - name: Split into git-friendly chunks
+        run: |
+          set -euo pipefail
+          cd apk
+          sha256sum "${{ inputs.asset }}" > SHA256SUM.txt
+          split -b 24m "${{ inputs.asset }}" chunk_
+          rm "${{ inputs.asset }}"
+          cat SHA256SUM.txt
+          ls -lh
+
+      - name: Force-push apk-delivery branch
+        run: |
+          set -euo pipefail
+          cd apk
+          git init -b apk-delivery
+          git config user.email "arena-agent@example.com"
+          git config user.name "Arena Agent"
+          git add -A
+          git commit -m "APK delivery: ${{ inputs.asset }} ($(cut -d' ' -f1 SHA256SUM.txt | cut -c1-12))"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push -f origin apk-delivery

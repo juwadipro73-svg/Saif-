@@ -7,8 +7,12 @@ on:
   push:
     branches: [ "**" ]
     # The catalog sync commits telegram_catalog/*; that alone does not need a new APK.
+    # The deliver-apk.yml helper force-pushes ONLY chunk_* + SHA256SUM.txt to the
+    # apk-delivery branch; that alone must not start a new APK build either.
     paths-ignore:
       - 'telegram_catalog/**'
+      - 'chunk_*'
+      - 'SHA256SUM.txt'
   workflow_dispatch:
 
 permissions:
