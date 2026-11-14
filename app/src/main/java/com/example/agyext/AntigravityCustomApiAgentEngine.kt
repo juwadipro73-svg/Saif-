@@ -71,6 +71,20 @@ class AntigravityCustomApiAgentEngine(
         encodeDefaults = true
     }
 
+    /**
+     * Last successful in-turn APK build (app name + download URL). ChatViewModel consumes it
+     * after each turn and appends the download link when the model's final answer forgot it,
+     * so every build ends with a download link without the user asking.
+     */
+    @Volatile
+    private var lastBuiltDownload: Pair<String, String>? = null
+
+    fun consumeLastBuiltDownload(): Pair<String, String>? {
+        val pending = lastBuiltDownload
+        lastBuiltDownload = null
+        return pending?.takeIf { it.second.isNotBlank() }
+    }
+
     private val httpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -174,6 +188,7 @@ class AntigravityCustomApiAgentEngine(
     ): String = withContext(Dispatchers.IO) {
         stopRequested = false
         sessionAllowAll = false
+        lastBuiltDownload = null
         ensureWorkspaceDirectories()
 
         val priorLoaded = if (store.messages.value.isNotEmpty() &&
@@ -674,6 +689,9 @@ class AntigravityCustomApiAgentEngine(
                 downloadUrl = AndroidLocalBridgeServer.instance.registerDownloadFile(appContext, f, f.name)
             }
         }
+        if (downloadUrl.isNotBlank()) {
+            lastBuiltDownload = appName to downloadUrl
+        }
         val summary = buildString {
             appendLine("APK_BUILT_SUCCESSFULLY=true")
             appendLine("APP_NAME=$appName")
@@ -726,6 +744,7 @@ Workspace paths:
 - For greetings, casual chat, and general-knowledge questions, answer directly and concisely in plain text without calling tools.
 - For coding, inspecting attached files in `/root/uploads`, Linux commands, git/GitHub tasks, web lookups, or building Android APKs, use your workspace tools (`view_file`, `write_file`, `edit_file`, `list_dir`, `grep_search`, `run_command`, `read_url`, `build_android_apk`).
 - When asked to build an Android app or APK: create clean project files inside `/root/workspace/<app-slug>` (either a mobile HTML5/CSS/JS app with `index.html` or a Java Android layout under `app/src/main/{AndroidManifest.xml,java,res}`), then call `build_android_apk` (or `saif-build-apk` via `run_command`) and include the returned `DOWNLOAD_URL` as a clickable Markdown link `[Download App APK](DOWNLOAD_URL)`.
+- Download-link rule (applies to EVERY successful build — APK, video, ZIP or any file): if no DOWNLOAD_URL was returned for a produced file, publish it with `saif-apk-link <absolute-path>` via `run_command`, and ALWAYS end your final answer with a last line `⬇️ **Download link:** [Download <file-name>](URL)` using the real URL. The user must never have to ask for the link.
 """.trimIndent()
         if (!useXmlToolMode) return base
         return base + "\n\n" + """

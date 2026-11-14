@@ -12,5 +12,9 @@ data class UserAccountEntity(
     val isActive: Boolean = true,
     val isBanned: Boolean = false,
     val apiUsageCount: Int = 0,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    // Last time this account opened the app (device-local copy; the cloud copy lives in Firestore).
+    val lastActiveAt: Long = 0L,
+    // True for the per-device guest row ("Continue as Guest"), false for email accounts.
+    val isGuest: Boolean = false
 )

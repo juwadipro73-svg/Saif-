@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
@@ -54,6 +55,13 @@ data class AdminGlobalConfig(
     val totalGlobalApiCalls: Long = 0L,
     val isMaintenanceMode: Boolean = false,
     val maintenanceMessage: String = "SAIF AI is currently under scheduled maintenance. Please check back shortly.",
+    // Remote kill switch: when active, every non-admin install is blocked at entry and
+    // shown the force-update screen with the admin-set download link below.
+    val forceUpdateActive: Boolean = false,
+    val forceUpdateMinCode: Int = 0,
+    val forceUpdateDownloadUrl: String = "",
+    // Admin-set "Contact Us" link (Premium dialog). Blank = button hidden/disabled.
+    val contactUrl: String = "",
     val updatedAt: Long = System.currentTimeMillis(),
     val updatedBy: String = ""
 )
@@ -74,7 +82,11 @@ data class ManagedUser(
     val customAppBuildLimit: Int? = null,
     val customTotalLimit: Int? = null,
     val isUnlimited: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    // Last time this user opened the app (0 = never recorded). Drives Active/Inactive stats.
+    val lastActiveAt: Long = 0L,
+    // True for "Continue as Guest" installs, false for email accounts.
+    val isGuest: Boolean = false
 ) {
     val isAdmin: Boolean get() = role.equals("admin", ignoreCase = true)
 }
@@ -87,6 +99,18 @@ object AdminConfigManager {
     private const val KEY_USER_CHAT_USAGE = "user_chat_usage_count"
     private const val KEY_USER_IMAGE_USAGE = "user_image_usage_count"
     private const val KEY_USER_APPBUILD_USAGE = "user_appbuild_usage_count"
+    private const val KEY_INSTALL_ID = "analytics_install_id"
+    private const val KEY_INSTALL_COUNTED = "analytics_install_counted"
+    private const val KEY_LAST_HEARTBEAT = "analytics_last_heartbeat"
+
+    /** Users seen within this window count as "Active", everyone else as "Inactive". */
+    const val ACTIVE_WINDOW_MS = 7L * 24L * 60L * 60L * 1000L
+
+    /** Minimum gap between two cloud heartbeats from the same install (local stamp is always fresh). */
+    private const val HEARTBEAT_MIN_GAP_MS = 6L * 60L * 60L * 1000L
+
+    fun isRecentlyActive(lastActiveAt: Long, now: Long = System.currentTimeMillis()): Boolean =
+        lastActiveAt > 0L && (now - lastActiveAt) <= ACTIVE_WINDOW_MS
 
     private lateinit var appContext: Context
     private lateinit var prefs: SharedPreferences
@@ -116,6 +140,9 @@ object AdminConfigManager {
 
     private val _isLoadingUsers = MutableStateFlow(false)
     val isLoadingUsers: StateFlow<Boolean> = _isLoadingUsers.asStateFlow()
+
+    private val _installCount = MutableStateFlow(0L)
+    val installCount: StateFlow<Long> = _installCount.asStateFlow()
 
     fun init(context: Context) {
         appContext = context.applicationContext
@@ -163,6 +190,10 @@ object AdminConfigManager {
                     totalGlobalApiCalls = json.optLong("totalGlobalApiCalls", 0L),
                     isMaintenanceMode = json.optBoolean("isMaintenanceMode", false),
                     maintenanceMessage = json.optString("maintenanceMessage", "SAIF AI is currently under scheduled maintenance. Please check back shortly."),
+                    forceUpdateActive = json.optBoolean("forceUpdateActive", false),
+                    forceUpdateMinCode = json.optInt("forceUpdateMinCode", 0),
+                    forceUpdateDownloadUrl = json.optString("forceUpdateDownloadUrl", ""),
+                    contactUrl = json.optString("contactUrl", ""),
                     updatedAt = json.optLong("updatedAt", System.currentTimeMillis()),
                     updatedBy = json.optString("updatedBy", "")
                 )
@@ -200,6 +231,10 @@ object AdminConfigManager {
             put("totalGlobalApiCalls", config.totalGlobalApiCalls)
             put("isMaintenanceMode", config.isMaintenanceMode)
             put("maintenanceMessage", config.maintenanceMessage)
+            put("forceUpdateActive", config.forceUpdateActive)
+            put("forceUpdateMinCode", config.forceUpdateMinCode)
+            put("forceUpdateDownloadUrl", config.forceUpdateDownloadUrl)
+            put("contactUrl", config.contactUrl)
             put("updatedAt", config.updatedAt)
             put("updatedBy", config.updatedBy)
         }
@@ -257,6 +292,10 @@ object AdminConfigManager {
                         val totalCalls = snapshot.getLong("totalGlobalApiCalls") ?: 0L
                         val isMaint = snapshot.getBoolean("isMaintenanceMode") ?: false
                         val maintMsg = snapshot.getString("maintenanceMessage") ?: "SAIF AI is currently under scheduled maintenance."
+                        val forceActive = snapshot.getBoolean("forceUpdateActive") ?: false
+                        val forceMinCode = snapshot.getLong("forceUpdateMinCode")?.toInt() ?: 0
+                        val forceUrl = snapshot.getString("forceUpdateDownloadUrl") ?: ""
+                        val contact = snapshot.getString("contactUrl") ?: ""
                         val updatedAt = snapshot.getLong("updatedAt") ?: System.currentTimeMillis()
                         val updatedBy = snapshot.getString("updatedBy") ?: ""
 
@@ -289,6 +328,10 @@ object AdminConfigManager {
                             totalGlobalApiCalls = totalCalls,
                             isMaintenanceMode = isMaint,
                             maintenanceMessage = maintMsg,
+                            forceUpdateActive = forceActive,
+                            forceUpdateMinCode = forceMinCode,
+                            forceUpdateDownloadUrl = forceUrl,
+                            contactUrl = contact,
                             updatedAt = updatedAt,
                             updatedBy = updatedBy
                         )
@@ -325,6 +368,10 @@ object AdminConfigManager {
                     "totalGlobalApiCalls" to config.totalGlobalApiCalls,
                     "isMaintenanceMode" to config.isMaintenanceMode,
                     "maintenanceMessage" to config.maintenanceMessage,
+                    "forceUpdateActive" to config.forceUpdateActive,
+                    "forceUpdateMinCode" to config.forceUpdateMinCode,
+                    "forceUpdateDownloadUrl" to config.forceUpdateDownloadUrl,
+                    "contactUrl" to config.contactUrl,
                     "updatedAt" to System.currentTimeMillis(),
                     "updatedBy" to config.updatedBy
                 )
@@ -536,7 +583,9 @@ object AdminConfigManager {
                         isActive = ru.isActive,
                         isBanned = ru.isBanned,
                         apiUsageCount = ru.apiUsageCount,
-                        createdAt = ru.createdAt
+                        createdAt = ru.createdAt,
+                        lastActiveAt = ru.lastActiveAt,
+                        isGuest = ru.isGuest
                     )
                     userMap[mu.email.lowercase()] = mu
                 }
@@ -559,7 +608,9 @@ object AdminConfigManager {
                                 role = if (u.role.equals("admin", true)) u.role else existing.role,
                                 isActive = u.isActive,
                                 isBanned = !u.isActive,
-                                apiUsageCount = maxOf(existing.apiUsageCount, u.apiUsageCount)
+                                apiUsageCount = maxOf(existing.apiUsageCount, u.apiUsageCount),
+                                lastActiveAt = maxOf(existing.lastActiveAt, u.lastActiveAt),
+                                isGuest = existing.isGuest || u.isGuest
                             )
                         } else {
                             userMap[key] = u
@@ -582,7 +633,9 @@ object AdminConfigManager {
                                 role = if (u.role.equals("admin", true)) u.role else existing.role,
                                 isActive = u.isActive,
                                 isBanned = !u.isActive,
-                                apiUsageCount = maxOf(existing.apiUsageCount, u.apiUsageCount)
+                                apiUsageCount = maxOf(existing.apiUsageCount, u.apiUsageCount),
+                                lastActiveAt = maxOf(existing.lastActiveAt, u.lastActiveAt),
+                                isGuest = existing.isGuest || u.isGuest
                             )
                         } else {
                             userMap[key] = u
@@ -600,6 +653,239 @@ object AdminConfigManager {
         } catch (e: Exception) {
             _isLoadingUsers.value = false
             Log.w(TAG, "Failed to fetch all users", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Stable per-install id (survives app updates; changes only on reinstall / data wipe).
+     * Used to count downloads and to give every guest install its own admin-panel row.
+     */
+    fun installId(): String {
+        var id = prefs.getString(KEY_INSTALL_ID, null)
+        if (id.isNullOrBlank()) {
+            id = java.util.UUID.randomUUID().toString()
+            prefs.edit().putString(KEY_INSTALL_ID, id).apply()
+        }
+        return id
+    }
+
+    /** Reads the global download/install counter once (0 when offline or unavailable). */
+    suspend fun refreshInstallCount(): Long = withContext(Dispatchers.IO) {
+        try {
+            if (AuthManager.isFirebaseAvailable()) {
+                val snap = FirebaseFirestore.getInstance()
+                    .collection("app_stats").document("global").get().await()
+                val count = snap.getLong("installCount") ?: 0L
+                _installCount.value = count
+                return@withContext count
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Install count read note: ${e.message}")
+        }
+        _installCount.value
+    }
+
+    /**
+     * Called on every app start. Counts this install once (download analytics), stamps the
+     * current account's activity (active/inactive analytics) and registers guest installs as
+     * their own rows so the admin panel shows EVERY user — email, Gmail or guest.
+     *
+     * Never touches ban state or roles: the payload carries no `isActive` / `role` keys, so a
+     * heartbeat can never unban a user or strip an admin.
+     */
+    suspend fun recordInstallAndHeartbeat(): Unit = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        try {
+            val id = installId()
+            val shortId = id.take(8)
+
+            // --- Local stamp (always fresh, works offline) ---
+            val current = try { AuthManager.currentUser.value } catch (_: Exception) { null }
+            val currentEmail = current?.email?.trim().orEmpty()
+            val isGuestSession = current == null ||
+                currentEmail.equals("guest@saif.ai", ignoreCase = true) ||
+                current.uid.startsWith("guest:")
+            try {
+                val db = SaifDatabase.getDatabase(appContext)
+                if (isGuestSession) {
+                    db.userAccountDao().upsertUser(
+                        UserAccountEntity(
+                            email = "guest@saif.ai",
+                            name = "Guest (this device)",
+                            passwordHash = "",
+                            role = "user",
+                            isActive = true,
+                            isBanned = false,
+                            lastActiveAt = now,
+                            isGuest = true
+                        )
+                    )
+                } else if (currentEmail.isNotBlank()) {
+                    db.userAccountDao().updateLastActive(currentEmail, now)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Local heartbeat note: ${e.message}")
+            }
+
+            // --- Cloud writes (throttled) ---
+            if (!AuthManager.isFirebaseAvailable()) return@withContext
+            val lastCloud = prefs.getLong(KEY_LAST_HEARTBEAT, 0L)
+            val counted = prefs.getBoolean(KEY_INSTALL_COUNTED, false)
+            if (counted && (now - lastCloud) < HEARTBEAT_MIN_GAP_MS) return@withContext
+
+            try {
+                val firestore = FirebaseFirestore.getInstance()
+
+                if (!counted) {
+                    try {
+                        firestore.collection("app_stats").document("global")
+                            .set(mapOf("installCount" to FieldValue.increment(1)), SetOptions.merge())
+                            .await()
+                        prefs.edit().putBoolean(KEY_INSTALL_COUNTED, true).apply()
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Install counter note: ${e.message}")
+                    }
+                }
+
+                try {
+                    val versionCode = try {
+                        val info = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) info.longVersionCode
+                        else @Suppress("DEPRECATION") info.versionCode.toLong()
+                    } catch (_: Exception) { 0L }
+                    firestore.collection("app_installs").document(id)
+                        .set(
+                            mapOf(
+                                "firstSeen" to now,
+                                "lastSeen" to now,
+                                "versionCode" to versionCode
+                            ),
+                            SetOptions.merge()
+                        ).await()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Install doc note: ${e.message}")
+                }
+
+                val userPayload: Map<String, Any>?
+                val docIds: List<String>
+                if (isGuestSession) {
+                    userPayload = mapOf(
+                        "email" to "guest-$shortId@saif.ai",
+                        "name" to "Guest $shortId",
+                        "loginType" to "guest",
+                        "isGuest" to true,
+                        "lastActiveAt" to now
+                    )
+                    docIds = listOf("guest-$id")
+                } else {
+                    userPayload = mapOf(
+                        "email" to currentEmail,
+                        "name" to (current?.name?.ifBlank { currentEmail.substringBefore("@") } ?: currentEmail.substringBefore("@")),
+                        "loginType" to "email",
+                        "isGuest" to false,
+                        "lastActiveAt" to now
+                    )
+                    val uidKey = current?.uid?.trim().orEmpty()
+                    docIds = buildList {
+                        if (uidKey.isNotBlank()) add(uidKey)
+                        add(currentEmail)
+                    }
+                }
+                for (collection in listOf("users", "Users")) {
+                    for (docId in docIds) {
+                        try {
+                            firestore.collection(collection).document(docId)
+                                .set(userPayload, SetOptions.merge()).await()
+                        } catch (_: Exception) { }
+                    }
+                }
+                prefs.edit().putLong(KEY_LAST_HEARTBEAT, now).apply()
+            } catch (e: Exception) {
+                Log.w(TAG, "Cloud heartbeat note: ${e.message}")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Heartbeat note: ${e.message}")
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Tamper / security reports (SaifTamperGuard -> admin Security Alerts feed)
+    // ------------------------------------------------------------------
+
+    data class TamperReport(
+        val id: String = "",
+        val email: String = "",
+        val uid: String = "",
+        val device: String = "",
+        val signals: List<String> = emptyList(),
+        val versionCode: Long = 0L,
+        val installId: String = "",
+        val timestamp: Long = 0L
+    )
+
+    private val _tamperReports = MutableStateFlow<List<TamperReport>>(emptyList())
+    val tamperReports: StateFlow<List<TamperReport>> = _tamperReports.asStateFlow()
+
+    /** Writes one tamper verdict from this device. Best-effort: never throws. */
+    suspend fun reportTamperVerdict(signals: List<String>): Unit = withContext(Dispatchers.IO) {
+        try {
+            if (!AuthManager.isFirebaseAvailable() || signals.isEmpty()) return@withContext
+            val current = try { AuthManager.currentUser.value } catch (_: Exception) { null }
+            val versionCode = try {
+                val info = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) info.longVersionCode
+                else @Suppress("DEPRECATION") info.versionCode.toLong()
+            } catch (_: Exception) { 0L }
+            val payload = mapOf(
+                "email" to (current?.email.orEmpty()),
+                "uid" to (current?.uid.orEmpty()),
+                "device" to "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim(),
+                "signals" to signals.distinct(),
+                "versionCode" to versionCode,
+                "installId" to installId(),
+                "timestamp" to System.currentTimeMillis()
+            )
+            FirebaseFirestore.getInstance().collection("tamper_reports").add(payload).await()
+        } catch (e: Exception) {
+            Log.w(TAG, "Tamper report note: ${e.message}")
+        }
+    }
+
+    /** Latest-first security alerts for the admin panel (single-field order, no index needed). */
+    suspend fun fetchTamperReports(limit: Long = 50L): Result<List<TamperReport>> = withContext(Dispatchers.IO) {
+        try {
+            if (!AuthManager.isFirebaseAvailable()) {
+                _tamperReports.value = emptyList()
+                return@withContext Result.success(emptyList())
+            }
+            val snap = FirebaseFirestore.getInstance()
+                .collection("tamper_reports")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(limit)
+                .get().await()
+            val list = snap.documents.map { doc ->
+                val data = doc.data ?: emptyMap()
+                val rawSignals = data["signals"]
+                TamperReport(
+                    id = doc.id,
+                    email = (data["email"] as? String).orEmpty(),
+                    uid = (data["uid"] as? String).orEmpty(),
+                    device = (data["device"] as? String).orEmpty(),
+                    signals = when (rawSignals) {
+                        is List<*> -> rawSignals.map { it.toString() }
+                        is String -> rawSignals.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                        else -> emptyList()
+                    },
+                    versionCode = (data["versionCode"] as? Number)?.toLong() ?: 0L,
+                    installId = (data["installId"] as? String).orEmpty(),
+                    timestamp = (data["timestamp"] as? Number)?.toLong() ?: 0L
+                )
+            }
+            _tamperReports.value = list
+            Result.success(list)
+        } catch (e: Exception) {
+            Log.w(TAG, "Tamper fetch note: ${e.message}")
             Result.failure(e)
         }
     }
@@ -631,6 +917,16 @@ object AdminConfigManager {
         val createdAt = (data["createdAt"] as? Number)?.toLong()
             ?: System.currentTimeMillis()
 
+        val lastActiveAt = (data["lastActiveAt"] as? Number)?.toLong()
+            ?: (data["lastSeenAt"] as? Number)?.toLong()
+            ?: 0L
+
+        val loginType = (data["loginType"] as? String)?.lowercase()
+        val isGuest = (data["isGuest"] as? Boolean)
+            ?: (loginType == "guest" || docId.startsWith("guest:") ||
+                email.equals("guest@saif.ai", ignoreCase = true) ||
+                email.startsWith("guest-", ignoreCase = true))
+
         return ManagedUser(
             uid = docId,
             email = email,
@@ -639,7 +935,9 @@ object AdminConfigManager {
             isActive = isActive,
             isBanned = !isActive,
             apiUsageCount = usage,
-            createdAt = createdAt
+            createdAt = createdAt,
+            lastActiveAt = lastActiveAt,
+            isGuest = isGuest
         )
     }
 
@@ -690,51 +988,8 @@ object AdminConfigManager {
         }
     }
 
-    suspend fun updateUserRole(targetUser: ManagedUser, newRole: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            val cleanRole = newRole.lowercase()
-
-            // Update Room database
-            try {
-                val db = SaifDatabase.getDatabase(appContext)
-                db.userAccountDao().updateUserRole(targetUser.email, cleanRole)
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to update Room role", e)
-            }
-
-            // Update Firestore if available
-            if (AuthManager.isFirebaseAvailable()) {
-                val firestore = FirebaseFirestore.getInstance()
-                val update = mapOf(
-                    "role" to cleanRole,
-                    "Role" to cleanRole,
-                    "updatedAt" to System.currentTimeMillis()
-                )
-
-                try { firestore.collection("users").document(targetUser.uid).set(update, SetOptions.merge()).await() } catch (ignored: Exception) {}
-                try { firestore.collection("Users").document(targetUser.uid).set(update, SetOptions.merge()).await() } catch (ignored: Exception) {}
-                if (targetUser.email.isNotBlank()) {
-                    try { firestore.collection("users").document(targetUser.email).set(update, SetOptions.merge()).await() } catch (ignored: Exception) {}
-                    try { firestore.collection("Users").document(targetUser.email).set(update, SetOptions.merge()).await() } catch (ignored: Exception) {}
-                }
-            }
-
-            val updatedList = _managedUsers.value.map {
-                if (it.email.equals(targetUser.email, true) || it.uid == targetUser.uid) it.copy(role = cleanRole) else it
-            }
-            _managedUsers.value = updatedList
-
-            val current = AuthManager.currentUser.value
-            if (current != null && current.email.equals(targetUser.email, true)) {
-                AuthManager.refreshCurrentUserData()
-            }
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to update user role", e)
-            Result.failure(e)
-        }
-    }
+    // NOTE: remote role promotion/demotion was deliberately removed. Only the accounts that are
+    // already admins stay admins; roles can no longer be changed from the admin panel.
 
     suspend fun resetUserQuota(targetUser: ManagedUser): Result<Unit> = withContext(Dispatchers.IO) {
         try {

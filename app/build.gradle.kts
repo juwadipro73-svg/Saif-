@@ -20,6 +20,26 @@ val appVersionCode = if (ciRunNumber != null) maxOf(baseVersionCode, 1000 + ciRu
 val appVersionName = if (ciRunNumber != null) "$baseVersionName-b$ciRunNumber" else baseVersionName
 val buildStamp = if (ciRunNumber != null) "build #$ciRunNumber ($ciSha)" else "local build"
 
+// Tamper-guard pinning: read the signing certificate's SHA-256 straight from the keystore at
+// build time and bake it into BuildConfig, so SaifTamperGuard can kill repackaged APKs
+// (decompile -> edit -> re-sign always changes the certificate). Empty when unreadable.
+fun signerCertSha256(storeFile: java.io.File, storePassword: String, alias: String): String {
+    if (!storeFile.isFile) return ""
+    val types = listOf("JKS", java.security.KeyStore.getDefaultType(), "PKCS12").distinct()
+    for (type in types) {
+        try {
+            val ks = java.security.KeyStore.getInstance(type)
+            storeFile.inputStream().use { ks.load(it, storePassword.toCharArray()) }
+            val cert = ks.getCertificate(alias) ?: continue
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            return md.digest(cert.encoded).joinToString("") { "%02x".format(it) }
+        } catch (_: Exception) { }
+    }
+    return ""
+}
+val debugSignerPin = signerCertSha256(rootProject.file("app/saif-debug.jks"), "android", "androiddebugkey")
+val releaseSignerPin = signerCertSha256(rootProject.file("app/release.jks"), "123456", "antigem")
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
@@ -91,6 +111,15 @@ android {
 
     buildTypes {
         debug {
+            // Full R8 on every build (CI ships the debug APK): SAIF AI's own classes come out
+            // renamed + repackaged, logs are stripped, and the tamper guard pins the cert below.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            buildConfigField("String", "EXPECTED_SIGNER_SHA256", "\"$debugSignerPin\"")
         }
         release {
             isMinifyEnabled = true
@@ -100,6 +129,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "EXPECTED_SIGNER_SHA256", "\"$releaseSignerPin\"")
         }
     }
 

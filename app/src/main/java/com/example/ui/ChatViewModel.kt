@@ -546,6 +546,7 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
+                        append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")
@@ -606,6 +607,7 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
+                        append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")
@@ -680,7 +682,15 @@ class ChatViewModel(
                 } else {
                     result
                 }
-                repository.insertMessage(ChatMessageEntity(sessionId = sessionId, role = "model", content = finalDeliveredResult))
+                // Safety net: when this turn built an APK but the final answer forgot the link,
+                // append it so every build ends with a download link without the user asking.
+                val pendingDownload = runCatching { customApiEngine.consumeLastBuiltDownload() }.getOrNull()
+                val deliveredWithLink = if (pendingDownload != null && !finalDeliveredResult.contains(pendingDownload.second)) {
+                    finalDeliveredResult.trimEnd() + "\n\n⬇️ **Download link:** [Download ${pendingDownload.first} APK](${pendingDownload.second})"
+                } else {
+                    finalDeliveredResult
+                }
+                repository.insertMessage(ChatMessageEntity(sessionId = sessionId, role = "model", content = deliveredWithLink))
                 workCompleted = true
                 com.example.util.SaifMemoryCore.learn(com.example.util.SaifMemoryCore.Features.CHAT, prompt, finalDeliveredResult)
                 val prefs = context.getSharedPreferences("SettingsPrefs", android.content.Context.MODE_PRIVATE)

@@ -84,6 +84,8 @@ fun AdminDashboardScreen(
     val globalConfig by AdminConfigManager.globalConfig.collectAsState()
     val managedUsers by AdminConfigManager.managedUsers.collectAsState()
     val isLoadingUsers by AdminConfigManager.isLoadingUsers.collectAsState()
+    val installCount by AdminConfigManager.installCount.collectAsState()
+    val tamperReports by AdminConfigManager.tamperReports.collectAsState()
     val currentUser by AuthManager.currentUser.collectAsState()
 
     var selectedTab by remember { mutableStateOf(AdminTab.ANALYTICS) }
@@ -92,6 +94,8 @@ fun AdminDashboardScreen(
     // Fetch latest user list & config on mount
     LaunchedEffect(Unit) {
         AdminConfigManager.fetchAllUsers()
+        AdminConfigManager.refreshInstallCount()
+        AdminConfigManager.fetchTamperReports()
     }
 
     // High Animation Transitions
@@ -145,6 +149,8 @@ fun AdminDashboardScreen(
         scope.launch {
             isRefreshing = true
             AdminConfigManager.fetchAllUsers()
+            AdminConfigManager.refreshInstallCount()
+            AdminConfigManager.fetchTamperReports()
             AuthManager.refreshCurrentUserData()
             isRefreshing = false
             Toast.makeText(context, "Data synced from cloud & local DB", Toast.LENGTH_SHORT).show()
@@ -467,6 +473,8 @@ fun AdminDashboardScreen(
                     AdminTab.ANALYTICS -> AdminAnalyticsTab(
                         config = globalConfig,
                         users = managedUsers,
+                        installCount = installCount,
+                        tamperReports = tamperReports,
                         radarPulse = radarPulse,
                         liquidAngle = liquidAngle,
                         onNavigateToUsers = { selectedTab = AdminTab.USERS },
@@ -608,6 +616,8 @@ fun LiquidGlassIconButton(
 private fun AdminAnalyticsTab(
     config: AdminGlobalConfig,
     users: List<ManagedUser>,
+    installCount: Long,
+    tamperReports: List<AdminConfigManager.TamperReport>,
     radarPulse: Float,
     liquidAngle: Float,
     onNavigateToUsers: () -> Unit,
@@ -620,6 +630,9 @@ private fun AdminAnalyticsTab(
     val adminUsers = users.count { it.isAdmin }
     val totalApiCalls = config.totalGlobalApiCalls
     val totalUserPrompts = users.sumOf { it.apiUsageCount }
+    // Engagement analytics: seen in the last 7 days = Active, everyone else = Inactive.
+    val engagedUsers = users.count { AdminConfigManager.isRecentlyActive(it.lastActiveAt) }
+    val idleUsers = totalUsers - engagedUsers
 
     Column(
         modifier = Modifier
@@ -753,6 +766,119 @@ private fun AdminAnalyticsTab(
             )
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            LiquidKpiStatCard(
+                title = "App Downloads",
+                value = "$installCount",
+                subtitle = "Unique installs",
+                icon = Icons.Outlined.Download,
+                accentColor = Color(0xFF22D3EE),
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToUsers
+            )
+
+            LiquidKpiStatCard(
+                title = "Active Users (7d)",
+                value = "$engagedUsers",
+                subtitle = "$idleUsers Inactive",
+                icon = Icons.Outlined.Bolt,
+                accentColor = Color(0xFF4ADE80),
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToUsers
+            )
+        }
+
+        // --- Security Alerts (tamper / hooking / repackaging reports) ---
+        LiquidGlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            accentColor = if (tamperReports.isEmpty()) Color(0xFF10B981) else Color(0xFFEF4444),
+            borderColor = if (tamperReports.isEmpty()) Color(0x6010B981) else Color(0x60EF4444)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🛡️ Security Alerts",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (tamperReports.isEmpty()) Color(0x2210B981) else Color(0x22EF4444))
+                        .border(
+                            BorderStroke(
+                                1.dp,
+                                if (tamperReports.isEmpty()) Color(0xFF10B981).copy(alpha = 0.6f)
+                                else Color(0xFFEF4444).copy(alpha = 0.6f)
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = if (tamperReports.isEmpty()) "CLEAN" else "${tamperReports.size} ALERTS",
+                        color = if (tamperReports.isEmpty()) Color(0xFF10B981) else Color(0xFFEF4444),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Repackaged installs are killed on launch; debugger, root, emulator and hooking signals land here.",
+                color = Color(0xFFA8A59B),
+                fontSize = 11.5.sp
+            )
+            if (tamperReports.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                tamperReports.take(5).forEach { report ->
+                    val mins = ((System.currentTimeMillis() - report.timestamp) / 60000L).coerceAtLeast(0L)
+                    val ago = when {
+                        report.timestamp <= 0L -> "unknown time"
+                        mins < 1L -> "just now"
+                        mins < 60L -> "${mins}m ago"
+                        mins < 1440L -> "${mins / 60L}h ago"
+                        else -> "${mins / 1440L}d ago"
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 3.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0x22EF4444))
+                            .border(BorderStroke(1.dp, Color(0x50EF4444)), RoundedCornerShape(10.dp))
+                            .padding(horizontal = 10.dp, vertical = 7.dp)
+                    ) {
+                        Column {
+                            Text(
+                                text = report.signals.joinToString(" • ").ifBlank { "UNKNOWN" },
+                                color = Color(0xFFFCA5A5),
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = (report.email.ifBlank { "uid:${report.uid.take(12)}" }) +
+                                    (if (report.device.isNotBlank()) " • ${report.device}" else "") +
+                                    " • $ago",
+                                color = Color(0xFFD6D3C7),
+                                fontSize = 10.5.sp,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         // --- 3. Quick Control Shortcuts with Fluid Motion ---
         Text(
             text = "Quick Control Center Shortcuts",
@@ -764,7 +890,7 @@ private fun AdminAnalyticsTab(
 
         LiquidShortcutCard(
             title = "Manage Registered Users",
-            description = "Inspect user accounts, ban/suspend misbehaving accounts, promote admins, or tune individual VIP limits.",
+            description = "Inspect email, Gmail and guest accounts, ban/suspend misbehaving accounts, delete users, or tune individual VIP limits.",
             icon = Icons.Default.ManageAccounts,
             accentColor = Color(0xFF9B82EC),
             buttonLabel = "Open Users ($totalUsers)",
@@ -1196,18 +1322,6 @@ private fun AdminUsersTab(
                                 }
                             }
                         },
-                        onToggleRole = { newRole ->
-                            scope.launch {
-                                actionInProgressUid = user.uid
-                                val res = AdminConfigManager.updateUserRole(user, newRole)
-                                actionInProgressUid = null
-                                if (res.isSuccess) {
-                                    Toast.makeText(context, "${user.name} role changed to $newRole", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "Failed: ${res.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        },
                         onResetQuota = {
                             scope.launch {
                                 actionInProgressUid = user.uid
@@ -1480,7 +1594,6 @@ private fun LiquidUserManagementCard(
     quotaLimit: Int,
     isProcessing: Boolean,
     onToggleStatus: (Boolean) -> Unit,
-    onToggleRole: (String) -> Unit,
     onResetQuota: () -> Unit,
     onDeleteClick: () -> Unit,
     onEditLimits: () -> Unit,
@@ -1591,6 +1704,23 @@ private fun LiquidUserManagementCard(
                                 )
                             }
                         }
+                        if (user.isGuest) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color(0x3322D3EE))
+                                    .border(BorderStroke(1.dp, Color(0xFF22D3EE)), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                            ) {
+                                Text(
+                                    text = "GUEST",
+                                    color = Color(0xFF22D3EE),
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(2.dp))
@@ -1602,6 +1732,24 @@ private fun LiquidUserManagementCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.clickable { onCopyEmail() }
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    val recentlyActive = AdminConfigManager.isRecentlyActive(user.lastActiveAt)
+                    Text(
+                        text = "Last seen: " + if (user.lastActiveAt > 0L) {
+                            val mins = ((System.currentTimeMillis() - user.lastActiveAt) / 60000L).coerceAtLeast(0L)
+                            when {
+                                mins < 1L -> "just now"
+                                mins < 60L -> "${mins}m ago"
+                                mins < 1440L -> "${mins / 60L}h ago"
+                                else -> "${mins / 1440L}d ago"
+                            }
+                        } else {
+                            "never recorded"
+                        },
+                        color = if (recentlyActive) Color(0xFF4ADE80) else Color(0xFFA8A59B),
+                        fontSize = 10.5.sp,
+                        fontWeight = if (recentlyActive) FontWeight.SemiBold else FontWeight.Normal
                     )
                 }
 
@@ -1691,30 +1839,6 @@ private fun LiquidUserManagementCard(
                         text = if (user.isActive) "Ban" else "Unban",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
-                    )
-                }
-
-                // Role Toggle
-                OutlinedButton(
-                    onClick = { onToggleRole(if (user.isAdmin) "user" else "admin") },
-                    enabled = !isProcessing,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                    border = BorderStroke(1.dp, Color(0x35B3A0F2)),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                    modifier = Modifier.weight(1.1f).height(34.dp)
-                ) {
-                    Icon(
-                        imageVector = if (user.isAdmin) Icons.Default.Person else Icons.Default.Shield,
-                        contentDescription = null,
-                        modifier = Modifier.size(13.dp),
-                        tint = if (user.isAdmin) Color(0xFFA8A59B) else Color(0xFF6B31CF)
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text(
-                        text = if (user.isAdmin) "Demote" else "Admin",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
                     )
                 }
 
@@ -2597,6 +2721,10 @@ private fun AdminBroadcastTab(
     var isAnnouncementActive by remember { mutableStateOf(currentConfig.isAnnouncementActive) }
     var isMaintenanceMode by remember { mutableStateOf(currentConfig.isMaintenanceMode) }
     var maintenanceMsg by remember { mutableStateOf(currentConfig.maintenanceMessage) }
+    var forceUpdateActive by remember { mutableStateOf(currentConfig.forceUpdateActive) }
+    var forceUpdateMinCode by remember { mutableStateOf(currentConfig.forceUpdateMinCode.let { if (it > 0) it.toString() else "" }) }
+    var forceUpdateDownloadUrl by remember { mutableStateOf(currentConfig.forceUpdateDownloadUrl) }
+    var contactUrl by remember { mutableStateOf(currentConfig.contactUrl) }
     var isSaving by remember { mutableStateOf(false) }
 
     Column(
@@ -2959,7 +3087,130 @@ private fun AdminBroadcastTab(
             }
         }
 
-        // --- 4. Save Broadcast Settings Button ---
+        // --- 4. Force Update Kill Switch Card ---
+        LiquidGlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            accentColor = Color(0xFFF59E0B),
+            borderColor = Color(0x50F59E0B)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "🛑 Force-Update Kill Switch",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Stops the app for ALL non-admin users until they install a new version. Admins are never blocked.",
+                        color = Color(0xFFA8A59B),
+                        fontSize = 11.5.sp
+                    )
+                }
+
+                Switch(
+                    checked = forceUpdateActive,
+                    onCheckedChange = { forceUpdateActive = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFFF59E0B)
+                    )
+                )
+            }
+
+            if (forceUpdateActive) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Download link (shown to blocked users):",
+                    color = Color(0xFFD6D3C7),
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                OutlinedTextField(
+                    value = forceUpdateDownloadUrl,
+                    onValueChange = { forceUpdateDownloadUrl = it },
+                    placeholder = { Text("https://…/SAIF-AI-latest.apk", fontSize = 12.5.sp, color = Color(0xFF6B6962)) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0x35262522),
+                        unfocusedContainerColor = Color(0x22262522),
+                        focusedBorderColor = Color(0xFFF59E0B),
+                        unfocusedBorderColor = Color(0x304A4843),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Minimum allowed build code (optional — empty = block every version):",
+                    color = Color(0xFFD6D3C7),
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                OutlinedTextField(
+                    value = forceUpdateMinCode,
+                    onValueChange = { forceUpdateMinCode = it.filter { c -> c.isDigit() }.take(9) },
+                    placeholder = { Text("e.g. 1041", fontSize = 12.5.sp, color = Color(0xFF6B6962)) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color(0x35262522),
+                        unfocusedContainerColor = Color(0x22262522),
+                        focusedBorderColor = Color(0xFFF59E0B),
+                        unfocusedBorderColor = Color(0x304A4843),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
+                    ),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        // --- 5. Contact-Us Link Card ---
+        LiquidGlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            accentColor = Color(0xFF22D3EE),
+            borderColor = Color(0x5022D3EE)
+        ) {
+            Text(
+                text = "✉️ Contact-Us Link (Premium dialog)",
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "This link opens when users tap “Contact Us” in the upgrade dialog. Empty = button hidden.",
+                color = Color(0xFFA8A59B),
+                fontSize = 11.5.sp
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            OutlinedTextField(
+                value = contactUrl,
+                onValueChange = { contactUrl = it },
+                placeholder = { Text("https://t.me/… or https://…", fontSize = 12.5.sp, color = Color(0xFF6B6962)) },
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0x35262522),
+                    unfocusedContainerColor = Color(0x22262522),
+                    focusedBorderColor = Color(0xFF22D3EE),
+                    unfocusedBorderColor = Color(0x304A4843),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // --- 6. Save Broadcast Settings Button ---
         Button(
             onClick = {
                 scope.launch {
@@ -2969,6 +3220,10 @@ private fun AdminBroadcastTab(
                         isAnnouncementActive = isAnnouncementActive,
                         isMaintenanceMode = isMaintenanceMode,
                         maintenanceMessage = maintenanceMsg.trim(),
+                        forceUpdateActive = forceUpdateActive,
+                        forceUpdateMinCode = forceUpdateMinCode.toIntOrNull() ?: 0,
+                        forceUpdateDownloadUrl = forceUpdateDownloadUrl.trim(),
+                        contactUrl = contactUrl.trim(),
                         updatedAt = System.currentTimeMillis()
                     )
                     val res = AdminConfigManager.saveGlobalConfig(updated)

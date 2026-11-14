@@ -39,6 +39,17 @@ data class LocalApkBuildState(
  */
 object OnDeviceApkBuildManager {
 
+    /**
+     * Appended to the main-chat system prompt: teaches the model the `<saif-apk>` marker that
+     * triggers the on-device compiler. The compiler always appends the download link itself,
+     * so the model must only emit the marker — the user never has to ask for the link.
+     */
+    const val CHAT_APK_BUILD_RULE =
+        "App-build rule: when the user asks you to build, create or make an Android app or APK, ALWAYS " +
+            "wrap the COMPLETE single-file mobile HTML5 app (inline CSS/JS, no external files) in exactly one block " +
+            "`<saif-apk name=\"App Name\">...full HTML...</saif-apk>`. Put nothing inside the block except the HTML. " +
+            "The phone compiles and signs it automatically and appends the download link — never invent a link yourself."
+
     private val _current = MutableStateFlow<LocalApkBuildState?>(null)
     val current: StateFlow<LocalApkBuildState?> = _current.asStateFlow()
 

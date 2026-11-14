@@ -98,9 +98,22 @@
 -keepclassmembers class * extends com.sun.jna.** { public *; }
 -dontwarn java.awt.**
 
-# Hardening of the release build: flatten package names, drop source file names and line numbers, and let R8
-# merge and inline across classes. SAIF AI's own classes are not kept by name anywhere above, so they come out
-# renamed. This makes the APK harder to read; it cannot make it impossible to reverse engineer.
+# WebView JavaScript bridges (SandboxRunner probe object, InteractiveUiJsBridge,
+# YouTubeMediaJsInterface): WebKit finds these methods by name at run time.
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keepattributes JavascriptInterface
+
+# Launched by reflective class name from WakeWordManager.
+-keep class com.example.AssistantOverlayActivity { *; }
+
+# Tamper-guard entry points: reached from MainActivity + verified by name tests.
+-keep class com.example.security.SaifTamperGuard { *; }
+
+# Hardening of every build (debug included): flatten package names, drop source file names and line numbers,
+# and let R8 merge and inline across classes. SAIF AI's own classes are not kept by name anywhere above, so
+# they come out renamed. This makes the APK harder to read; it cannot make it impossible to reverse engineer.
 -allowaccessmodification
 -repackageclasses 'a'
 -renamesourcefileattribute ''
