@@ -115,12 +115,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Remote kill switch: block entry for every non-admin while the admin's
             // force-update switch is on. Admins always bypass it so they can turn it off.
-            val globalConfig by com.example.data.local.AdminConfigManager.globalConfig.collectAsState()
+            val gateConfig by com.example.data.local.AdminConfigManager.globalConfig.collectAsState()
             val gateUser by AuthManager.currentUser.collectAsState()
             val activityContext = LocalContext.current
-            val gateBlocked = remember(globalConfig, gateUser) {
+            val gateBlocked = remember(gateConfig, gateUser) {
                 com.example.ui.components.ForceUpdateGate.shouldBlock(
-                    config = globalConfig,
+                    config = gateConfig,
                     installedVersionCode = com.example.ui.components.ForceUpdateGate.installedVersionCode(activityContext),
                     isAdmin = gateUser?.isAdmin == true
                 )
@@ -128,7 +128,7 @@ class MainActivity : ComponentActivity() {
             if (gateBlocked) {
                 SaifAiTheme(isLightMode = false) {
                     com.example.ui.components.ForceUpdateGateScreen(
-                        downloadUrl = globalConfig.forceUpdateDownloadUrl
+                        downloadUrl = gateConfig.forceUpdateDownloadUrl
                     )
                 }
                 return@setContent
