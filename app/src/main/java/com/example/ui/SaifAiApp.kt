@@ -720,6 +720,12 @@ fun SaifAiApp(
                             isGenerating = isGenerating,
                             hasAttachments = selectedAttachments.isNotEmpty(),
                             onSend = {
+                                // Permanent /video skill: repair-pass install (covers rootfs downloaded later).
+                                if (input.trim().startsWith("/video", ignoreCase = true)) {
+                                    try {
+                                        Thread { com.example.skills.VideoSkillInstaller.ensureInstalled(context) }.start()
+                                    } catch (_: Exception) {}
+                                }
                                 val action = com.example.slash.SaifSlashCommandRegistry.resolveAppAction(input)
                                 if (action != null) {
                                     viewModel.onInputChange("")

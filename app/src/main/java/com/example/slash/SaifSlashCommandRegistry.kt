@@ -49,7 +49,7 @@ object SaifSlashCommandRegistry {
         SlashCommandItem("ide", "/ide", "Open the SAIF AI Code Editor & Workspace IDE", type = "app"),
         SlashCommandItem("code", "/code", "Open the SAIF AI Code Editor & Workspace IDE", type = "app"),
         SlashCommandItem("browser", "/browser", "Open the In-App Research & Preview Browser", type = "app"),
-        SlashCommandItem("video", "/video", "Open SAIF AI Video Studio", type = "app"),
+        SlashCommandItem("video", "/video", "Open SAIF AI Video Studio — or type /video <request> to run the AI video-editing skill", type = "app", argumentHint = "[editing request]"),
         SlashCommandItem("notes", "/notes", "Open SAIF AI Notes Workspace", type = "app"),
         SlashCommandItem("agents", "/agents", "Manage Coding, Research, Automation, Analysis & Content AI Agents", type = "app"),
         SlashCommandItem("skills", "/skills", "Manage AI Skills & Import Skills from GitHub", type = "app"),
@@ -144,8 +144,45 @@ object SaifSlashCommandRegistry {
         },
         "/permissioned-github" to { arg ->
             "Execute Git & GitHub repository operations safely (branch status, clean commits, PR inspection, never exposing tokens).\n\nGitHub Task:\n${arg.ifBlank { "Check `git status` and connected GitHub repository state." }}"
-        }
+        },
+        // Permanent video-editing skill (reference-style-matcher v1.0.0). Bare `/video` still
+        // opens Video Studio (see resolveAppAction); `/video <request>` reaches this expansion.
+        "/video" to { arg -> videoSkillExpansion(arg) }
     )
+
+    private fun videoSkillExpansion(arg: String): String {
+        val request = arg.trim()
+        return buildString {
+            appendLine("You are SAIF AI's precision post-production director and motion-design systems engineer (permanent skill: reference-style-matcher v1.0.0).")
+            appendLine()
+            appendLine("PERMANENT SKILL BUNDLE — read fully before acting (Linux workspace paths):")
+            appendLine("- Guide: /root/workspace/.agents/skills/reference-style-matcher/SKILL.md")
+            appendLine("- Scripts: /root/workspace/.agents/skills/reference-style-matcher/scripts/analyze_reference.py and scripts/build_style_skill.py")
+            appendLine("- Schema: /root/workspace/.agents/skills/reference-style-matcher/references/template_skill_schema.md")
+            appendLine("If those files are missing on this machine, follow the condensed modes below exactly.")
+            appendLine()
+            appendLine("ENVIRONMENT (SAIF AI phone, Ubuntu ARM64 Linux):")
+            appendLine("- Verify tools first: `which ffmpeg ffprobe python3 node npx`. Install what's missing (apt: ffmpeg, nodejs; pip: opencv-python-headless, scenedetect, numpy, faster-whisper; HyperFrames via npx). Prefer CPU int8 Whisper.")
+            appendLine("- Chat-attached videos land in /root/uploads/ — list it to find the reference/raw clips.")
+            appendLine("- Never overwrite originals. Work in scratch/video_edit_<name>/ with source/, analysis/, hyperframes_project/, renders/, logs/.")
+            appendLine()
+            appendLine("MODE 1 — reference video first (no raw footage yet): do NOT ask for raw footage before analyzing. Run the analyzer with --transcribe, visually inspect frames/ (contact sheet, hook_*, cut_*, mid_*) with your image tool and never guess unseen traits, build the template with build_style_skill.py, then refine its SKILL.md + style_profile.json with exact visual facts (typography/casing/colors, caption box/stroke/shadow/Y-position/animation, transition family, overlay motifs, color feel, music/SFX cues). Save under reference_styles/<style-slug>/, summarize the style DNA (aspect/FPS, hook + cut cadence, color look, caption style, transitions, audio LUFS), give the template paths, then STOP and ask for the raw video(s).")
+            appendLine()
+            appendLine("MODE 2 — reference + raw footage together: run Mode 1 fully first (template saved permanently), then immediately run Mode 3 on the raw footage. Deliver the finished MP4 + SRT + HyperFrames project + template paths.")
+            appendLine()
+            appendLine("MODE 3 — raw footage + saved style template (no reference needed): read the template SKILL.md + style_profile.json in full. Build analysis/edit_decision_list.json to the template (hook rule, pacing curve, punch-in cadence, pause trimming that never cuts mid-word unless the style does). Reframe + color-grade + loudness-match via FFmpeg (no stretching; face at target ratio; blur fill only if the template says so). Render REAL animated captions/motion graphics as a HyperFrames composition (index.html + timed clips + GSAP, verified with `hyperframes check --json`) — never claim animation from static drawtext. QC: inspect frames at 0.3s, hook transition, 3+ cut boundaries, caption moments, middle, end; ffprobe-verify resolution/FPS/H.264/AAC/size; fix black/frozen frames, clipped speech, caption-face overlaps, clipping. Deliver MP4 + SRT + project + EDL + honest notes (font substitutions, approximations).")
+            appendLine()
+            appendLine("HONEST BOUNDARIES: match format/pacing/framing/color/captions/audio deterministically. Substitute uninstalled licensed fonts with the closest available (note it). Approximate proprietary NLE plugins via FFmpeg/HyperFrames. NEVER copy the reference creator's logos, watermarks, usernames, overlays, stock clips or footage frames into outputs unless the user owns the rights and explicitly says so.")
+            appendLine()
+            if (request.isBlank()) {
+                appendLine("The user typed bare /video with no request yet. Ask one short routing question: do they have (a) a reference video to copy the style from, (b) raw footage + a saved style name, or (c) both right now — then follow the matching mode.")
+            } else {
+                appendLine("User request:")
+                appendLine(request)
+                appendLine("Pick the matching mode from the request + attachments and execute it now. If the request is ambiguous, ask the one routing question above first.")
+            }
+        }.trim()
+    }
 
     /** Ensures custom commands, saved skills, and specialist agents are initialized. */
     fun init(context: Context) {

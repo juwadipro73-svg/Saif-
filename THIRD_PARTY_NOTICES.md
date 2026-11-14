@@ -50,6 +50,13 @@ The same notices are inside the app: **Settings > About SAIF AI > Credits**.
 - `docs/chrome_extension_api/chrome/` from DefinitelyTyped (`@types/chrome`). MIT licence,
   Copyright (c) Microsoft Corporation and the contributors named in the file. Licence file kept next to it.
 
+### Reference-style-matcher video-editing skill (bundled agent skill, runs the `/video` command)
+- Files: `app/src/main/assets/skills/reference-style-matcher/` (`SKILL.md`, `README.md`,
+  `scripts/analyze_reference.py`, `scripts/build_style_skill.py`, `references/template_skill_schema.md`),
+  installed on-device by `VideoSkillInstaller` and invoked through the `/video` slash command.
+- Licence: MIT, as declared in the skill's own frontmatter (`SKILL.md`); supplied by the repository owner.
+  The skill text is used as agent instructions and its Python scripts run locally in the Linux workspace.
+
 ---
 
 ## 2. Programs shipped inside the APK as ready-made binaries

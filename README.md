@@ -17,6 +17,15 @@ A native Android AI workspace: chat with your own API key (or, optionally, Googl
 - Chat keeps small text/photos under 3 MB inside the app. Attaching an APK, ZIP or video (or a supported >=3 MB photo/document) starts **one private website upload**, not an unsupported Antigravity binary attachment: stream to signed GCS, verify checksum, save to private Drive, then display a one-time download link in SAIF AI. Prompted project ZIPs can also be generated in the cloud. These features require the authenticated gateway, website routing, App Check and builder deployment in [cloud/README.md](cloud/README.md); the supplied demo URL is not verified as a live upload API. The app does not secretly send attached binary bytes to an AI model.
 - Chat text, code snippets and **small images/text attachments (3 MB combined max)** stay in the app. Explicit APK/game compilation and MP4 renders are routed to `SaifAiCloudManager` and an authenticated backend. Project Studio and Video Studio build/export buttons no longer invoke the local APK compiler or full video renderer. A job card listens to Firebase RTDB and shows a private **SAIF AI DOWNLOADS** button when an artifact is ready. Cloud builds require separate service deployment; an unconfigured debug build fails closed and tells you what is missing.
 
+## `/video` editing skill (permanent)
+
+Typing `/video <request>` in chat runs the bundled **reference-style-matcher** skill: it analyses a
+reference video's editing DNA (pacing, cuts, framing, color, captions, audio), saves a reusable style
+template, and edits your raw footage to match — all locally in the Linux workspace
+(`scripts/analyze_reference.py`, `scripts/build_style_skill.py`). Bare `/video` still opens Video Studio.
+The skill files ship in the APK (`app/src/main/assets/skills/reference-style-matcher/`) and are
+re-installed on-device automatically (`VideoSkillInstaller`).
+
 ## Advance Auto-Builder (always-on)
 
 Every project build runs through the Advance Auto-Builder (`com.example.autobuild`) with no button needed:
