@@ -89,7 +89,9 @@ object BuildCheckpointStore {
 
     fun appendPrompt(projectDir: File, appName: String, prompt: String) {
         update(projectDir) { cp ->
-            val base = if (cp.appName.isBlank() || cp.appName == "Project") cp.copy(appName = appName) else cp
+            // Fresh checkpoints (never written before) adopt the real project name instead of
+            // the directory-derived placeholder; existing ones keep their stored name.
+            val base = if (cp.promptHistory.isEmpty() && cp.lastActiveAt == 0L) cp.copy(appName = appName) else cp
             base.copy(
                 promptHistory = (base.promptHistory + prompt.take(MAX_PROMPT_CHARS)).takeLast(MAX_PROMPT_HISTORY),
                 lastActiveAt = System.currentTimeMillis()
