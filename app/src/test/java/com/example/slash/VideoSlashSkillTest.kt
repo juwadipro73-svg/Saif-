@@ -1,6 +1,5 @@
 package com.example.slash
 
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -8,19 +7,16 @@ import org.junit.Test
 
 /**
  * Plain JVM tests for the permanent `/video` editing skill wiring.
- * - Bare `/video` keeps opening Video Studio (existing behavior).
- * - `/video <request>` expands into the full skill instructions for the agent.
+ * The old Video Studio window has been removed: bare `/video` is NOT an app
+ * action anymore — it expands into the reference-style-matcher skill, exactly
+ * like `/video <request>`.
  */
 class VideoSlashSkillTest {
 
     @Test
-    fun `bare video opens the studio`() {
-        assertEquals(SaifAppSlashAction.OPEN_VIDEO_STUDIO, SaifSlashCommandRegistry.resolveAppAction("/video"))
-        assertEquals(SaifAppSlashAction.OPEN_VIDEO_STUDIO, SaifSlashCommandRegistry.resolveAppAction("  /VIDEO  "))
-    }
-
-    @Test
-    fun `video with request is not an app action`() {
+    fun `bare video is not an app action anymore`() {
+        assertNull(SaifSlashCommandRegistry.resolveAppAction("/video"))
+        assertNull(SaifSlashCommandRegistry.resolveAppAction("  /VIDEO  "))
         assertNull(SaifSlashCommandRegistry.resolveAppAction("/video edit my vlog like this reel"))
     }
 

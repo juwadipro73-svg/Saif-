@@ -36,8 +36,9 @@ The same notices are inside the app: **Settings > About SAIF AI > Credits**.
   and parts of `docs/` (all present in the AntiGem repository), and `termux-daemon/` (named as AntiGem code by
   the earlier notice of this repository).
 - Changes: SAIF AI renamed and restyled the interface, added its own sign-in, chat home screen, live voice
-  conversation, video studio, API-key provider, cloud build templates and storage clean-up, and changed many
-  files. The modified files are distributed under the same GPL.
+  conversation, API-key provider, cloud build templates and storage clean-up, and changed many
+  files. (An earlier built-in video-studio window was removed again; `/video` now runs a bundled agent
+  skill.) The modified files are distributed under the same GPL.
 
 ### Termux terminal view and terminal emulator
 - Project: <https://github.com/termux/termux-app> (libraries `terminal-view` and `terminal-emulator`), based on
@@ -56,6 +57,16 @@ The same notices are inside the app: **Settings > About SAIF AI > Credits**.
   installed on-device by `VideoSkillInstaller` and invoked through the `/video` slash command.
 - Licence: MIT, as declared in the skill's own frontmatter (`SKILL.md`); supplied by the repository owner.
   The skill text is used as agent instructions and its Python scripts run locally in the Linux workspace.
+
+### REA reverse-engineering skill bundle (bundled agent skill, runs the `/rea` command)
+- Project: <https://github.com/morluto/rea> (snapshot at commit `6938696`). Bundled subset: the
+  `.agents/skills/` directory (`reverse-engineer-anything`, `rea-analysis-optimization`,
+  `rea-ci-tests-audit`, `rea-changelog-update`, `rea-tool-design`) plus `LICENSE`, `README.md`,
+  `DISCLAIMER.md` and `SECURITY.md`.
+- Files: `app/src/main/assets/skills/rea/`, installed on-device by `BundledSkillsInstaller` and invoked
+  through the `/rea` slash command.
+- Licence: MIT, Copyright (c) 2026 morluto. The skill text and references are used as agent instructions;
+  the full licence text ships in the bundle itself (`skills/rea/LICENSE`).
 
 ---
 

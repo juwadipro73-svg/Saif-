@@ -15,16 +15,25 @@ A native Android AI workspace: chat with your own API key (or, optionally, Googl
 - On app sign-in the local development environment and bridge start automatically if needed; progress/retry are in Settings. The standard package (`com.saifai.app`) uses ARM64 Ubuntu/PRoot; the classic terminal launcher style does not change the environment into a native Termux rootfs.
 - The purple mic starts a **live voice conversation**. It is SAIF AI's own engine (`com.example.live`): it needs only the microphone permission and something that can answer (your provider API key, or the connected chat agent). It works with any provider: OpenAI, Groq and Gemini keys transcribe speech in the cloud, every other provider uses the on-device speech model (English, downloaded once on first use). Screen sharing is optional and is asked for inside the conversation. Notification permission and battery exemption are not startup requirements. Spoken coding tasks go to the same chat agent as typed ones. Tool approvals still require the user. A public GitHub repository/folder/SKILL.md import uses your chosen /command name and saves its skill text, references and scripts as one app-private Markdown document (up to 256 KB), scoped to the app account. Binary assets are listed by path, not embedded in the chat prompt; review untrusted skills before use.
 - Chat keeps small text/photos under 3 MB inside the app. Attaching an APK, ZIP or video (or a supported >=3 MB photo/document) starts **one private website upload**, not an unsupported Antigravity binary attachment: stream to signed GCS, verify checksum, save to private Drive, then display a one-time download link in SAIF AI. Prompted project ZIPs can also be generated in the cloud. These features require the authenticated gateway, website routing, App Check and builder deployment in [cloud/README.md](cloud/README.md); the supplied demo URL is not verified as a live upload API. The app does not secretly send attached binary bytes to an AI model.
-- Chat text, code snippets and **small images/text attachments (3 MB combined max)** stay in the app. Explicit APK/game compilation and MP4 renders are routed to `SaifAiCloudManager` and an authenticated backend. Project Studio and Video Studio build/export buttons no longer invoke the local APK compiler or full video renderer. A job card listens to Firebase RTDB and shows a private **SAIF AI DOWNLOADS** button when an artifact is ready. Cloud builds require separate service deployment; an unconfigured debug build fails closed and tells you what is missing.
+- Chat text, code snippets and **small images/text attachments (3 MB combined max)** stay in the app. Explicit APK/game compilation and MP4 renders are routed to `SaifAiCloudManager` and an authenticated backend. Project Studio build/export buttons no longer invoke the local APK compiler (the old Video Studio window has been removed entirely). A job card listens to Firebase RTDB and shows a private **SAIF AI DOWNLOADS** button when an artifact is ready. Cloud builds require separate service deployment; an unconfigured debug build fails closed and tells you what is missing.
 
 ## `/video` editing skill (permanent)
 
-Typing `/video <request>` in chat runs the bundled **reference-style-matcher** skill: it analyses a
-reference video's editing DNA (pacing, cuts, framing, color, captions, audio), saves a reusable style
-template, and edits your raw footage to match — all locally in the Linux workspace
-(`scripts/analyze_reference.py`, `scripts/build_style_skill.py`). Bare `/video` still opens Video Studio.
+Typing `/video <request>` — or bare `/video`, which asks what you want — runs the bundled
+**reference-style-matcher** skill and nothing else: it analyses a reference video's editing DNA (pacing,
+cuts, framing, color, captions, audio), saves a reusable style template, and edits your raw footage to
+match — all locally in the Linux workspace (`scripts/analyze_reference.py`,
+`scripts/build_style_skill.py`). The old built-in Video Studio window has been removed from the app.
 The skill files ship in the APK (`app/src/main/assets/skills/reference-style-matcher/`) and are
-re-installed on-device automatically (`VideoSkillInstaller`).
+re-installed on-device automatically (`BundledSkillsInstaller`, also reachable via `VideoSkillInstaller`).
+
+## `/rea` reverse-engineering skill (permanent)
+
+Typing `/rea <target>` in chat runs the bundled **REA** (Reverse Engineer Anything, by
+[morluto](https://github.com/morluto/rea), MIT) skill: decompile and analyse APKs, binaries and apps,
+compare versions, and observe runtime behavior with evidence for every claim. The bundle ships in the APK
+(`app/src/main/assets/skills/rea/`, snapshot at upstream commit `6938696`) and is re-installed
+on-device automatically next to the `/video` skill.
 
 ## Advance Auto-Builder (always-on)
 

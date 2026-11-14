@@ -742,7 +742,6 @@ object AuthManager {
         if (previousOwner != null && previousOwner != owner && previousOwner.startsWith("guest:")) {
             runCatching { com.example.providers.TerminalProviderManager.bindUserAccount(appContext, owner, previousOwner) }
             runCatching { com.example.agents.SaifAgentRegistry.bindUserAccount(appContext, owner, previousOwner) }
-            runCatching { com.example.studio.AdvancedEditingEnginePrefs.bindUserAccount(appContext, owner, previousOwner) }
             runCatching { com.example.gemini.data.remote.SavedAiSkills.migrateAccount(appContext, previousOwner, owner) }
         }
         userDocListener?.remove()

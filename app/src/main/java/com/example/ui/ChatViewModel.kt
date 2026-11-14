@@ -228,35 +228,6 @@ class ChatViewModel(
     private val _isGenerating = MutableStateFlow(false)
     val isGenerating: StateFlow<Boolean> = _isGenerating.asStateFlow()
 
-    private val _pendingOpenVideoProject = MutableStateFlow<com.example.ui.components.VideoProjectData?>(null)
-    val pendingOpenVideoProject: StateFlow<com.example.ui.components.VideoProjectData?> = _pendingOpenVideoProject.asStateFlow()
-
-    fun consumePendingVideoProject() {
-        _pendingOpenVideoProject.value = null
-    }
-
-    fun triggerVideoProjectOpen(project: com.example.ui.components.VideoProjectData) {
-        _pendingOpenVideoProject.value = project
-    }
-
-    private fun isVideoCreationPrompt(prompt: String): Boolean {
-        if (_currentMode.value == "video" || _currentMode.value == "video_project") return true
-        val p = prompt.lowercase().trim()
-        if (p.contains("grow on youtube") || p.contains("how to grow on youtube") || p.contains("grow channel")) return true
-        if (p.contains("promt se video") || p.contains("prompt se video") || p.contains("prompt to video") || p.contains("script to video")) return true
-        val videoKeywords = listOf(
-            "video", "reel", "short", "clip", "movie", "animat", "timeline", "edl",
-            "youtube", "render", "director", "editor", "sfx", "b-roll", "broll", "voiceover"
-        )
-        val actionKeywords = listOf(
-            "bana", "create", "make", "generate", "render", "edit", "chahiye", "ready karo",
-            "karo", "do", "produce", "synthesize", "likho", "write", "bna", "dikhao", "play"
-        )
-        val hasVideo = videoKeywords.any { p.contains(it) }
-        val hasAction = actionKeywords.any { p.contains(it) }
-        return hasVideo && (hasAction || p.split(Regex("\\s+")).size <= 6)
-    }
-
     private val _selectedAttachments = MutableStateFlow<List<Uri>>(emptyList())
     val selectedAttachments: StateFlow<List<Uri>> = _selectedAttachments.asStateFlow()
 
@@ -442,30 +413,6 @@ class ChatViewModel(
                 timestamp = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault()).format(java.util.Date())
             )
             com.example.util.ProjectChatHistoryManager.saveMessages(context, appName, listOf(welcomeBuildMsg))
-        }
-    }
-
-    fun createVideoProjectSession(
-        videoProject: com.example.ui.components.VideoProjectData,
-        context: android.content.Context
-    ) {
-        viewModelScope.launch {
-            // Save video project persistently
-            com.example.util.ProjectDataManager.saveVideoProject(context, videoProject)
-
-            val sessionTitle = videoProject.projectName.trim().ifBlank { "Video Project" }
-            val existing = allSessions.value.firstOrNull { it.title.equals(sessionTitle, ignoreCase = true) && (it.mode == "video_project" || it.mode == "project") }
-            if (existing != null) {
-                _activeSessionId.value = existing.id
-            } else {
-                val newSession = repository.createSession(
-                    title = sessionTitle,
-                    mode = "video_project"
-                )
-                _activeSessionId.value = newSession.id
-            }
-            _currentMode.value = "general"
-            _isFilterBookmarked.value = false
         }
     }
 
@@ -835,13 +782,7 @@ class ChatViewModel(
         viewModelScope.launch {
             val target = allSessions.value.firstOrNull { it.id == sessionId }
             if (target != null && context != null) {
-                if (target.mode == "video_project" || com.example.util.ProjectDataManager.hasVideoProject(context, target.title)) {
-                    val oldProj = com.example.util.ProjectDataManager.getVideoProject(context, target.title)
-                    if (oldProj != null) {
-                        com.example.util.ProjectDataManager.deleteVideoProject(context, target.title)
-                        com.example.util.ProjectDataManager.saveVideoProject(context, oldProj.copy(projectName = newTitle.trim()))
-                    }
-                } else if (target.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, target.title)) {
+                if (target.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, target.title)) {
                     val oldProj = com.example.util.ProjectDataManager.getProject(context, target.title)
                     if (oldProj != null) {
                         com.example.util.ProjectDataManager.renameProject(context, target.title, newTitle.trim(), oldProj.copy(appName = newTitle.trim()))
@@ -860,8 +801,6 @@ class ChatViewModel(
                 if (target.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, target.title)) {
                     com.example.util.ProjectDataManager.deleteProject(context, target.title)
                     com.example.util.ProjectChatHistoryManager.clearMessages(context, target.title)
-                } else if (target.mode == "video_project" || com.example.util.ProjectDataManager.hasVideoProject(context, target.title)) {
-                    com.example.util.ProjectDataManager.deleteVideoProject(context, target.title)
                 }
             }
             repository.deleteSession(sessionId)

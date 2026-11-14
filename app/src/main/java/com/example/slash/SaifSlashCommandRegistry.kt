@@ -9,7 +9,6 @@ import com.example.gemini.data.remote.SlashCommandItem
 import com.example.gemini.data.remote.SlashCommandsCache
 
 enum class SaifAppSlashAction {
-    OPEN_VIDEO_STUDIO,
     OPEN_TERMINAL,
     OPEN_CODE_IDE,
     OPEN_BROWSER,
@@ -34,9 +33,9 @@ data class ActiveSlashToken(
  * Unified SAIF AI Slash Command Engine (Section 2).
  *
  * Repairs and connects all slash command sources on the main screen:
- * 1. Immediate app actions (/terminal, /ide, /code, /browser, /video, /notes, /clear, /new, /agents, /skills, /providers, /github, /settings)
+ * 1. Immediate app actions (/terminal, /ide, /code, /browser, /notes, /clear, /new, /agents, /skills, /providers, /github, /settings)
  * 2. Specialist AI agents (/agent-coding, /agent-research, /agent-automation, /agent-analysis, /agent-content + custom agents)
- * 3. Built-in workflow & engineering commands (/plan, /goal, /boost, /grill-me, /teamwork-preview, /learn, /schedule, /apk, /debug, /review, /research, /explain, /test)
+ * 3. Built-in workflow & engineering commands (/plan, /goal, /boost, /grill-me, /teamwork-preview, /learn, /schedule, /apk, /debug, /review, /research, /explain, /test, /video, /rea)
  * 4. Built-in & live Hub skills (/android-cli, /modern-web-guidance, /generative_ui, /permissioned-github, etc.)
  * 5. Saved GitHub AI Skills (SavedAiSkills)
  * 6. User-created Custom Slash Commands (CustomSlashCommands)
@@ -49,7 +48,7 @@ object SaifSlashCommandRegistry {
         SlashCommandItem("ide", "/ide", "Open the SAIF AI Code Editor & Workspace IDE", type = "app"),
         SlashCommandItem("code", "/code", "Open the SAIF AI Code Editor & Workspace IDE", type = "app"),
         SlashCommandItem("browser", "/browser", "Open the In-App Research & Preview Browser", type = "app"),
-        SlashCommandItem("video", "/video", "Open SAIF AI Video Studio — or type /video <request> to run the AI video-editing skill", type = "app", argumentHint = "[editing request]"),
+        SlashCommandItem("video", "/video", "AI video-editing skill: match any reference style, edit raw footage", type = "command", argumentHint = "<editing request>"),
         SlashCommandItem("notes", "/notes", "Open SAIF AI Notes Workspace", type = "app"),
         SlashCommandItem("agents", "/agents", "Manage Coding, Research, Automation, Analysis & Content AI Agents", type = "app"),
         SlashCommandItem("skills", "/skills", "Manage AI Skills & Import Skills from GitHub", type = "app"),
@@ -73,7 +72,8 @@ object SaifSlashCommandRegistry {
         SlashCommandItem("review", "/review", "Audit code for bugs, security risks, regressions, and edge cases", type = "command", argumentHint = "[file or diff]"),
         SlashCommandItem("research", "/research", "Run a structured multi-angle technical research & comparison report", type = "command", argumentHint = "<topic>"),
         SlashCommandItem("explain", "/explain", "Explain code, commands, or architecture clearly step by step", type = "command", argumentHint = "<subject>"),
-        SlashCommandItem("test", "/test", "Write and execute deterministic unit/integration tests for workspace code", type = "command", argumentHint = "[target]")
+        SlashCommandItem("test", "/test", "Write and execute deterministic unit/integration tests for workspace code", type = "command", argumentHint = "[target]"),
+        SlashCommandItem("rea", "/rea", "Reverse-engineer anything: APKs, binaries, apps and runtime behavior (REA skill)", type = "command", argumentHint = "<target>")
     )
 
     private val BUILT_IN_EXPANSIONS: Map<String, (String) -> String> = mapOf(
@@ -145,9 +145,11 @@ object SaifSlashCommandRegistry {
         "/permissioned-github" to { arg ->
             "Execute Git & GitHub repository operations safely (branch status, clean commits, PR inspection, never exposing tokens).\n\nGitHub Task:\n${arg.ifBlank { "Check `git status` and connected GitHub repository state." }}"
         },
-        // Permanent video-editing skill (reference-style-matcher v1.0.0). Bare `/video` still
-        // opens Video Studio (see resolveAppAction); `/video <request>` reaches this expansion.
-        "/video" to { arg -> videoSkillExpansion(arg) }
+        // Permanent video-editing skill (reference-style-matcher v1.0.0). `/video` always
+        // runs this skill now — the old Video Studio window has been removed from the app.
+        "/video" to { arg -> videoSkillExpansion(arg) },
+        // Permanent reverse-engineering skill bundle (REA v62, morluto/rea).
+        "/rea" to { arg -> reaSkillExpansion(arg) }
     )
 
     private fun videoSkillExpansion(arg: String): String {
@@ -180,6 +182,32 @@ object SaifSlashCommandRegistry {
                 appendLine("User request:")
                 appendLine(request)
                 appendLine("Pick the matching mode from the request + attachments and execute it now. If the request is ambiguous, ask the one routing question above first.")
+            }
+        }.trim()
+    }
+
+    private fun reaSkillExpansion(arg: String): String {
+        val request = arg.trim()
+        return buildString {
+            appendLine("You are a rigorous reverse engineer using the permanent REA skill bundle (Reverse Engineer Anything, v62, by morluto — MIT).")
+            appendLine()
+            appendLine("PERMANENT SKILL BUNDLE — read the relevant SKILL.md fully before acting (Linux workspace paths):")
+            appendLine("- Main skill: /root/workspace/.agents/skills/rea/skills/reverse-engineer-anything/SKILL.md")
+            appendLine("- References in .../reverse-engineer-anything/references/: android-applications, desktop-build, connection-and-recovery, environments, evidence-workflows, javascript-applications, native-and-artifacts, runtime-observation (open only what the target needs).")
+            appendLine("- Companion skills: rea-analysis-optimization, rea-ci-tests-audit, rea-tool-design, rea-changelog-update (same parent dir; repo-maintenance oriented, use only when asked).")
+            appendLine("- Read DISCLAIMER.md and SECURITY.md in /root/workspace/.agents/skills/rea/ and respect them: work only on targets the user owns or is authorized to analyze; never help bypass licensing, DRM, or access controls.")
+            appendLine("If those files are missing on this machine, continue with careful standard practice and say so.")
+            appendLine()
+            appendLine("ENVIRONMENT (SAIF AI phone, Ubuntu ARM64 Linux): REA's MCP server (`npx rea-agents setup`, `rea doctor`) may or may not be registered here. First check whether REA tools are actually available; if they are, use their real tool list and schemas. If not, do the analysis with the workspace tools you do have (apktool/jadx/strings/objdump/ffmpeg/ffprobe/python, installed via apt/pip as needed) and tell the user how to register the REA MCP server for deeper runs. Prefer shipped-artifact evidence: decompile, compare versions, observe runtime behavior; keep inline evidence for every claim.")
+            appendLine()
+            appendLine("RULES: use REA when the question depends on a shipped binary/package, decompilation, runtime evidence, or behavior not established by source. For ordinary analysis of a complete source repository, use normal repository tools instead. Never fabricate findings — report exactly what the evidence shows.")
+            appendLine()
+            if (request.isBlank()) {
+                appendLine("The user typed bare /rea with no target yet. Ask one short question: which app/binary/version should be analyzed, and what exactly should be explained (feature, comparison, decompiled logic, reconstruction guide)?")
+            } else {
+                appendLine("User request:")
+                appendLine(request)
+                appendLine("Execute it now against the target above (plus any attachments, found under /root/uploads/). If the target or goal is ambiguous, ask the one question above first.")
             }
         }.trim()
     }
@@ -220,7 +248,6 @@ object SaifSlashCommandRegistry {
     /** Maps immediate app slash commands to [SaifAppSlashAction]. */
     fun resolveAppAction(rawInput: String): SaifAppSlashAction? {
         return when (rawInput.trim().lowercase()) {
-            "/video" -> SaifAppSlashAction.OPEN_VIDEO_STUDIO
             "/terminal", "/term" -> SaifAppSlashAction.OPEN_TERMINAL
             "/ide", "/code", "/editor" -> SaifAppSlashAction.OPEN_CODE_IDE
             "/browser", "/web" -> SaifAppSlashAction.OPEN_BROWSER

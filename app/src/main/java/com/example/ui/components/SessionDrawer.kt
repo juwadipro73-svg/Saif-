@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -318,10 +317,8 @@ fun SessionDrawerContent(
                         ) {
                             val isActive = session.id == activeSessionId
                             val isAppProject = session.mode == "project" || com.example.util.ProjectDataManager.hasProject(context, session.title)
-                            val isVideoProject = session.mode == "video_project" || com.example.util.ProjectDataManager.hasVideoProject(context, session.title)
-                            val isProject = isAppProject || isVideoProject
+                            val isProject = isAppProject
                             val projectRed = Color(0xFFEF4444)
-                            val videoPurple = Color(0xFF9B82EC)
                             var showMenu by remember { mutableStateOf(false) }
 
                             Row(
@@ -330,10 +327,8 @@ fun SessionDrawerContent(
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(
                                         when {
-                                            isActive && isVideoProject -> videoPurple.copy(alpha = 0.22f)
                                             isActive && isAppProject -> projectRed.copy(alpha = 0.20f)
                                             isActive -> SaifTheme.colors.surfaceCard
-                                            isVideoProject -> videoPurple.copy(alpha = 0.08f)
                                             isAppProject -> projectRed.copy(alpha = 0.08f)
                                             else -> Color.Transparent
                                         }
@@ -344,17 +339,14 @@ fun SessionDrawerContent(
                             ) {
                                 Icon(
                                     imageVector = when {
-                                        isVideoProject -> Icons.Outlined.Videocam
                                         isAppProject -> Icons.Outlined.Code
                                         else -> Icons.Outlined.ChatBubbleOutline
                                     },
                                     contentDescription = when {
-                                        isVideoProject -> "Video Project"
                                         isAppProject -> "App Project"
                                         else -> "Chat"
                                     },
                                     tint = when {
-                                        isVideoProject -> videoPurple
                                         isAppProject -> projectRed
                                         else -> SaifTheme.colors.textSecondary
                                     },
@@ -364,9 +356,8 @@ fun SessionDrawerContent(
                                 Text(
                                     text = session.title,
                                     fontSize = 14.sp,
-                                    fontWeight = if (isAppProject || isVideoProject) FontWeight.Bold else FontWeight.Normal,
+                                    fontWeight = if (isAppProject) FontWeight.Bold else FontWeight.Normal,
                                     color = when {
-                                        isVideoProject -> videoPurple
                                         isAppProject -> projectRed
                                         else -> SaifTheme.colors.textPrimary
                                     },
@@ -375,22 +366,7 @@ fun SessionDrawerContent(
                                     modifier = Modifier.weight(1f)
                                 )
 
-                                if (isVideoProject) {
-                                    Surface(
-                                        color = videoPurple.copy(alpha = 0.18f),
-                                        shape = RoundedCornerShape(4.dp),
-                                        border = BorderStroke(0.5.dp, videoPurple.copy(alpha = 0.4f)),
-                                        modifier = Modifier.padding(horizontal = 4.dp)
-                                    ) {
-                                        Text(
-                                            text = "VIDEO",
-                                            fontSize = 9.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = videoPurple,
-                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp)
-                                        )
-                                    }
-                                } else if (isAppProject) {
+                                if (isAppProject) {
                                     Surface(
                                         color = projectRed.copy(alpha = 0.18f),
                                         shape = RoundedCornerShape(4.dp),
@@ -615,8 +591,7 @@ fun SessionDrawerContent(
     // Confirm Single Session / Project Delete Dialog
     if (sessionToDelete != null) {
         val targetSession = sessionToDelete!!
-        val isVideo = targetSession.mode.equals("video_project", ignoreCase = true) || com.example.util.ProjectDataManager.hasVideoProject(context, targetSession.title)
-        val isProject = targetSession.mode.equals("project", ignoreCase = true) || com.example.util.ProjectDataManager.hasProject(context, targetSession.title) || isVideo
+        val isProject = targetSession.mode.equals("project", ignoreCase = true) || com.example.util.ProjectDataManager.hasProject(context, targetSession.title)
 
         BasicAlertDialog(onDismissRequest = { sessionToDelete = null }) {
             Surface(
@@ -635,7 +610,7 @@ fun SessionDrawerContent(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isVideo) "Delete Video Project?" else if (isProject) "Delete Project?" else "Delete Chat?",
+                            text = if (isProject) "Delete Project?" else "Delete Chat?",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = SaifTheme.colors.textPrimary
@@ -645,9 +620,7 @@ fun SessionDrawerContent(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = if (isVideo) {
-                            "Are you sure you want to delete '${targetSession.title}'? All timeline clips, drafts, and director edits will be permanently removed."
-                        } else if (isProject) {
+                        text = if (isProject) {
                             "Are you sure you want to delete '${targetSession.title}'? All project source code, layouts, and chat history will be permanently deleted."
                         } else {
                             "Are you sure you want to delete this chat session with '${targetSession.title}'?"

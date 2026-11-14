@@ -11,7 +11,8 @@ class SaifSlashCommandRegistryTest {
         assertEquals(SaifAppSlashAction.OPEN_TERMINAL, SaifSlashCommandRegistry.resolveAppAction(" /terminal "))
         assertEquals(SaifAppSlashAction.OPEN_CODE_IDE, SaifSlashCommandRegistry.resolveAppAction("/ide"))
         assertEquals(SaifAppSlashAction.OPEN_BROWSER, SaifSlashCommandRegistry.resolveAppAction("/browser"))
-        assertEquals(SaifAppSlashAction.OPEN_VIDEO_STUDIO, SaifSlashCommandRegistry.resolveAppAction("/video"))
+        // /video is a permanent agent skill now (reference-style-matcher), not an app window action.
+        assertNull(SaifSlashCommandRegistry.resolveAppAction("/video"))
         assertEquals(SaifAppSlashAction.OPEN_NOTES, SaifSlashCommandRegistry.resolveAppAction("/notes"))
         assertEquals(SaifAppSlashAction.NEW_CHAT, SaifSlashCommandRegistry.resolveAppAction("/new"))
         assertEquals(SaifAppSlashAction.CLEAR_CHAT, SaifSlashCommandRegistry.resolveAppAction("/clear"))
