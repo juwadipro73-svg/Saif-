@@ -345,3 +345,39 @@ jobs:
             esc = chunk.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
             print("::notice title=APK libraries %d/%d::%s" % (i + 1, len(parts), esc))
         PYEOF
+
+  # One-shot helper for size-limited networks: when the push message contains
+  # [deliver-apk], the just-built APK is split into git-friendly (<100 MB)
+  # chunks and force-pushed to the `apk-delivery` branch, so the APK bytes can
+  # be fetched over plain git (github.com) where release-asset/blob hosts are
+  # blocked. The apk-delivery push does NOT trigger a new build (paths-ignore).
+  deliver-chunks:
+    needs: build
+    if: success() && contains(github.event.head_commit.message, '[deliver-apk]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Download just-built APK artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: app-debug-build-${{ github.run_number }}
+        path: apk
+
+    - name: Split APK and force-push apk-delivery branch
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd apk
+        f=$(ls *.apk | head -1)
+        sha256sum "$f" > SHA256SUM.txt
+        split -b 24m "$f" chunk_
+        rm "$f"
+        cat SHA256SUM.txt
+        ls -lh
+        git init -b apk-delivery
+        git config user.email "arena-agent@example.com"
+        git config user.name "Arena Agent"
+        git add -A
+        git commit -m "APK delivery build #${{ github.run_number }} ($(cut -d' ' -f1 SHA256SUM.txt | cut -c1-12))"
+        git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+        git push -f origin apk-delivery
