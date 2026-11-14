@@ -1,4 +1,7 @@
 import groovy.json.JsonSlurper
+import java.io.File
+import java.security.KeyStore
+import java.security.MessageDigest
 import org.gradle.api.tasks.testing.Test
 
 val versionFile = rootProject.file("version.json")
@@ -23,15 +26,15 @@ val buildStamp = if (ciRunNumber != null) "build #$ciRunNumber ($ciSha)" else "l
 // Tamper-guard pinning: read the signing certificate's SHA-256 straight from the keystore at
 // build time and bake it into BuildConfig, so SaifTamperGuard can kill repackaged APKs
 // (decompile -> edit -> re-sign always changes the certificate). Empty when unreadable.
-fun signerCertSha256(storeFile: java.io.File, storePassword: String, alias: String): String {
+fun signerCertSha256(storeFile: File, storePassword: String, alias: String): String {
     if (!storeFile.isFile) return ""
-    val types = listOf("JKS", java.security.KeyStore.getDefaultType(), "PKCS12").distinct()
+    val types = listOf("JKS", KeyStore.getDefaultType(), "PKCS12").distinct()
     for (type in types) {
         try {
-            val ks = java.security.KeyStore.getInstance(type)
+            val ks = KeyStore.getInstance(type)
             storeFile.inputStream().use { ks.load(it, storePassword.toCharArray()) }
             val cert = ks.getCertificate(alias) ?: continue
-            val md = java.security.MessageDigest.getInstance("SHA-256")
+            val md = MessageDigest.getInstance("SHA-256")
             return md.digest(cert.encoded).joinToString("") { "%02x".format(it) }
         } catch (_: Exception) { }
     }
