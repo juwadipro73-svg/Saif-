@@ -40,7 +40,9 @@ on-device automatically next to the `/video` skill.
 Every project build runs through the Advance Auto-Builder (`com.example.autobuild`) with no button needed:
 
 - **Idea expansion** — a one-line idea becomes an ambitious brief (10+ must-features, wow delights, extra screens). Works offline via built-in heuristic briefs when no key/network is available.
-- **Parallel agents** — independent code modules generate on up to 3 agents at once.
+- **Parallel agent swarm** — big tasks fan out (one task per screen, one per feature group) across up to 8 agents at once; the chat shows live who is doing what (🤖 roster + per-agent status lines).
+- **No size cap** — code generation auto-continues past per-call output limits, so files and projects grow as large as the app genuinely needs (no 2 MB-style ceiling).
+- **Delta follow-ups + true resume** — follow-up prompts only touch what the request needs (never a scratch rebuild); interrupted runs reuse the saved spec/plan and skip already-finished tasks.
 - **Quality gates** — each result is re-tested in the headless sandbox and scored 0-100; anything under 82/100 is automatically improved in rounds (max 3 per session).
 - **Continue-forward rule** — files you didn't ask to touch stay frozen; if a new pass breaks older checks, the previous good version is restored automatically.
 - **Checkpoints + resume** — prompts, file hashes, scores and findings persist per project, so interrupted work continues days later: on app start, every 6 hours in the background, or instantly when you reopen the project chat.

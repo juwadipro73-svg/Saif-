@@ -54,6 +54,9 @@ import com.example.data.local.ProviderSettingsManager
 import com.example.data.remote.AIApiUtility
 import com.example.builder.AutonomousAppBuilder
 import com.example.builder.ProjectDiskBridge
+import com.example.builder.agent.AGENT_DONE
+import com.example.builder.agent.AGENT_WORKING
+import com.example.builder.agent.BuildAgentStatus
 import com.example.util.ProjectChatHistoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -89,7 +92,9 @@ data class BuildAiMessage(
     val thoughts: List<String> = emptyList(),
     val elapsedSeconds: Int = 0,
     val durationText: String = "",
-    val activePhase: String = ""
+    val activePhase: String = "",
+    /** Live parallel-agent roster (who is doing what). Live-only, not persisted to chat history. */
+    val agents: List<BuildAgentStatus> = emptyList()
 )
 
 /**
@@ -442,6 +447,13 @@ fun BuildAIScreen(
                                     steps = updatedSteps
                                 )
                             } else msg
+                        }
+                    }
+                },
+                onAgentUpdate = { roster ->
+                    withContext(Dispatchers.Main) {
+                        messages = messages.map { msg ->
+                            if (msg.id == assistantMsgId) msg.copy(agents = roster) else msg
                         }
                     }
                 }
@@ -1094,6 +1106,23 @@ private fun SaifAiAssistantBubble(
                                     color = purpleAi,
                                     fontWeight = FontWeight.Medium
                                 )
+                                if (message.agents.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    val workingCount = message.agents.count { it.state == AGENT_WORKING }
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = purpleAi.copy(alpha = 0.16f),
+                                        border = BorderStroke(1.dp, purpleAi.copy(alpha = 0.45f))
+                                    ) {
+                                        Text(
+                                            text = "🤖 ${message.agents.size} agents" + if (workingCount > 0) " · $workingCount working" else "",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = purpleAi,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = if (isTaskBarExpanded) "• Tap to collapse" else "• Tap to inspect details",
@@ -1150,6 +1179,70 @@ private fun SaifAiAssistantBubble(
                     HorizontalDivider(color = Color(0xFF3A3835), thickness = 1.dp)
 
                     Column(modifier = Modifier.padding(12.dp)) {
+                        // 0. Live parallel agents: how many run at once and what each one does
+                        if (message.agents.isNotEmpty()) {
+                            Text(
+                                text = if (message.isOptimizing) "LIVE AGENTS · ${message.agents.size} RUNNING TOGETHER" else "AGENTS · ${message.agents.size} RAN TOGETHER",
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp,
+                                color = purpleAi
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            message.agents.forEach { agent ->
+                                val dotColor = when (agent.state) {
+                                    AGENT_WORKING -> runGreen
+                                    AGENT_DONE -> runGreen.copy(alpha = 0.55f)
+                                    else -> Color(0xFF6B6962)
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (agent.state == AGENT_WORKING && message.isOptimizing) {
+                                        CircularProgressIndicator(
+                                            color = runGreen,
+                                            strokeWidth = 1.5.dp,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = if (agent.state == AGENT_DONE) Icons.Default.CheckCircle else Icons.Default.Circle,
+                                            contentDescription = agent.state,
+                                            tint = dotColor,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "🤖 ${agent.name}",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFE5E2D6)
+                                        )
+                                        val detail = when {
+                                            agent.taskTitle.isNotBlank() && agent.file.isNotBlank() -> "${agent.taskTitle} → ${agent.file}"
+                                            agent.taskTitle.isNotBlank() -> agent.taskTitle
+                                            agent.file.isNotBlank() -> agent.file
+                                            agent.state == AGENT_DONE -> "finished"
+                                            else -> "standing by"
+                                        }
+                                        Text(
+                                            text = detail,
+                                            fontSize = 10.5.sp,
+                                            color = Color(0xFFA8A59B),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+
                         // 1. AI Real Chain of Thought
                         if (message.thoughts.isNotEmpty()) {
                             Surface(

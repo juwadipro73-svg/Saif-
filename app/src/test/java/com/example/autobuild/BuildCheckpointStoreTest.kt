@@ -35,6 +35,8 @@ class BuildCheckpointStoreTest {
             lastPhase = "S5_SANDBOX",
             promptHistory = listOf("game banao", "aur accha karo"),
             completedTaskIds = listOf("task_1_tokens"),
+            plannedTaskIds = listOf("task_1_tokens", "task_2_state"),
+            planSignature = "deadbeef12345678",
             fileHashes = mapOf("index.html" to "abc123"),
             passedProbes = listOf("#app-root"),
             lastPassedCount = 12,

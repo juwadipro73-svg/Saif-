@@ -34,12 +34,30 @@ data class NextFeatureIdea(
     val description: String = ""
 )
 
+/**
+ * Live state of one parallel build agent, shown in the chat ("kaun kya kar raha hai").
+ * [state] is one of [AGENT_WORKING], [AGENT_WAITING] or [AGENT_DONE].
+ */
+data class BuildAgentStatus(
+    val id: String,
+    val name: String,
+    val state: String = AGENT_WORKING,
+    val taskTitle: String = "",
+    val file: String = ""
+)
+
+const val AGENT_WORKING = "working"
+const val AGENT_WAITING = "waiting"
+const val AGENT_DONE = "done"
+
 sealed interface BuildEvent {
     data class PhaseStarted(val phase: BuildPhase, val index: Int, val total: Int) : BuildEvent
     data class Thought(val summary: String) : BuildEvent
-    data class TaskStarted(val id: String, val title: String, val file: String) : BuildEvent
-    data class Writing(val file: String, val approxBytes: Int, val snippet: String = "") : BuildEvent
-    data class Editing(val file: String, val hunks: Int) : BuildEvent
+    /** Full live roster of parallel agents; emitted whenever any agent starts/finishes work. */
+    data class AgentsUpdate(val agents: List<BuildAgentStatus>) : BuildEvent
+    data class TaskStarted(val id: String, val title: String, val file: String, val agentId: String = "", val agentName: String = "") : BuildEvent
+    data class Writing(val file: String, val approxBytes: Int, val snippet: String = "", val agentId: String = "", val agentName: String = "") : BuildEvent
+    data class Editing(val file: String, val hunks: Int, val agentId: String = "", val agentName: String = "") : BuildEvent
     data class StaticCheck(val passed: Boolean, val issues: List<String>) : BuildEvent
     data class SandboxRun(val passed: Boolean, val issues: List<String>, val passedCount: Int, val totalCount: Int) : BuildEvent
     data class Fixing(val round: Int, val issueSummary: String) : BuildEvent

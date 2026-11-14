@@ -14,7 +14,9 @@ data class HtmlGuardResult(
  */
 object HtmlGuard {
 
-    private const val MAX_SIZE_BYTES = 400 * 1024 // 400 KB
+    // No small project cap: high-end apps are allowed to grow into many megabytes.
+    // This only guards against runaway garbage, far beyond any genuine app size.
+    private const val MAX_SIZE_BYTES = 20 * 1024 * 1024 // 20 MB
 
     private val ALLOWED_CDN_DOMAINS = listOf(
         "cdnjs.cloudflare.com",
@@ -52,7 +54,7 @@ object HtmlGuard {
 
         // 1. Size check
         if (trimmed.toByteArray(Charsets.UTF_8).size > MAX_SIZE_BYTES) {
-            issues.add("Document size exceeds maximum limit of 400 KB (${trimmed.length / 1024} KB).")
+            issues.add("Document size exceeds maximum limit of 20 MB (${trimmed.length / (1024 * 1024)} MB).")
         }
 
         // 2. Starts with <!DOCTYPE html>

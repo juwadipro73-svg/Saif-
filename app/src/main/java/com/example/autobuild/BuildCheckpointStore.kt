@@ -25,6 +25,10 @@ data class BuildCheckpoint(
     val lastPhase: String = "",
     val promptHistory: List<String> = emptyList(),
     val completedTaskIds: List<String> = emptyList(),
+    /** Task ids of the plan that is currently (or was last) executing — resume skips the completed ones. */
+    val plannedTaskIds: List<String> = emptyList(),
+    /** Signature of that plan (ids + target files). Resume only skips tasks when it still matches. */
+    val planSignature: String = "",
     val fileHashes: Map<String, String> = emptyMap(),
     val passedProbes: List<String> = emptyList(),
     val lastPassedCount: Int = 0,
@@ -168,6 +172,22 @@ object BuildCheckpointStore {
         return map
     }
 
+    /**
+     * Stable signature for a task plan: same tasks + same target files = same signature.
+     * Pure JVM logic (no Android APIs) so unit tests can cover it.
+     */
+    fun planSignatureFor(tasks: List<Pair<String, String>>): String {
+        return try {
+            val digest = MessageDigest.getInstance("SHA-256")
+            val canonical = tasks.sortedBy { it.first }
+                .joinToString("|") { (id, files) -> "$id=$files" }
+            digest.digest(canonical.toByteArray(Charsets.UTF_8))
+                .joinToString("") { "%02x".format(it) }.take(16)
+        } catch (_: Exception) {
+            tasks.hashCode().toString(16)
+        }
+    }
+
     /** Files whose content changed (or vanished) compared to a previous snapshot. */
     fun detectChangedFiles(projectDir: File, oldHashes: Map<String, String>): List<String> {
         if (oldHashes.isEmpty()) return emptyList()
@@ -240,6 +260,8 @@ object BuildCheckpointStore {
             put("lastPhase", cp.lastPhase)
             put("promptHistory", JSONArray(cp.promptHistory))
             put("completedTaskIds", JSONArray(cp.completedTaskIds))
+            put("plannedTaskIds", JSONArray(cp.plannedTaskIds))
+            put("planSignature", cp.planSignature)
             val hashes = JSONObject()
             cp.fileHashes.forEach { (path, hash) -> hashes.put(path, hash) }
             put("fileHashes", hashes)
@@ -275,6 +297,8 @@ object BuildCheckpointStore {
             lastPhase = json.optString("lastPhase", ""),
             promptHistory = strList("promptHistory"),
             completedTaskIds = strList("completedTaskIds"),
+            plannedTaskIds = strList("plannedTaskIds"),
+            planSignature = json.optString("planSignature", ""),
             fileHashes = hashes,
             passedProbes = strList("passedProbes"),
             lastPassedCount = json.optInt("lastPassedCount", 0),

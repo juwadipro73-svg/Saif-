@@ -46,7 +46,8 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
         errorInfo: CompilerErrorInfo? = null,
         base64Images: List<String> = emptyList(),
         onProgressUpdate: suspend (statusText: String, stage: Int) -> Unit = { _, _ -> },
-        advanceMode: Boolean = true
+        advanceMode: Boolean = true,
+        onAgentUpdate: suspend (List<com.example.builder.agent.BuildAgentStatus>) -> Unit = {}
     ): AutonomousBuildResult = withContext(Dispatchers.IO) {
         val sanitizedAppName = project.appName.replace(Regex("[^a-zA-Z0-9_]"), "_").ifBlank { "Project" }
         val projectDir = File(context.filesDir, "projects/$sanitizedAppName").apply { mkdirs() }
@@ -83,14 +84,20 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
                     is com.example.builder.agent.BuildEvent.Thought -> {
                         onProgressUpdate("  ${event.summary}", 1)
                     }
+                    is com.example.builder.agent.BuildEvent.AgentsUpdate -> {
+                        onAgentUpdate(event.agents)
+                    }
                     is com.example.builder.agent.BuildEvent.TaskStarted -> {
-                        onProgressUpdate("  Task ${event.id}: ${event.title}...", 2)
+                        val who = if (event.agentName.isNotBlank()) "🤖 ${event.agentName} · " else ""
+                        onProgressUpdate("  $who Task ${event.id}: ${event.title}...", 2)
                     }
                     is com.example.builder.agent.BuildEvent.Writing -> {
-                        onProgressUpdate("  Writing ${event.file} (${event.approxBytes} B)...", 2)
+                        val who = if (event.agentName.isNotBlank()) "🤖 ${event.agentName} · " else ""
+                        onProgressUpdate("  $who Writing ${event.file} (${event.approxBytes} B)...", 2)
                     }
                     is com.example.builder.agent.BuildEvent.Editing -> {
-                        onProgressUpdate("  Patching ${event.file} (${event.hunks} hunks)...", 2)
+                        val who = if (event.agentName.isNotBlank()) "🤖 ${event.agentName} · " else ""
+                        onProgressUpdate("  $who Patching ${event.file} (${event.hunks} hunks)...", 2)
                     }
                     is com.example.builder.agent.BuildEvent.StaticCheck -> {
                         val status = if (event.passed) "Static checks passed" else "Found issues: ${event.issues.size}"

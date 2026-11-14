@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * What it does on EVERY build (no button needed):
  * 1. Expands a small idea into an ambitious brief ([IdeaExpander]).
- * 2. Runs the staged pipeline with up to 3 parallel agents.
+ * 2. Runs the staged pipeline with a swarm of up to 8 parallel agents.
  * 3. Freezes files the user didn't ask to touch (continue-forward rule).
  * 4. Re-tests the result and auto-improves it in rounds until the quality gate passes.
  * 5. Guards against regressions: if a new pass breaks older features, the previous
@@ -56,7 +56,8 @@ object AutoBuildOrchestrator {
     private const val TAG = "AutoBuildX"
     const val TARGET_SCORE = DeepQualityAudit.TARGET_SCORE
     const val MAX_AUTO_ROUNDS = 3
-    const val PARALLEL_AGENTS = 3
+    /** Big tasks fan out across this many parallel agents (BuildAgent caps lanes by task count). */
+    const val PARALLEL_AGENTS = 8
 
     private val activeBuilds = ConcurrentHashMap.newKeySet<String>()
 
@@ -66,14 +67,15 @@ object AutoBuildOrchestrator {
         prompt: String,
         qualityMode: QualityMode,
         base64Images: List<String>,
-        onEvent: suspend (BuildEvent) -> Unit
+        onEvent: suspend (BuildEvent) -> Unit,
+        isResume: Boolean = false
     ): Result<AdvanceOutcome> {
         val key = project.appName.lowercase()
         if (!activeBuilds.add(key)) {
             return Result.failure(IllegalStateException("A build is already running for '${project.appName}' — continuing that one instead of starting over."))
         }
         return try {
-            runInternal(context, project, prompt, qualityMode, base64Images, onEvent)
+            runInternal(context, project, prompt, qualityMode, base64Images, onEvent, isResume)
         } finally {
             activeBuilds.remove(key)
         }
@@ -85,7 +87,8 @@ object AutoBuildOrchestrator {
         prompt: String,
         qualityMode: QualityMode,
         base64Images: List<String>,
-        onEvent: suspend (BuildEvent) -> Unit
+        onEvent: suspend (BuildEvent) -> Unit,
+        isResume: Boolean
     ): Result<AdvanceOutcome> {
         val app = context.applicationContext
         val projectDir = BuildCheckpointStore.projectDirFor(app, project.appName).apply { mkdirs() }
@@ -153,7 +156,7 @@ object AutoBuildOrchestrator {
         }
 
         try {
-            // ---- Main pass: staged pipeline with parallel agents ----
+            // ---- Main pass: staged pipeline with the parallel agent swarm ----
             val mainResult = BuildAgent.run(
                 context = app,
                 project = project,
@@ -163,7 +166,8 @@ object AutoBuildOrchestrator {
                 parallelAgents = PARALLEL_AGENTS,
                 frozenFiles = frozen,
                 briefGuidance = guidance,
-                onEvent = onEvent
+                onEvent = onEvent,
+                resumeFromCheckpoint = isResume
             )
             if (mainResult.isFailure) {
                 val err = mainResult.exceptionOrNull()?.message ?: "Build failed"
@@ -442,7 +446,7 @@ object AutoBuildOrchestrator {
                 }
                 appendLine("Keep every existing feature working.")
             }.trim()
-            val result = runAdvancedBuild(app, project, resumePrompt, QualityMode.BALANCED, emptyList(), onEvent)
+            val result = runAdvancedBuild(app, project, resumePrompt, QualityMode.BALANCED, emptyList(), onEvent, isResume = true)
             if (result.isSuccess) {
                 val outcome = result.getOrNull()!!
                 "'${project.appName}' aage badh gaya — quality ${outcome.finalScore}/100." +
