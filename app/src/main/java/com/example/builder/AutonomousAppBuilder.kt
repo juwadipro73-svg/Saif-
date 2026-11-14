@@ -51,12 +51,18 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
     ): AutonomousBuildResult = withContext(Dispatchers.IO) {
         val sanitizedAppName = project.appName.replace(Regex("[^a-zA-Z0-9_]"), "_").ifBlank { "Project" }
         val projectDir = File(context.filesDir, "projects/$sanitizedAppName").apply { mkdirs() }
-        ensureAndroidContainerStubs(projectDir, project)
 
         val fullPrompt = if (errorInfo != null) {
             "Fix runtime glitch: ${errorInfo.errorMessage} in ${errorInfo.fileName}:${errorInfo.lineNumber}\n${errorInfo.codeSnippet}\n$prompt"
         } else {
             prompt
+        }
+
+        // Stack routing: native / flutter requests keep their own source tree — the HTML
+        // WebView container stubs are only for HTML builds.
+        val stack = com.example.builder.agent.BuildAgent.detectBuildStack(fullPrompt)
+        if (stack == com.example.builder.agent.BuildStack.HTML) {
+            ensureAndroidContainerStubs(projectDir, project)
         }
 
         var latestSummary = ""
@@ -113,8 +119,27 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
                         onProgressUpdate("  Waiting for rate-limit window (${event.seconds}s): ${event.reason}", 2)
                     }
                     is com.example.builder.agent.BuildEvent.Committed -> {
-                        updatedFiles.add("index.html")
-                        updatedFiles.add("app/src/main/assets/index.html")
+                        when (stack) {
+                            com.example.builder.agent.BuildStack.NATIVE -> {
+                                File(projectDir, "app/src/main").walkTopDown()
+                                    .filter { it.isFile }.take(25).forEach { f ->
+                                        updatedFiles.add("app/src/main/" + f.relativeTo(File(projectDir, "app/src/main")).path.replace('\\', '/'))
+                                    }
+                                if (updatedFiles.isEmpty()) updatedFiles.add("app/src/main/AndroidManifest.xml")
+                            }
+                            com.example.builder.agent.BuildStack.FLUTTER -> {
+                                File(projectDir, "flutter_app").walkTopDown()
+                                    .filter { it.isFile }.take(25).forEach { f ->
+                                        updatedFiles.add("flutter_app/" + f.relativeTo(File(projectDir, "flutter_app")).path.replace('\\', '/'))
+                                    }
+                                if (File(projectDir, "flutter_app.zip").isFile) updatedFiles.add("flutter_app.zip")
+                                if (updatedFiles.isEmpty()) updatedFiles.add("flutter_app/lib/main.dart")
+                            }
+                            com.example.builder.agent.BuildStack.HTML -> {
+                                updatedFiles.add("index.html")
+                                updatedFiles.add("app/src/main/assets/index.html")
+                            }
+                        }
                         try { editorViewModel?.refreshTree(context) } catch (ignored: Exception) {}
                         onProgressUpdate("  Committed version v${String.format("%04d", event.version)} to disk", 4)
                     }
@@ -163,11 +188,16 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
 
         if (result.isSuccess) {
             val rootHtml = File(projectDir, "index.html")
-            val raw = if (rootHtml.exists()) rootHtml.readText() else ""
+            val raw = if (stack == com.example.builder.agent.BuildStack.HTML && rootHtml.exists()) rootHtml.readText() else ""
+            val fallbackFiles = when (stack) {
+                com.example.builder.agent.BuildStack.NATIVE -> listOf("app/src/main/AndroidManifest.xml")
+                com.example.builder.agent.BuildStack.FLUTTER -> listOf("flutter_app/lib/main.dart", "flutter_app.zip")
+                com.example.builder.agent.BuildStack.HTML -> listOf("index.html", "app/src/main/assets/index.html")
+            }
             AutonomousBuildResult(
                 isSuccess = true,
                 summary = latestSummary.ifBlank { "Built '${project.appName}' successfully!" },
-                updatedFiles = if (updatedFiles.isNotEmpty()) updatedFiles else listOf("index.html", "app/src/main/assets/index.html"),
+                updatedFiles = if (updatedFiles.isNotEmpty()) updatedFiles else fallbackFiles,
                 rawResponse = raw,
                 error = null
             )

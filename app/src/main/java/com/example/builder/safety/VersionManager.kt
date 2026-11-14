@@ -135,6 +135,98 @@ object VersionManager {
         }
     }
 
+    /**
+     * Commits a NATIVE build: the relocated `app/src/main/` tree is snapshotted into the
+     * version archive (sources were already written atomically by the assembler).
+     */
+    fun commitNativeAtomic(
+        projectDir: File,
+        prompt: String,
+        summary: String,
+        changedFiles: List<String>,
+        testPassedCount: Int = 0,
+        testTotalCount: Int = 0
+    ): Result<Int> {
+        return try {
+            val nextVersionNum = getNextVersionNumber(projectDir)
+            val vDir = File(getVersionsDir(projectDir), String.format("v%04d", nextVersionNum)).apply { mkdirs() }
+            val srcMain = File(projectDir, "app/src/main")
+            if (srcMain.isDirectory) {
+                copyTree(srcMain, File(vDir, "app/src/main"))
+            }
+            writeMetaJson(vDir, nextVersionNum, prompt, summary, changedFiles, testPassedCount, testTotalCount, "native")
+            pruneVersions(projectDir)
+            Result.success(nextVersionNum)
+        } catch (e: Exception) {
+            Log.e(TAG, "Native commit failed: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Commits a FLUTTER build: the `flutter_app/` source tree plus the project ZIP are
+     * snapshotted into the version archive.
+     */
+    fun commitFlutterAtomic(
+        projectDir: File,
+        prompt: String,
+        summary: String,
+        changedFiles: List<String>,
+        testPassedCount: Int = 0,
+        testTotalCount: Int = 0
+    ): Result<Int> {
+        return try {
+            val nextVersionNum = getNextVersionNumber(projectDir)
+            val vDir = File(getVersionsDir(projectDir), String.format("v%04d", nextVersionNum)).apply { mkdirs() }
+            val appDir = File(projectDir, "flutter_app")
+            if (appDir.isDirectory) {
+                copyTree(appDir, File(vDir, "flutter_app"))
+            }
+            File(projectDir, "flutter_app.zip").takeIf { it.isFile }?.copyTo(File(vDir, "flutter_app.zip"), overwrite = true)
+            writeMetaJson(vDir, nextVersionNum, prompt, summary, changedFiles, testPassedCount, testTotalCount, "flutter")
+            pruneVersions(projectDir)
+            Result.success(nextVersionNum)
+        } catch (e: Exception) {
+            Log.e(TAG, "Flutter commit failed: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    private fun copyTree(src: File, dst: File) {
+        src.walkTopDown().forEach { f ->
+            val rel = f.relativeTo(src).path
+            if (rel.isBlank()) return@forEach
+            val out = File(dst, rel)
+            if (f.isDirectory) out.mkdirs() else {
+                out.parentFile?.mkdirs()
+                f.copyTo(out, overwrite = true)
+            }
+        }
+    }
+
+    private fun writeMetaJson(
+        vDir: File,
+        versionNum: Int,
+        prompt: String,
+        summary: String,
+        changedFiles: List<String>,
+        testPassed: Int,
+        testTotal: Int,
+        stack: String
+    ) {
+        val meta = JSONObject().apply {
+            put("versionNumber", versionNum)
+            put("timestamp", System.currentTimeMillis())
+            put("stack", stack)
+            put("prompt", prompt)
+            put("summary", summary)
+            put("changedFiles", org.json.JSONArray(changedFiles))
+            put("testPassedCount", testPassed)
+            put("testTotalCount", testTotal)
+        }
+        File(vDir, "meta.json").writeText(meta.toString(2))
+    }
+
     private fun pruneVersions(projectDir: File) {
         val versionsDir = getVersionsDir(projectDir)
         val existing = versionsDir.listFiles()?.filter { it.isDirectory && it.name.startsWith("v") }?.sortedBy { it.name } ?: return

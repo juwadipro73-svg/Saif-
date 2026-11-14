@@ -22,6 +22,17 @@ enum class BuildIntent {
     RESET
 }
 
+/**
+ * Tech stack the user asked for. The builder honors it end to end: HTML apps assemble into
+ * the WebView container, NATIVE apps compile from Java + AndroidManifest into a real APK,
+ * FLUTTER apps ship as a complete Dart project ZIP with a build guide.
+ */
+enum class BuildStack {
+    HTML,
+    NATIVE,
+    FLUTTER
+}
+
 enum class QualityMode(val title: String, val description: String, val estTime: String) {
     QUICK("Quick", "Fast prototype, minimal stages", "~1-2 min"),
     BALANCED("Balanced", "Default for edits, thorough testing", "~3-5 min"),

@@ -114,10 +114,14 @@ object LlmGateway {
                 currentRequest.systemPrompt + currentRequest.prompt,
                 isCode = (role == LlmRole.CODER || role == LlmRole.FIXER)
             )
+            // First-try ask: code roles request a full-size chunk (the provider's real
+            // maximum is learned in ModelLimitsStore; smaller models are handled by the
+            // caller's halving retries). The continuation loop keeps appending while the
+            // model reports length-truncation, so output scales to the requirement.
             val desiredOutput = currentRequest.maxTokens ?: when (role) {
-                LlmRole.PLANNER -> 2500
-                LlmRole.CODER -> 3500
-                LlmRole.FIXER -> 2500
+                LlmRole.PLANNER -> 4000
+                LlmRole.CODER -> 16384
+                LlmRole.FIXER -> 8192
                 LlmRole.REVIEWER -> 1800
                 LlmRole.SUMMARIZER -> 1000
             }
@@ -127,7 +131,8 @@ object LlmGateway {
                 model = activeModel,
                 inputTokens = estInput,
                 maxOutputTokens = desiredOutput,
-                onWaiting = onWaiting
+                onWaiting = onWaiting,
+                minOutputTokens = if (role == LlmRole.CODER || role == LlmRole.FIXER) 4096 else 2048
             )
 
             val callReq = currentRequest.copy(maxTokens = allocatedOutput)
@@ -242,7 +247,7 @@ object LlmGateway {
                     systemPrompt = trimmedSys,
                     prompt = trimmedPrompt,
                     history = emptyList(),
-                    maxTokens = req.maxTokens?.let { (it * 0.75).toInt().coerceAtLeast(1024) }
+                    maxTokens = req.maxTokens?.let { (it * 0.75).toInt().coerceAtLeast(2048) }
                 )
             }
             else -> {
@@ -253,7 +258,7 @@ object LlmGateway {
                     systemPrompt = minimalSys,
                     prompt = excerptPrompt,
                     history = emptyList(),
-                    maxTokens = req.maxTokens?.let { (it * 0.50).toInt().coerceAtLeast(800) }
+                    maxTokens = req.maxTokens?.let { (it * 0.50).toInt().coerceAtLeast(2048) }
                 )
             }
         }

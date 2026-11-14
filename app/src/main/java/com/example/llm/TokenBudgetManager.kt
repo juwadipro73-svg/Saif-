@@ -60,22 +60,29 @@ object TokenBudgetManager {
     /**
      * Reserves token budget for a task, suspending if the sliding 60-second window is crowded.
      * Emits countdown callbacks via [onWaiting].
+     *
+     * @param minOutputTokens floor for the safety clamp: code generation must never be
+     * squeezed to a useless trickle just because the prompt context is large. The caller's
+     * continuation loop appends further chunks, so every call keeps a useful size.
      */
     suspend fun reserve(
         provider: String,
         model: String,
         inputTokens: Int,
         maxOutputTokens: Int,
-        onWaiting: (suspend (reason: String, secondsRemaining: Int) -> Unit)? = null
+        onWaiting: (suspend (reason: String, secondsRemaining: Int) -> Unit)? = null,
+        minOutputTokens: Int = 2048
     ): Int {
         val key = cacheKey(provider, model)
         val mutex = getMutex(key)
         val neededTotal = inputTokens + maxOutputTokens
         val ceiling = calculateBudgetCeiling(provider, model)
 
-        // Safety clamp: task tokens cannot exceed 0.85 * TPM alone
+        // Safety clamp: task tokens cannot exceed 0.85 * TPM alone — but never crush the
+        // output below a useful floor. The model keeps generating via auto-continue, so a
+        // big file simply takes more chunks instead of being cut off by a small cap.
         val clampedOutput = if (neededTotal > ceiling) {
-            val adjusted = (ceiling - inputTokens).coerceAtLeast(256)
+            val adjusted = (ceiling - inputTokens).coerceAtLeast(minOutputTokens)
             Log.w(TAG, "[$key] Total tokens ($neededTotal) exceeds ceiling ($ceiling). Clamping maxOutput: $maxOutputTokens -> $adjusted")
             adjusted
         } else {
@@ -85,6 +92,7 @@ object TokenBudgetManager {
 
         mutex.withLock {
             val history = getHistory(key)
+            var waitedMs = 0L
             while (true) {
                 val now = System.currentTimeMillis()
                 // Evict entries older than 60 seconds
@@ -96,6 +104,15 @@ object TokenBudgetManager {
 
                 if (availableInWindow >= actualNeeded) {
                     // Record reservation
+                    history.add(TokenUsageEntry(now, actualNeeded))
+                    break
+                }
+
+                // Circuit breaker: never hang a build forever when the reservation can
+                // never fit the window (huge context). Proceed — the provider's own 429
+                // path with backoff is the real governor at that point.
+                if (waitedMs >= 300_000L) {
+                    Log.w(TAG, "[$key] Window wait exceeded 5 min (used=$currentlyUsed/$ceiling, needed=$actualNeeded). Proceeding anyway.")
                     history.add(TokenUsageEntry(now, actualNeeded))
                     break
                 }
@@ -113,6 +130,7 @@ object TokenBudgetManager {
                 Log.i(TAG, "[$key] Rate-limit window crowded (used=$currentlyUsed/$ceiling, needed=$actualNeeded). Waiting ${waitSec}s...")
                 onWaiting?.invoke("Rate-limit window cooling down ($waitSec s)", waitSec)
                 delay(waitMs)
+                waitedMs += waitMs
             }
         }
 

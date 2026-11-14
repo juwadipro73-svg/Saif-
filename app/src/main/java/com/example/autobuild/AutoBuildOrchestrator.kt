@@ -6,6 +6,9 @@ import com.example.builder.agent.Assembler
 import com.example.builder.agent.BuildAgent
 import com.example.builder.agent.BuildEvent
 import com.example.builder.agent.BuildPhase
+import com.example.builder.agent.BuildStack
+import com.example.builder.agent.FlutterStack
+import com.example.builder.agent.NativeStack
 import com.example.builder.agent.DesignTokens
 import com.example.builder.agent.FeatureSpec
 import com.example.builder.agent.AppSpec
@@ -102,7 +105,10 @@ object AutoBuildOrchestrator {
 
         val rootHtml = File(projectDir, "index.html")
         val isNewApp = try {
-            !(rootHtml.exists() && rootHtml.length() > 50 && rootHtml.readText().contains(Assembler.SAIF_BUILD_MARKER))
+            val hasHtml = rootHtml.exists() && rootHtml.length() > 50 && rootHtml.readText().contains(Assembler.SAIF_BUILD_MARKER)
+            val hasNative = File(projectDir, "src/native").walkTopDown().any { it.isFile && it.extension.equals("java", true) }
+            val hasFlutter = File(projectDir, "src/flutter/lib/main.dart").isFile || File(projectDir, "flutter_app/lib/main.dart").isFile
+            !(hasHtml || hasNative || hasFlutter)
         } catch (_: Exception) {
             true
         }
@@ -298,6 +304,22 @@ object AutoBuildOrchestrator {
     // Auditing: spec + document + fresh headless sandbox run.
     // ------------------------------------------------------------------
 
+    /**
+     * Stack of the last build in this project: the persisted S0 decision when present,
+     * otherwise inferred from which source tree exists.
+     */
+    private fun readStackFor(projectDir: File): BuildStack {
+        try {
+            val persisted = File(projectDir, ".saif/stack.txt").takeIf { it.isFile }?.readText()?.trim()
+            if (!persisted.isNullOrBlank()) return BuildStack.valueOf(persisted)
+        } catch (_: Exception) { }
+        return when {
+            File(projectDir, "src/flutter").isDirectory || File(projectDir, "flutter_app").isDirectory -> BuildStack.FLUTTER
+            File(projectDir, "src/native").isDirectory -> BuildStack.NATIVE
+            else -> BuildStack.HTML
+        }
+    }
+
     private suspend fun runAudit(app: Context, projectDir: File): AuditBundle {
         var featureCount = 0
         var screenCount = 0
@@ -346,21 +368,35 @@ object AutoBuildOrchestrator {
             Log.w(TAG, "Audit spec read failed: ${e.message}")
         }
 
+        // Stack-aware audit: verify whatever the last build actually produced.
+        val stack = readStackFor(projectDir)
         val html = try {
-            File(projectDir, "index.html").takeIf { it.exists() }?.readText().orEmpty()
+            when (stack) {
+                BuildStack.NATIVE -> File(projectDir, "app/src/main").walkTopDown()
+                    .filter { it.isFile && (it.extension.equals("java", true) || it.extension.equals("xml", true)) }
+                    .joinToString("\n") { it.readText() }
+                BuildStack.FLUTTER -> File(projectDir, "flutter_app").walkTopDown()
+                    .filter { it.isFile && it.extension.equals("dart", true) }
+                    .joinToString("\n") { it.readText() }
+                BuildStack.HTML -> File(projectDir, "index.html").takeIf { it.exists() }?.readText().orEmpty()
+            }
         } catch (_: Exception) {
             ""
         }
 
         val report = try {
-            SandboxRunner.testHtml(app, html, spec)
+            when (stack) {
+                BuildStack.NATIVE -> NativeStack.verify(projectDir, "")
+                BuildStack.FLUTTER -> FlutterStack.verify(projectDir)
+                BuildStack.HTML -> SandboxRunner.testHtml(app, html, spec)
+            }
         } catch (e: Exception) {
-            Log.w(TAG, "Audit sandbox failed: ${e.message}")
+            Log.w(TAG, "Audit verification failed: ${e.message}")
             TestReport(
                 passed = false,
                 passedCount = 0,
                 totalCount = 1,
-                issues = listOf(TestIssue("ERROR", "Sandbox unavailable: ${e.message}"))
+                issues = listOf(TestIssue("ERROR", "Verification unavailable: ${e.message}"))
             )
         }
 
