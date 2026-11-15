@@ -126,11 +126,18 @@ object AutoBuildOrchestrator {
             )
         }
 
-        // Idea expansion for new / tiny prompts; chat-aware resume otherwise.
+        // Quick fixes (small repair on a working app) skip every expensive extra:
+        // no idea expansion, and later no improvement rounds — one surgical pass only.
+        val quickFix = BuildAgent.detectQuickFix(prompt, isNewApp)
+        if (quickFix) {
+            onEvent(BuildEvent.Thought("Quick-fix mode: surgical repair only — skipping expansion and improvement rounds."))
+        }
+
+        // Idea expansion for NEW apps only; follow-ups continue forward instead of
+        // redesigning (a 3-word fix must never trigger a full product expansion).
         var brief: IdeaBrief? = null
         var guidance: String
-        val wordCount = prompt.trim().split(Regex("\\s+")).size
-        if (isNewApp || wordCount < 25) {
+        if (isNewApp) {
             onEvent(BuildEvent.Thought("Advance mode: expanding your idea into a rich product brief..."))
             brief = try {
                 IdeaExpander.expand(project.appName, prompt, provider, activeKey, activeModel)
@@ -189,7 +196,7 @@ object AutoBuildOrchestrator {
             var bundle = runAudit(app, projectDir)
             onEvent(BuildEvent.QualityGate(bundle.audit.score, !bundle.audit.needsImprovement()))
             var rounds = 0
-            while (bundle.audit.needsImprovement() && rounds < MAX_AUTO_ROUNDS) {
+            while (!quickFix && bundle.audit.needsImprovement() && rounds < MAX_AUTO_ROUNDS) {
                 rounds++
                 val roundSnapshot = rounds
                 BuildCheckpointStore.update(projectDir) {

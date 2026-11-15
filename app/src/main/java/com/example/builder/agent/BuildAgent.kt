@@ -153,7 +153,13 @@ object BuildAgent {
                 prompt
             }
 
+            // Quick-fix mode: small repairs skip the full-build machinery (spec regen,
+            // fan-out, polish) and run one surgical file task instead of a scratch rebuild.
+            val quickFix = detectQuickFix(prompt, !isExistingApp)
             onEvent(BuildEvent.Thought("Detected intent: $intent (${detectLanguage(prompt)}), stack: $stack"))
+            if (quickFix) {
+                onEvent(BuildEvent.Thought("Quick-fix mode: surgical repair only — no rebuild, no polish pass."))
+            }
             if (stack != BuildStack.HTML) {
                 onEvent(
                     BuildEvent.Thought(
@@ -170,7 +176,8 @@ object BuildAgent {
             // STAGE S1: SPECIFICATION ("Product Brain")
             // -------------------------------------------------------------
             trackPhase(BuildPhase.S1_SPEC, 2, 10)
-            val resumedSpec = if (resumeFromCheckpoint) loadSpecFromDisk(saifDir) else null
+            // Quick fixes reuse the saved product spec instead of regenerating it.
+            val resumedSpec = if (resumeFromCheckpoint || quickFix) loadSpecFromDisk(saifDir) else null
             val spec = if (resumedSpec != null) {
                 onEvent(BuildEvent.Thought("Resuming: reusing the saved product spec (${resumedSpec.features.size} features, ${resumedSpec.screens.size} screens)..."))
                 resumedSpec
@@ -211,7 +218,7 @@ object BuildAgent {
                 resumedPlan
             } else {
                 onEvent(BuildEvent.Thought("Splitting spec into modules for the agent swarm..."))
-                val fresh = generatePlan(spec, qualityMode, provider, activeModel, isExistingApp, intent, prompt, frozenFiles, stack)
+                val fresh = generatePlan(spec, qualityMode, provider, activeModel, isExistingApp, intent, prompt, frozenFiles, stack, quickFix)
                 File(saifDir, "plan.json").writeText(planToJson(fresh).toString(2))
                 fresh
             }
@@ -496,7 +503,7 @@ object BuildAgent {
             if (!testReport.passed && qualityMode != QualityMode.QUICK) {
                 trackPhase(BuildPhase.S6_FIX, 7, 10)
                 var fixRound = 0
-                val maxFixRounds = 3
+                val maxFixRounds = if (quickFix) 1 else 3
 
                 while (!testReport.passed && fixRound < maxFixRounds) {
                     fixRound++
@@ -524,7 +531,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S7: POLISH PASS (Balanced & Max modes)
             // -------------------------------------------------------------
-            if (qualityMode == QualityMode.MAX && testReport.passed) {
+            if (qualityMode == QualityMode.MAX && testReport.passed && !quickFix) {
                 trackPhase(BuildPhase.S7_POLISH, 8, 10)
                 onEvent(BuildEvent.Thought("Running visual polish, animation timing, and contrast check..."))
                 delay(300)
@@ -898,6 +905,44 @@ object BuildAgent {
     }
 
     /**
+     * True for a small repair on a working app ("fix crash on settings", "button ka glitch
+     * thik karo"): short fix-worded prompt, existing app, no rebuild language. Quick fixes
+     * skip the expensive full-build machinery (idea expansion, spec regen, multi-task fan-out,
+     * polish, improvement rounds) and run one surgical file task instead. Pure logic for tests.
+     */
+    fun detectQuickFix(prompt: String, isNewApp: Boolean): Boolean {
+        if (isNewApp) return false
+        val intent = classifyIntent(prompt, true)
+        if (intent != BuildIntent.FIX_BUG) return false
+        if (promptMentionsEverything(prompt)) return false
+        val words = prompt.trim().split(Regex("\\s+")).size
+        if (words > 40) return false
+        val lower = prompt.lowercase()
+        val fixWords = listOf(
+            "fix", "bug", "glitch", "error", "issue", "crash", "broken", "not working",
+            "thik karo", "theek karo", "sudhar", "galti", "problem", "slow", "stuck", "freeze"
+        )
+        return fixWords.any { lower.contains(it) }
+    }
+
+    /**
+     * Single-task plan for a quick fix: only the file the request targets. The S6 fix round
+     * can still add envelopes for other files if verification fails, so nothing gets stuck.
+     */
+    fun quickFixTaskFor(prompt: String, stack: BuildStack = BuildStack.HTML): List<BuildTask> {
+        val target = guessDeltaTarget(prompt, stack)
+        val short = prompt.trim().replace(Regex("\\s+"), " ").take(60).ifBlank { "quick fix" }
+        return listOf(
+            BuildTask(
+                "task_quickfix_${(kotlin.math.abs(prompt.hashCode()) % 900) + 100}",
+                "Quick fix: $short",
+                listOf(target),
+                expectedOutputTokens = 6000
+            )
+        )
+    }
+
+    /**
      * Builds the task list for a run. New / full-rebuild runs fan out: one task per screen
      * plus one task per feature group, so big apps spread across many parallel agents.
      * Follow-up runs on a working app get a small delta plan that only touches what the
@@ -1137,11 +1182,13 @@ object BuildAgent {
         intent: BuildIntent,
         prompt: String,
         frozenFiles: Set<String>,
-        stack: BuildStack = BuildStack.HTML
+        stack: BuildStack = BuildStack.HTML,
+        quickFix: Boolean = false
     ): BuildPlan {
         val ceiling = TokenBudgetManager.calculateBudgetCeiling(provider, model)
         val targetTier = if (ceiling <= 10_000) "TINY" else if (ceiling <= 60_000) "MEDIUM" else "RICH"
-        val tasks = createTaskPlan(spec, isExistingApp, intent, prompt, frozenFiles, stack)
+        val tasks = if (quickFix) quickFixTaskFor(prompt, stack)
+        else createTaskPlan(spec, isExistingApp, intent, prompt, frozenFiles, stack)
         return BuildPlan(tasks = tasks, targetTier = targetTier)
     }
 

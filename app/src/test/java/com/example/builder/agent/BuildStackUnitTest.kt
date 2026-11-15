@@ -384,4 +384,45 @@ class BuildStackUnitTest {
         assertTrue(BuildAgent.MAX_CONTINUATIONS >= 32)
         assertTrue(BuildAgent.CODER_MAX_OUTPUT_TOKENS >= 16384)
     }
+
+    // ------------------------------------------------------------------
+    // Quick-fix mode: small repairs must run one surgical task, not a rebuild
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `short bug prompt on existing app is a quick fix`() {
+        assertTrue(BuildAgent.detectQuickFix("fix the crash on the settings screen", false))
+        assertTrue(BuildAgent.detectQuickFix("button ka glitch thik karo", false))
+        assertTrue(BuildAgent.detectQuickFix("login is broken, error 500", false))
+    }
+
+    @Test
+    fun `new app is never a quick fix`() {
+        assertFalse(BuildAgent.detectQuickFix("fix the crash on the settings screen", true))
+    }
+
+    @Test
+    fun `rebuild language is never a quick fix`() {
+        assertFalse(BuildAgent.detectQuickFix("fix everything, rebuild the app from scratch", false))
+        assertFalse(BuildAgent.detectQuickFix("fix the layout, poora dobara banao", false))
+    }
+
+    @Test
+    fun `feature asks are not quick fixes`() {
+        assertFalse(BuildAgent.detectQuickFix("add dark mode with a toggle in settings", false))
+    }
+
+    @Test
+    fun `long prompts are not quick fixes`() {
+        val long = "fix the home screen " + "and also check the navigation flow ".repeat(10)
+        assertFalse(BuildAgent.detectQuickFix(long, false))
+    }
+
+    @Test
+    fun `quick fix plan is exactly one surgical task`() {
+        val tasks = BuildAgent.quickFixTaskFor("fix the crash on the settings screen")
+        assertEquals(1, tasks.size)
+        assertTrue(tasks[0].targetFiles.isNotEmpty())
+        assertTrue(tasks[0].expectedOutputTokens <= 6000)
+    }
 }
