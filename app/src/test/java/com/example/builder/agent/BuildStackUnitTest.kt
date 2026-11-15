@@ -453,6 +453,14 @@ class BuildStackUnitTest {
     }
 
     @Test
+    fun `several product areas at once is a build, not an edit`() {
+        val multi = "make an app with login, dashboard, charts, chat, payments and settings"
+        assertTrue(BuildAgent.mentionsManyFeatures(multi))
+        assertFalse(BuildAgent.detectIncrementalEdit(multi, false))
+        assertFalse(BuildAgent.mentionsManyFeatures("add a dark mode toggle in settings"))
+    }
+
+    @Test
     fun `incremental plan touches at most two files`() {
         val tasks = BuildAgent.incrementalTaskFor("add a dark mode toggle")
         assertEquals(1, tasks.size)

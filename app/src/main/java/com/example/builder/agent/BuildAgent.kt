@@ -979,6 +979,9 @@ object BuildAgent {
     fun detectIncrementalEdit(prompt: String, isNewApp: Boolean): Boolean {
         if (isNewApp) return false
         if (promptMentionsEverything(prompt)) return false
+        // A short prompt that still lists several product areas is a build, not an edit
+        // ("app with login, dashboard, charts, chat, payments and settings").
+        if (mentionsManyFeatures(prompt)) return false
         val lower = prompt.lowercase()
         // "start over" / "from scratch" language means a real rebuild, not an edit.
         if (REBUILD_WORDS.any { lower.contains(it) }) return false
@@ -987,6 +990,18 @@ object BuildAgent {
         val intent = classifyIntent(prompt, true)
         return intent != BuildIntent.NEW_APP && intent != BuildIntent.RESET
     }
+
+    /** Product areas that, three or more at once, mean a multi-screen build rather than an edit. */
+    fun mentionsManyFeatures(prompt: String): Boolean {
+        val lower = prompt.lowercase()
+        return FEATURE_WORDS.count { lower.contains(it) } >= 3
+    }
+
+    private val FEATURE_WORDS = listOf(
+        "login", "signup", "sign up", "dashboard", "chart", "payment", "checkout",
+        "chat", "notification", "profile", "settings", "search", "filter", "cart",
+        "admin", "report", "upload", "camera", "map", "calendar", "database"
+    )
 
     private val REBUILD_WORDS = listOf(
         "from scratch", "start over", "start from zero", "dobara banao", "naya app banao",
