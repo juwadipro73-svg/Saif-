@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.SweepGradient
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.foundation.layout.padding
@@ -81,24 +80,34 @@ private fun DrawScope.drawThinkingOrb(
         center = center
     )
 
-    // comet ring: a sweep gradient from transparent to hot, rotating with the spin
+    // comet ring: 26 short arcs whose alpha and heat ramp up to a bright head, rotating with spin
     val ringWidth = radius * 0.16f
-    drawArc(
-        brush = SweepGradient(
-            center = center,
-            colors = listOf(
-                tail.copy(alpha = 0f),
-                tail.copy(alpha = 0.18f),
-                tail.copy(alpha = 0.55f),
-                core
-            )
-        ),
-        startAngle = Math.toDegrees(spin.toDouble()).toFloat(),
-        sweepAngle = 300f,
-        useCenter = false,
-        topLeft = Offset(center.x - radius + ringWidth, center.y - radius + ringWidth),
-        size = Size((radius - ringWidth) * 2f, (radius - ringWidth) * 2f),
-        style = Stroke(width = ringWidth, cap = StrokeCap.Round)
+    val ringRadius = radius - ringWidth
+    val segments = 26
+    val sweepTotal = 300f
+    val baseDeg = Math.toDegrees(spin.toDouble()).toFloat()
+    val segSweep = sweepTotal / segments + 1.5f
+    for (i in 0 until segments) {
+        val frac = i / (segments - 1f)
+        drawArc(
+            color = lerp(tail.copy(alpha = 0f), core.copy(alpha = 0.95f), frac * frac),
+            startAngle = baseDeg + sweepTotal * frac,
+            sweepAngle = segSweep,
+            useCenter = false,
+            topLeft = Offset(center.x - ringRadius, center.y - ringRadius),
+            size = Size(ringRadius * 2f, ringRadius * 2f),
+            style = Stroke(width = ringWidth * (0.45f + 0.55f * frac))
+        )
+    }
+    // bright comet head
+    val headAngle = Math.toRadians((baseDeg + sweepTotal).toDouble())
+    drawCircle(
+        color = Color.White.copy(alpha = 0.9f),
+        radius = ringWidth * 0.62f,
+        center = Offset(
+            center.x + Math.cos(headAngle).toFloat() * ringRadius,
+            center.y + Math.sin(headAngle).toFloat() * ringRadius
+        )
     )
 
     // three sparks riding ahead of the comet, each with a tiny fading trail
