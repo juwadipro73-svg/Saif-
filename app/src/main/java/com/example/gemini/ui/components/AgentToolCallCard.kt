@@ -8,6 +8,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.animateFloatAsState
@@ -72,13 +73,13 @@ private fun AnimatedTerminalGlyph(
     val cursorAlpha by transition.animateFloat(
         initialValue = 1f,
         targetValue = 0.15f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 460), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween<Float>(durationMillis = 460), RepeatMode.Reverse),
         label = "cursorBlink"
     )
     val shellGlow by transition.animateFloat(
         initialValue = 0.10f,
         targetValue = 0.26f,
-        animationSpec = infiniteRepeatable(tween(durationMillis = 900), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween<Float>(durationMillis = 900), RepeatMode.Reverse),
         label = "shellGlow"
     )
     Canvas(modifier) {
