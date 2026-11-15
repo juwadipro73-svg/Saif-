@@ -11,10 +11,8 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.provider.AlarmClock
-import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.provider.Settings
-import android.telephony.SmsManager
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
@@ -582,195 +580,17 @@ object DeviceActionManager {
         }
     }
 
-    // 6. Phone Call & Contact Resolution
+    // 6. Phone calls & contact lookup — REMOVED from this build (no CALL_PHONE / READ_CONTACTS).
     suspend fun callOrDialPhone(context: Context, numberOrName: String, directCall: Boolean): String {
-        var digits = numberOrName.filter { it.isDigit() || it == '+' }
-        var resolvedName = numberOrName
-
-        if (digits.isBlank() && numberOrName.isNotBlank()) {
-            val resolved = resolveContactNumber(context, numberOrName)
-            if (!resolved.isNullOrBlank()) {
-                digits = resolved
-                resolvedName = "$numberOrName ($digits)"
-            }
-        }
-
-        val hasCallPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CALL_PHONE
-        ) == PackageManager.PERMISSION_GRANTED
-
-        val acc = SaifAccessibilityService.instance
-
-        return try {
-            if (digits.isNotBlank()) {
-                if (directCall && hasCallPermission) {
-                    val callIntent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$digits")).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    context.startActivity(callIntent)
-                    delay(600L)
-                    // Ensure call button is pressed if a SIM selection or confirmation pops up
-                    for (attempt in 1..4) {
-                        if (acc?.clickDialerCallButton() == true) break
-                        delay(400L)
-                    }
-                    "Calling $resolvedName…"
-                } else {
-                    val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$digits")).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    context.startActivity(dialIntent)
-                    // Auto-press the green Call button via Accessibility with retry loop so the dialer UI is ready!
-                    var dialed = false
-                    for (attempt in 1..5) {
-                        delay(450L)
-                        if (acc?.clickDialerCallButton() == true) {
-                            dialed = true
-                            break
-                        }
-                    }
-                    if (dialed) "Calling $resolvedName now." else "Opened the dialer for $resolvedName."
-                }
-            } else {
-                val dialIntent = Intent(Intent.ACTION_DIAL).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                context.startActivity(dialIntent)
-                // If contact name was specified, try searching it in the dialer
-                if (numberOrName.isNotBlank() && acc != null) {
-                    delay(800L)
-                    acc.findAndType(numberOrName)
-                    delay(500L)
-                    acc.clickFirstClickableInList()
-                } else {
-                    delay(600L)
-                    acc?.clickDialerCallButton()
-                }
-                if (numberOrName.isNotBlank()) {
-                    "Opened the dialer for $numberOrName."
-                } else {
-                    "Opened the phone dialer."
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error dialing phone: ${e.message}")
-            "Phone call karne me samasya: ${e.message}"
-        }
+        return "Calling is turned off in this build. Open your phone app if you want to call $numberOrName."
     }
 
-    fun resolveContactNumber(context: Context, nameQuery: String): String? {
-        val hasContactPerm = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_CONTACTS
-        ) == PackageManager.PERMISSION_GRANTED
+    /** Contacts access is removed: nothing is read from the address book and no prompt is shown. */
+    fun resolveContactNumber(context: Context, nameQuery: String): String? = null
 
-        if (!hasContactPerm) {
-            PermissionManager.showPermissionPrompt(
-                PermissionPromptData(
-                    id = "contacts",
-                    title = "Contacts Permission Required",
-                    message = "Please allow Contacts permission so I can find the number for '$nameQuery'.",
-                    manifestPermission = Manifest.permission.READ_CONTACTS
-                )
-            )
-            return null
-        }
-
-        val cleanQuery = nameQuery.trim().lowercase()
-        val queryCandidates = mutableListOf(cleanQuery)
-
-        // Expand common familial / relationship terms in Hindi & English
-        if (cleanQuery.contains("papa") || cleanQuery.contains("dad") || cleanQuery.contains("pitaji") ||
-            cleanQuery.contains("father") || cleanQuery.contains("daddy") || cleanQuery.contains("abba") || cleanQuery.contains("bapu")) {
-            queryCandidates.addAll(listOf("papa", "dad", "father", "daddy", "pitaji", "abba", "bapu", "pappa"))
-        }
-        if (cleanQuery.contains("mummy") || cleanQuery.contains("mom") || cleanQuery.contains("mother") ||
-            cleanQuery.contains("maa") || cleanQuery.contains("ammi") || cleanQuery.contains("mataji")) {
-            queryCandidates.addAll(listOf("mummy", "mom", "mother", "maa", "ammi", "mataji", "mami"))
-        }
-        if (cleanQuery.contains("bhai") || cleanQuery.contains("brother") || cleanQuery.contains("bro") || cleanQuery.contains("bhaiya")) {
-            queryCandidates.addAll(listOf("bhai", "brother", "bro", "bhaiya"))
-        }
-        if (cleanQuery.contains("behan") || cleanQuery.contains("sister") || cleanQuery.contains("didi")) {
-            queryCandidates.addAll(listOf("behan", "sister", "didi"))
-        }
-
-        // Add individual words
-        queryCandidates.addAll(cleanQuery.split(" ").filter { it.length > 1 })
-
-        var cursor: Cursor? = null
-        try {
-            cursor = context.contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                arrayOf(
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                    ContactsContract.CommonDataKinds.Phone.NUMBER
-                ),
-                null,
-                null,
-                null
-            )
-            if (cursor != null) {
-                val nameIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
-                val numIdx = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-
-                while (cursor.moveToNext()) {
-                    val contactName = cursor.getString(nameIdx)?.lowercase() ?: ""
-                    val contactNumber = cursor.getString(numIdx) ?: ""
-
-                    if (queryCandidates.any { cand -> contactName.contains(cand) || cand.contains(contactName) }) {
-                        return contactNumber
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error resolving contact: ${e.message}")
-        } finally {
-            cursor?.close()
-        }
-        return null
-    }
-
-    // 7. SMS Messaging
+    // 7. SMS Messaging — REMOVED from this build (no SMS permission is requested).
     fun sendSmsMessage(context: Context, recipient: String, message: String): String {
-        var digits = recipient.filter { it.isDigit() || it == '+' }
-        if (digits.isBlank() && recipient.isNotBlank()) {
-            val resolved = resolveContactNumber(context, recipient)
-            if (!resolved.isNullOrBlank()) {
-                digits = resolved
-            }
-        }
-
-        val hasSmsPerm = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.SEND_SMS
-        ) == PackageManager.PERMISSION_GRANTED
-
-        return try {
-            if (digits.isNotBlank() && hasSmsPerm) {
-                val smsManager: SmsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    context.getSystemService(SmsManager::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    SmsManager.getDefault()
-                }
-                smsManager.sendTextMessage(digits, null, message, null, null)
-                Toast.makeText(context, "SMS sent to $recipient: $message", Toast.LENGTH_SHORT).show()
-                "$recipient ko SMS bhej diya hai."
-            } else {
-                val uri = if (digits.isNotBlank()) Uri.parse("smsto:$digits") else Uri.parse("smsto:")
-                val smsIntent = Intent(Intent.ACTION_SENDTO, uri).apply {
-                    putExtra("sms_body", message)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                context.startActivity(smsIntent)
-                "Opened the SMS app for $recipient."
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to send SMS: ${e.message}")
-            "SMS bhejne me dikkat aayi: ${e.message}"
-        }
+        return "SMS sending is turned off in this build. Open your messaging app to send it yourself."
     }
 
     // 8. Flashlight / Torch
@@ -982,83 +802,11 @@ object DeviceActionManager {
         }
     }
 
-    // 17. Notification & Message Reading
-    fun readLatestSms(context: Context, limit: Int = 4): List<String> {
-        val smsList = mutableListOf<String>()
-        val hasReadSms = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
-        if (!hasReadSms) {
-            return smsList // Sideload-safe: SMS reading via content provider omitted to prevent Play Protect block
-        }
-        var cursor: Cursor? = null
-        try {
-            val uri = Uri.parse("content://sms/inbox")
-            cursor = context.contentResolver.query(
-                uri,
-                arrayOf("address", "body"),
-                null,
-                null,
-                "date DESC LIMIT $limit"
-            )
-            if (cursor != null) {
-                val addrIdx = cursor.getColumnIndex("address")
-                val bodyIdx = cursor.getColumnIndex("body")
-                while (cursor.moveToNext()) {
-                    val addr = cursor.getString(addrIdx) ?: "SMS"
-                    val body = cursor.getString(bodyIdx) ?: ""
-                    if (body.isNotBlank()) {
-                        smsList.add("$addr se SMS: $body")
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Error reading SMS inbox: ${e.message}")
-        } finally {
-            cursor?.close()
-        }
-        return smsList
-    }
+    // 17. Notification & message reading — REMOVED from this build (no SMS / notification access).
+    fun readLatestSms(context: Context, limit: Int = 4): List<String> = emptyList()
 
     fun readNotificationsSummary(context: Context, appFilter: String?): String {
-        val sb = StringBuilder()
-        val notifGranted = SaifNotificationListenerService.isNotificationAccessGranted(context)
-        val notifs = if (notifGranted) SaifNotificationListenerService.getRecentNotifications(appFilter) else emptyList()
-        val smsMessages = readLatestSms(context, 4)
-
-        if (notifs.isNotEmpty()) {
-            sb.append("Aapke naye notifications:\n")
-            notifs.take(4).forEachIndexed { i, n ->
-                sb.append("${i + 1}. [${n.appName}] ${n.title}: ${n.text}\n")
-            }
-        }
-
-        if (smsMessages.isNotEmpty()) {
-            if (sb.isNotEmpty()) sb.append("\nAur ")
-            sb.append("Aaye huye SMS:\n")
-            smsMessages.forEachIndexed { i, s ->
-                sb.append("${i + 1}. $s\n")
-            }
-        }
-
-        if (sb.isNotBlank()) {
-            return sb.toString().trim()
-        }
-
-        // Open notification shade so user can inspect visible messages immediately
-        SaifAccessibilityService.instance?.openNotificationsShade()
-
-        if (!notifGranted) {
-            PermissionManager.showPermissionPrompt(
-                PermissionPromptData(
-                    id = "notification_listener",
-                    title = "Notification Access Required",
-                    message = "Please allow Notification Access so I can read your notifications.",
-                    isSpecial = true
-                )
-            )
-            return "Opened the notification shade. Allow Notification Access and SMS permission to have messages read aloud."
-        }
-
-        return "You have no new unread messages. I opened the notification shade."
+        return "Notification access and SMS reading are turned off in this build. Tell me which app to open if you want to check messages yourself."
     }
 
     // 18. Volume Control

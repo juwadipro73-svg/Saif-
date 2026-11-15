@@ -10,13 +10,11 @@ object SkillRegistry {
 
     init {
         register(AppSkill)
-        register(CallSkill)
         register(WhatsAppSkill)
         register(YouTubeSkill)
         register(SystemSkill)
         register(InstagramSkill)
         register(PlayStoreSkill)
-        register(NotificationsSkill)
         register(MediaCapcutSkill)
         register(DescribeScreenSkill)
     }
@@ -29,13 +27,13 @@ object SkillRegistry {
         val clean = name.trim().lowercase()
         return skills[clean] ?: when {
             clean.contains("whatsapp") -> WhatsAppSkill
-            clean.contains("call") || clean.contains("dial") -> CallSkill
+            clean.contains("call") || clean.contains("dial") -> null // calling removed in this build
             clean.contains("youtube") -> YouTubeSkill
             clean.contains("app") -> AppSkill
             clean.contains("torch") || clean.contains("volume") || clean.contains("alarm") || clean.contains("system") -> SystemSkill
             clean.contains("instagram") || clean.contains("insta") -> InstagramSkill
             clean.contains("play") || clean.contains("update") -> PlayStoreSkill
-            clean.contains("notif") -> NotificationsSkill
+            clean.contains("notif") -> null // notification access removed in this build
             clean.contains("capcut") || clean.contains("gallery") -> MediaCapcutSkill
             clean.contains("describe") || clean.contains("screen") -> DescribeScreenSkill
             else -> null

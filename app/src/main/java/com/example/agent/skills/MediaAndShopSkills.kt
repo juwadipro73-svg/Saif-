@@ -5,7 +5,6 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import com.example.agent.ScreenObserver
-import com.example.util.SaifNotificationListenerService
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 
@@ -41,38 +40,15 @@ object PlayStoreSkill : Skill {
     }
 }
 
+/** Notification access is REMOVED from this build, so this skill only answers honestly. */
 object NotificationsSkill : Skill {
     override val name: String = "notifications"
 
-    override suspend fun run(args: JSONObject, env: AgentEnv): SkillResult {
-        val action = args.optString("action", "read").lowercase()
-        val appFilter = args.optString("app", "").ifBlank { null }
-        val limit = args.optInt("limit", 10)
-
-        if (!SaifNotificationListenerService.isNotificationAccessGranted(env.context)) {
-            return SkillResult(false, "Notification access permission is not granted. Please enable it in Settings.", data = mapOf("needPermission" to true))
-        }
-
-        return when (action) {
-            "read", "summarize" -> {
-                val summary = SaifNotificationListenerService.getSummaryText(env.context, appFilter)
-                val items = SaifNotificationListenerService.getRecentNotifications(appFilter).take(limit)
-                SkillResult(true, summary, data = mapOf("count" to items.size, "notifications" to items))
-            }
-            "clear" -> {
-                // Clear notification tray
-                val service = env.service
-                service?.openNotificationsShade()
-                delay(800)
-                service?.clickElementByQuery("Clear all")
-                SkillResult(true, "Cleared active notifications")
-            }
-            else -> {
-                val summary = SaifNotificationListenerService.getSummaryText(env.context, appFilter)
-                SkillResult(true, summary)
-            }
-        }
-    }
+    override suspend fun run(args: JSONObject, env: AgentEnv): SkillResult =
+        SkillResult(
+            success = false,
+            message = "Notification access is turned off in this build, so I cannot read or clear notifications."
+        )
 }
 
 object MediaCapcutSkill : Skill {

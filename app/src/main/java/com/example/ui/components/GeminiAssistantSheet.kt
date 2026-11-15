@@ -92,7 +92,8 @@ fun GeminiAssistantSheet(
 
     val speechEngine = remember { DirectSpeechInputEngine(context) }
 
-    // Multi-action system prompt to execute device commands (YouTube, WhatsApp, Instagram, Camera, Flashlight, Calls, SMS, etc.)
+    // Multi-action system prompt to execute device commands (YouTube, WhatsApp, Instagram, Camera, Flashlight, ...).
+    // Calls, SMS, contacts and notification access are deliberately NOT offered: this build has none of them.
     val liveActionSystemPrompt = """
 You are SAIF AI, an advanced native Android AI assistant with full device automation capabilities.
 ${com.example.util.SaifIdentity.RULE}
@@ -111,8 +112,6 @@ Supported action types:
 - WHATSAPP: {"type": "WHATSAPP", "recipient": "<name_or_number>", "message": "<msg>"}
 - WHATSAPP_CALL: {"type": "WHATSAPP_CALL", "recipient": "<name>"}
 - INSTAGRAM: {"type": "INSTAGRAM", "subAction": "profile|messages|camera|story|open"}
-- CALL: {"type": "CALL", "target": "<name_or_number>", "direct": true}
-- SMS: {"type": "SMS", "recipient": "<name_or_number>", "message": "<msg>"}
 - CAMERA: {"type": "CAMERA", "mode": "photo|video"}
 - FLASHLIGHT: {"type": "FLASHLIGHT", "enable": true|false}
 - WIFI: {"type": "WIFI"}
@@ -121,7 +120,6 @@ Supported action types:
 - NOTES: {"type": "NOTES", "text": "<note_content>"}
 - GALLERY: {"type": "GALLERY"}
 - FILES: {"type": "FILES"}
-- NOTIFICATIONS: {"type": "NOTIFICATIONS", "filter": "<optional_app_filter>"}
 - VOLUME: {"type": "VOLUME", "direction": "up|down|mute"}
 - ACCESSIBILITY_CLICK: {"type": "ACCESSIBILITY_CLICK", "target": "<text_or_button_to_click>"}
 - ACCESSIBILITY_SCROLL: {"type": "ACCESSIBILITY_SCROLL", "direction": "down|up"}

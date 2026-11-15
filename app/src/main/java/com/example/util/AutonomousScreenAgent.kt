@@ -99,8 +99,6 @@ object AutonomousScreenAgent {
             - YOUTUBE_PLAY: payload = query
             - YOUTUBE_SUBSCRIBE: target = "subscribe"
             - WHATSAPP_SEND: target = recipient, payload = message
-            - CALL_PHONE: payload = contact or phone number
-            - READ_MESSAGES: target = "messages"
             - WAIT: payload = milliseconds (e.g. "1000")
             - SPEAK: spokenUpdate = brief voice status to tell user
             
@@ -248,15 +246,6 @@ object AutonomousScreenAgent {
                 val recipient = step.target
                 val message = step.payload.ifBlank { "Hii" }
                 DeviceActionManager.automateWhatsAppMessage(context, recipient, message)
-            }
-
-            "CALL_PHONE" -> {
-                val target = step.payload.ifBlank { step.target }
-                DeviceActionManager.callOrDialPhone(context, target, directCall = true)
-            }
-
-            "READ_MESSAGES" -> {
-                DeviceActionManager.readNotificationsSummary(context, null)
             }
 
             "HUMAN_TYPE" -> {
@@ -453,17 +442,6 @@ object AutonomousScreenAgent {
             return steps
         }
 
-        // 4. Calling: "papa ko call lagao" / "call papa"
-        if (lower.contains("call") || lower.contains("phone lagao") || lower.contains("phone milao") || lower.contains("dial")) {
-            val phoneRegex = Regex("""(?i)(?:call|dial|milao|lagao)\s*(?:karo|lagao)?\s*([+0-9a-zA-Z\u0900-\u097F]+)""")
-            val altRegex = Regex("""(?i)([+0-9a-zA-Z\u0900-\u097F]+)\s*ko\s*(?:call|phone)""")
-            val match = altRegex.find(userGoal) ?: phoneRegex.find(userGoal)
-            val target = match?.groupValues?.get(1)?.trim() ?: ""
-            val cleanTarget = if (target.lowercase() in listOf("karo", "lagao", "kisi", "kisi ko")) "papa" else target
-            steps.add(AutonomousStep(1, "Call Contact", "CALL_PHONE", payload = cleanTarget, spokenUpdate = "Calling $cleanTarget…"))
-            return steps
-        }
-
         // 5. WhatsApp: "watsaap kholo lucky2 ko hii likh kar bhejo" / "watsapp par kisi ko hi likh kar bhejo"
         if (lower.contains("whatsapp") || lower.contains("watsapp") || lower.contains("whats app")) {
             var recipient = ""
@@ -498,15 +476,6 @@ object AutonomousScreenAgent {
             val targetLabel = if (recipient.isNotBlank() && recipient != "kisi ko") recipient else "contact"
             steps.add(AutonomousStep(1, "Open WhatsApp", "LAUNCH_APP", target = "whatsapp", spokenUpdate = "Opening WhatsApp…"))
             steps.add(AutonomousStep(2, "Send WhatsApp Message", "WHATSAPP_SEND", target = recipient, payload = message, spokenUpdate = "Sending '$message' to $targetLabel on WhatsApp…"))
-            return steps
-        }
-
-        // 6. Messages & Notifications: "massage abhi kya kya aaye hai"
-        val isCheckingMessages = lower.contains("notification") || lower.contains("suchna") || lower.contains("suchnaye") ||
-                lower.contains("massage") || lower.contains("message") || lower.contains("messages") || lower.contains("msg") ||
-                lower.contains("sms") || lower.contains("unread")
-        if (isCheckingMessages && (lower.contains("aaye") || lower.contains("aaya") || lower.contains("kya") || lower.contains("check") || lower.contains("read") || lower.contains("padho") || lower.contains("batao") || lower.contains("dikhao") || lower.contains("sunao"))) {
-            steps.add(AutonomousStep(1, "Read Messages", "READ_MESSAGES", spokenUpdate = "Checking your messages…"))
             return steps
         }
 

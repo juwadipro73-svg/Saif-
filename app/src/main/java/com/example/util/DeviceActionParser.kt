@@ -108,16 +108,9 @@ object DeviceActionParser {
                     val sub = obj.optString("subAction", obj.optString("action", "open"))
                     DeviceAction.InstagramAction(sub)
                 }
-                "CALL", "DIAL", "CALL_PHONE" -> {
-                    val target = obj.optString("target", obj.optString("number", obj.optString("contact", "")))
-                    val direct = obj.optBoolean("direct", true)
-                    DeviceAction.DialPhone(target, direct)
-                }
-                "SMS", "SEND_SMS" -> {
-                    val recipient = obj.optString("recipient", obj.optString("contact", obj.optString("to", "")))
-                    val msg = obj.optString("message", obj.optString("text", ""))
-                    DeviceAction.SendSms(recipient, msg)
-                }
+                // Calling and SMS are removed from this build (no telephony permissions),
+                // so an old plan asking for them is ignored instead of asking for access.
+                "CALL", "DIAL", "CALL_PHONE", "SMS", "SEND_SMS" -> null
                 "FLASHLIGHT", "TORCH" -> {
                     val enable = if (obj.has("enable")) obj.getBoolean("enable") else null
                     DeviceAction.ToggleFlashlight(enable)
@@ -510,23 +503,7 @@ object DeviceActionParser {
             return DeviceAction.InstagramAction("open")
         }
 
-        // 12. Call / Phone ("papa ko call lagao", "call papa", "phone milao")
-        if (t.contains("call") || t.contains("phone milao") || t.contains("dial") || t.contains("phone lagao")) {
-            val phoneRegex = Regex("""(?:call|dial|milao|lagao)\s*(?:karo|lagao)?\s*([+0-9a-zA-Z\u0900-\u097F]+)""")
-            val altRegex = Regex("""([+0-9a-zA-Z\u0900-\u097F]+)\s*ko\s*(?:call|phone)""")
-            val match = altRegex.find(t) ?: phoneRegex.find(t)
-            val target = match?.groupValues?.get(1)?.trim() ?: ""
-            val cleanTarget = if (target.lowercase() in listOf("karo", "lagao", "kisi", "kisi ko", "")) "papa" else target
-            return DeviceAction.DialPhone(cleanTarget, directCall = true)
-        }
-
-        // 9. SMS
-        if (t.contains("sms") || t.contains("message bhejo") || t.contains("sandesh")) {
-            val smsRecipient = Regex("(?:par|pe)?\\s*([a-zA-Z0-9_+]+)\\s*ko").find(t)?.groupValues?.get(1) ?: ""
-            val msgMatch = Regex("(?:bhejo|likho)\\s*(.*)").find(t)
-            val smsText = msgMatch?.groupValues?.get(1)?.trim() ?: "Hello"
-            return DeviceAction.SendSms(smsRecipient, smsText)
-        }
+        // 12. Calling & SMS: removed from this build (no telephony permissions) — never planned.
 
         // 10. Notes
         if (t.contains("note") || t.contains("notes")) {

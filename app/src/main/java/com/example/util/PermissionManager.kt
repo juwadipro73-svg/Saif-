@@ -65,21 +65,6 @@ object PermissionManager {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun hasCallPhone(context: Context): Boolean {
-        return true // Uses ACTION_DIAL + Accessibility automation (zero dangerous permissions, safe for Play Protect)
-    }
-
-    fun hasReadContacts(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.READ_CONTACTS
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    fun hasSendSms(context: Context): Boolean {
-        return true // Uses ACTION_SENDTO SMS composer intent (zero dangerous permissions, safe for Play Protect)
-    }
-
     fun hasPostNotifications(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
@@ -89,10 +74,6 @@ object PermissionManager {
         } else {
             true
         }
-    }
-
-    fun hasNotificationListener(context: Context): Boolean {
-        return SaifNotificationListenerService.isNotificationAccessGranted(context)
     }
 
     fun getAllPermissionItems(context: Context): List<PermissionItemInfo> {
@@ -142,50 +123,6 @@ object PermissionManager {
             )
         )
 
-        list.add(
-            PermissionItemInfo(
-                id = "contacts",
-                title = "Contacts (संपर्क)",
-                description = "Find a contact's number so you can call or message them by name",
-                iconName = "contacts",
-                isGranted = hasReadContacts(context),
-                manifestPermission = Manifest.permission.READ_CONTACTS
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
-                id = "call",
-                title = "Phone Calls (फ़ोन कॉल)",
-                description = "Place calls directly with a voice command",
-                iconName = "phone",
-                isGranted = hasCallPhone(context),
-                manifestPermission = null
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
-                id = "sms",
-                title = "SMS Messages (संदेश)",
-                description = "Send SMS messages directly",
-                iconName = "message",
-                isGranted = hasSendSms(context),
-                manifestPermission = null
-            )
-        )
-
-        list.add(
-            PermissionItemInfo(
-                id = "notification_listener",
-                title = "Notification Access (सूचना पढ़ना)",
-                description = "Read out WhatsApp and phone notifications",
-                iconName = "notifications",
-                isGranted = hasNotificationListener(context),
-                isSpecialSettings = true
-            )
-        )
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             list.add(
                 PermissionItemInfo(
@@ -214,9 +151,6 @@ object PermissionManager {
                 }
                 "accessibility" -> {
                     SaifAccessibilityService.openAccessibilitySettings(context)
-                }
-                "notification_listener" -> {
-                    SaifNotificationListenerService.openNotificationAccessSettings(context)
                 }
                 else -> {
                     openAppSettings(context)
