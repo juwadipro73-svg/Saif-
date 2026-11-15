@@ -268,6 +268,11 @@ class AntigravityCustomApiAgentEngine(
         // the run auto-resumes instead of leaving the task half done.
         val pendingStoppedCommands = mutableListOf<String>()
         var autoResumesLeft = MAX_AUTO_RESUMES
+        // Safety net: project dirs patched this turn. If the turn ends without a rebuild,
+        // the engine recompiles them itself so the download link always carries the edits.
+        val editedProjectDirs = linkedSetOf<String>()
+        var rebuiltThisTurn = false
+        var autoBuildsLeft = MAX_AUTO_REBUILDS
 
         val maxAgentSteps = MAX_AGENT_STEPS
         while (stepCounter < maxAgentSteps) {
@@ -314,6 +319,32 @@ class AntigravityCustomApiAgentEngine(
                             "\n\n↻ A step stopped early - resuming until the work is finished…"
                     )
                     continue
+                }
+                if (editedProjectDirs.isNotEmpty() && !rebuiltThisTurn && autoBuildsLeft > 0 && !stopRequested) {
+                    autoBuildsLeft--
+                    val freshLinks = mutableListOf<String>()
+                    for (dir in editedProjectDirs.take(2)) {
+                        val res = runCatching {
+                            com.example.compiler.LinuxApkBuildBridge.compileLinuxDirectoryToApk(
+                                appContext,
+                                JSONObject().put("projectDir", dir)
+                            )
+                        }.getOrNull() ?: continue
+                        if (!res.optBoolean("success")) continue
+                        val url = res.optString("downloadUrl").takeIf { it.isNotBlank() } ?: continue
+                        val nm = res.optString("appName").ifBlank { File(dir).name }
+                        freshLinks.add("[$nm.apk]($url)")
+                    }
+                    editedProjectDirs.clear()
+                    if (freshLinks.isNotEmpty()) {
+                        if (accumulatedNarrative.isNotEmpty() && !accumulatedNarrative.endsWith("\n\n")) {
+                            accumulatedNarrative.append("\n\n")
+                        }
+                        accumulatedNarrative.append(
+                            "🔧 Edited code recompiled automatically - this link carries the new changes.\n" +
+                                "⬇️ **Download link:** " + freshLinks.joinToString(", ")
+                        )
+                    }
                 }
                 if (finalPiece.isNotBlank()) {
                     if (accumulatedNarrative.isNotEmpty() && !accumulatedNarrative.endsWith("\n\n")) {
@@ -436,6 +467,17 @@ class AntigravityCustomApiAgentEngine(
                     }
                 )
                 val execDuration = System.currentTimeMillis() - execStart
+                if (ok && (inv.name == "write_file" || inv.name == "edit_file")) {
+                    val editedPath = inv.arguments.optString("path")
+                    Regex("^(/root/(?:workspace/)?[^/]+)").find(editedPath)?.groupValues?.get(1)?.let { root ->
+                        editedProjectDirs.add(root)
+                    }
+                }
+                if (ok && (inv.name == "build_android_apk" ||
+                        (inv.name == "run_command" && inv.arguments.optString("command").contains("saif-build-apk")))
+                ) {
+                    rebuiltThisTurn = true
+                }
                 val cmdLabel = displayCmd.take(200)
                 val stoppedLike = !ok && (
                     exitCode == 124 || exitCode == 130 || exitCode == 137 || exitCode == 143 ||
@@ -890,7 +932,7 @@ Workspace paths:
 - For coding, inspecting attached files in `/root/uploads`, Linux commands, git/GitHub tasks, web lookups, or building Android APKs, use your workspace tools (`view_file`, `write_file`, `edit_file`, `list_dir`, `grep_search`, `run_command`, `read_url`, `build_android_apk`, `delegate_parallel`).
 - When asked to build an Android app or APK: create clean project files inside `/root/workspace/<app-slug>` (either a mobile HTML5/CSS/JS app with `index.html` or a Java Android layout under `app/src/main/{AndroidManifest.xml,java,res}`), then call `build_android_apk` (or `saif-build-apk` via `run_command`) and include the returned `DOWNLOAD_URL` as a clickable Markdown link `[Download App APK](DOWNLOAD_URL)`.
 - NEVER paste a whole app's code in the chat as text: always do the work with your tools (write files, then build). The user wants a finished, downloadable result - not a code dump.
-- Edit rule (speed): when the user asks for a SMALL change to code that already exists — a bug fix, a tweak, or one small feature — do NOT rebuild or re-plan the project. Run ONE `list_dir`, read only the 1-3 files involved, patch them with `edit_file` (surgical old_text/new_text), verify, and answer. Restating the whole project for a small change is a failure. A from-scratch rebuild is only for new apps or an explicit "start over".
+- Edit rule (speed): when the user asks for a SMALL change to code that already exists — a bug fix, a tweak, or one small feature — patch surgically: run ONE `list_dir`, read only the 1-3 files involved, fix them with `edit_file` (surgical old_text/new_text). Then you MUST call `build_android_apk` again for that same project dir and finish with the FRESH DOWNLOAD_URL it returns. An edit that is not recompiled does not exist for the user: never answer with an old link, never skip the rebuild. Restating the whole project for a small change is a failure; skipping the rebuild is a bigger failure. A from-scratch rewrite is only for new apps or an explicit "start over".
 - Quality rule: do every task in full detail with no shortcuts, no placeholders and no TODOs. For heavy or complex multi-part tasks, split the work with `delegate_parallel` (up to 4 specialists at once, one subtask each), then merge every detail of their results into your final answer and files. Never use `delegate_parallel` for a small edit.
 - Format rule: deliver the download in exactly the format the user asked for (APK, ZIP, HTML, MP4, PDF...). If they asked for a ZIP, zip the project and publish it with `saif-apk-link`; if they asked for a single HTML/video/file, publish that file - then end with the `⬇️ **Download link:**` line.
 - Download-link rule (applies to EVERY successful build — APK, video, ZIP or any file): if no DOWNLOAD_URL was returned for a produced file, publish it with `saif-apk-link <absolute-path>` via `run_command`, and ALWAYS end your final answer with a last line `⬇️ **Download link:** [Download <file-name>](URL)` using the real URL. The user must never have to ask for the link.
@@ -1757,6 +1799,8 @@ Available tools:
         private const val MAX_OUTPUT_CONTINUATIONS = 12
         /** How many times a run may pick itself back up after a step died mid-way. */
         private const val MAX_AUTO_RESUMES = 3
+        /** Safety-net recompiles when a turn patched project files but never rebuilt. */
+        private const val MAX_AUTO_REBUILDS = 2
         private const val CONTINUE_PROMPT =
             "Continue exactly where you stopped. Output ONLY the remaining content - do not repeat " +
                 "anything, no intro, no summary, no commentary."

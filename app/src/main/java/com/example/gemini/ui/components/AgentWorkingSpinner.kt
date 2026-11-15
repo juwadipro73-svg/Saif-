@@ -8,6 +8,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.SweepGradient
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.foundation.layout.padding
@@ -53,46 +57,76 @@ private val VERBS = listOf(
     "Wrangling"
 )
 
-/** The thinking mark is a slowly turning sphere of dots (same footprint the old star glyph had). */
-private const val SPHERE_POINTS = 110
-private val SPHERE_DIAMETER = 22.dp
-private val SPHERE_XYZ: FloatArray = FloatArray(SPHERE_POINTS * 3).also { a ->
-    val golden = Math.PI * (3.0 - Math.sqrt(5.0))
-    for (i in 0 until SPHERE_POINTS) {
-        val y = 1.0 - (i / (SPHERE_POINTS - 1).toDouble()) * 2.0
-        val r = Math.sqrt(1.0 - y * y)
-        val t = golden * i
-        a[i * 3] = (Math.cos(t) * r).toFloat()
-        a[i * 3 + 1] = y.toFloat()
-        a[i * 3 + 2] = (Math.sin(t) * r).toFloat()
-    }
-}
+/**
+ * The thinking mark: SAIF's own little orbit orb - a gradient comet ring sweeping round a
+ * breathing core with three trailing sparks, in the same violet family as the live orb so it
+ * feels like part of the app instead of a borrowed glyph.
+ */
+private val ORB_DIAMETER = 22.dp
 
-private fun DrawScope.drawDotSphere(center: Offset, radius: Float, spin: Float, color: Color, wave: Float = 0f) {
-    val cosA = Math.cos(spin.toDouble()).toFloat()
-    val sinA = Math.sin(spin.toDouble()).toFloat()
-    val tilt = 0.35f
-    val cosT = Math.cos(tilt.toDouble()).toFloat()
-    val sinT = Math.sin(tilt.toDouble()).toFloat()
-    val dotBase = radius * 0.075f
-    for (i in 0 until SPHERE_POINTS) {
-        val x = SPHERE_XYZ[i * 3]
-        val y = SPHERE_XYZ[i * 3 + 1]
-        val z = SPHERE_XYZ[i * 3 + 2]
-        val x1 = x * cosA + z * sinA
-        val z1 = -x * sinA + z * cosA
-        val y2 = y * cosT - z1 * sinT
-        val z2 = y * sinT + z1 * cosT
-        val depth = (z2 + 1f) / 2f
-        // a light wave travels over the dots so the sphere shimmers while it turns
-        val shimmer = 0.78f + 0.22f * Math.sin((wave + i * 0.37).toDouble()).toFloat()
-        val dotColor = lerp(color, Color.White, depth * 0.45f).copy(alpha = (0.22f + 0.78f * depth) * shimmer)
-        drawCircle(
-            color = dotColor,
-            radius = dotBase * (0.55f + 0.65f * depth),
-            center = Offset(center.x + x1 * radius, center.y + y2 * radius)
-        )
+private fun DrawScope.drawThinkingOrb(
+    center: Offset,
+    radius: Float,
+    spin: Float,
+    pulse: Float,
+    hue: Float
+) {
+    val core = lerp(Color(0xFF8B5CF6), Color(0xFF5EEAD4), hue * 0.45f)
+    val tail = lerp(Color(0xFF7C5CFF), Color(0xFFEC4899), hue * 0.55f)
+
+    // soft halo that breathes with the core
+    drawCircle(
+        color = core.copy(alpha = 0.10f + 0.10f * pulse),
+        radius = radius * (1.00f + 0.12f * pulse),
+        center = center
+    )
+
+    // comet ring: a sweep gradient from transparent to hot, rotating with the spin
+    val ringWidth = radius * 0.16f
+    drawArc(
+        brush = SweepGradient(
+            center = center,
+            colors = listOf(
+                tail.copy(alpha = 0f),
+                tail.copy(alpha = 0.18f),
+                tail.copy(alpha = 0.55f),
+                core
+            )
+        ),
+        startAngle = Math.toDegrees(spin.toDouble()).toFloat(),
+        sweepAngle = 300f,
+        useCenter = false,
+        topLeft = Offset(center.x - radius + ringWidth, center.y - radius + ringWidth),
+        size = Size((radius - ringWidth) * 2f, (radius - ringWidth) * 2f),
+        style = Stroke(width = ringWidth, cap = StrokeCap.Round)
+    )
+
+    // three sparks riding ahead of the comet, each with a tiny fading trail
+    for (i in 0 until 3) {
+        val angle = spin * 1.6f + i * (2.0 * Math.PI / 3.0).toFloat()
+        for (t in 3 downTo 0) {
+            val a = angle - t * 0.16f
+            val alpha = (0.85f - t * 0.22f).coerceAtLeast(0f)
+            val r = radius * 0.62f
+            drawCircle(
+                color = core.copy(alpha = alpha),
+                radius = radius * (0.10f - t * 0.018f).coerceAtLeast(0.02f),
+                center = Offset(center.x + Math.cos(a.toDouble()).toFloat() * r, center.y + Math.sin(a.toDouble()).toFloat() * r)
+            )
+        }
     }
+
+    // breathing core with a bright heart
+    drawCircle(
+        color = core.copy(alpha = 0.35f + 0.25f * pulse),
+        radius = radius * (0.30f + 0.06f * pulse),
+        center = center
+    )
+    drawCircle(
+        color = Color.White.copy(alpha = 0.75f + 0.25f * pulse),
+        radius = radius * (0.12f + 0.03f * pulse),
+        center = center
+    )
 }
 
 /** Room for the longest verb plus "...": the row never changes width. */
@@ -127,7 +161,7 @@ fun AgentWorkingSpinner(color: Color, modifier: Modifier = Modifier, compacting:
     val wordWidth = remember(measurer, wordStyle) {
         (VERBS + "Compacting").maxOf { measurer.measure("$it...", wordStyle).size.width } + measurer.measure("▌", wordStyle).size.width
     }
-    val glyphBox = with(density) { SPHERE_DIAMETER.roundToPx() }
+    val glyphBox = with(density) { ORB_DIAMETER.roundToPx() }
     val gapPx = with(density) { 4.dp.roundToPx() }
     val heightPx = maxOf(glyphLayouts.maxOf { it.size.height }, wordRef.size.height)
     val glyphBaseline = (heightPx - glyphLayouts[GLYPHS.indexOf("✻")].size.height) / 2f + glyphLayouts[GLYPHS.indexOf("✻")].firstBaseline
@@ -163,16 +197,13 @@ fun AgentWorkingSpinner(color: Color, modifier: Modifier = Modifier, compacting:
             .graphicsLayer()
     ) {
         // state is read here only: a tick redraws this layer and nothing else
-        val sphereColor = lerp(color, Color(0xFF9A7BFF), hue.value * 0.55f)
-        scale(pulse.value, pivot = Offset(glyphBox / 2f, size.height / 2f)) {
-            drawDotSphere(
-                Offset(glyphBox / 2f, size.height / 2f),
-                glyphBox / 2f - 1f,
-                spin.value,
-                sphereColor,
-                wave = spin.value * 2.2f
-            )
-        }
+        drawThinkingOrb(
+            center = Offset(glyphBox / 2f, size.height / 2f),
+            radius = glyphBox / 2f - 1f,
+            spin = spin.value,
+            pulse = (pulse.value - 0.94f) / 0.13f,
+            hue = hue.value
+        )
         val word = measurer.measure(shown.value, wordStyle, softWrap = false, maxLines = 1)
         drawText(word, topLeft = Offset((glyphBox + gapPx).toFloat(), wordBaseline - word.firstBaseline))
     }
