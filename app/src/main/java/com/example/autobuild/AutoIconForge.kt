@@ -82,7 +82,8 @@ object AutoIconForge {
         featuresText: String,
         provider: String,
         apiKey: String,
-        model: String
+        model: String,
+        force: Boolean = false
     ): IconResult {
         val category = IdeaExpander.detectCategory("$appName $vision $featuresText")
         val iconFile = File(projectDir, ICON_FILE)
@@ -97,6 +98,10 @@ object AutoIconForge {
                 false
             }
             if (!stamped) return IconResult(created = false, category = category, source = "existing-user")
+            // Our own icon is already on disk: reuse it instead of re-generating. Forging AI art
+            // here could wait up to 150s on EVERY build, which is a big part of why a tiny edit
+            // felt as slow as a full build. Only an explicit icon change (force) redraws it.
+            if (!force) return IconResult(created = false, category = category, source = "reused")
         }
 
         var bitmap: Bitmap? = null

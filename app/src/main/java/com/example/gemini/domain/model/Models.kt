@@ -141,7 +141,7 @@ data class AiModel(
         id.contains("claude", ignoreCase = true) || displayName.contains("claude", ignoreCase = true) -> ModelFamily.CLAUDE
         else -> ModelFamily.GEMINI
     },
-    val supportsThinking: Boolean = id.contains("thinking", ignoreCase = true) || id.contains("flash", ignoreCase = true) || id.contains("pro", ignoreCase = true) || id.contains("high", ignoreCase = true) || id.contains("medium", ignoreCase = true) || id.contains("low", ignoreCase = true),
+    val supportsThinking: Boolean = isThinkingCapable(id, displayName),
     val description: String = "",
     val isDefault: Boolean = false,
     val key: String = "",
@@ -151,13 +151,28 @@ data class AiModel(
     companion object {
         val DEFAULT_MODELS = emptyList<AiModel>()
 
+        /**
+         * Whether a model reasons before answering. Antigravity reports ids like
+         * `MODEL_PLACEHOLDER_M319`, so the check must use the display name too — keying off the raw
+         * id alone marked every Antigravity model as "no thinking", which silently disabled the
+         * reasoning budget and made pro models feel far weaker than inside Antigravity itself.
+         */
+        fun isThinkingCapable(id: String, displayName: String = ""): Boolean {
+            val s = "$id $displayName".lowercase()
+            if (listOf("lite", "nano").any { s.contains(it) }) return false
+            return listOf(
+                "thinking", "flash", "pro", "high", "medium", "low", "med",
+                "opus", "sonnet", "claude", "gpt", "gemini-3", "gemini 3"
+            ).any { s.contains(it) }
+        }
+
         fun fromApi(id: String, displayName: String?, description: String? = null): AiModel {
             val name = displayName?.takeIf { it.isNotBlank() } ?: formatModelName(id)
             val family = when {
                 id.contains("claude", ignoreCase = true) || name.contains("claude", ignoreCase = true) -> ModelFamily.CLAUDE
                 else -> ModelFamily.GEMINI
             }
-            val thinking = id.contains("thinking", ignoreCase = true) || id.contains("flash", ignoreCase = true) || id.contains("pro", ignoreCase = true) || id.contains("high", ignoreCase = true) || id.contains("medium", ignoreCase = true) || id.contains("low", ignoreCase = true)
+            val thinking = isThinkingCapable(id, name)
             val desc = description ?: when (family) {
                 ModelFamily.CLAUDE -> "Anthropic Claude via Antigravity"
                 ModelFamily.GEMINI -> "Google Gemini via Antigravity"
@@ -207,15 +222,15 @@ data class AiModel(
 
 enum class ThinkingLevel(val label: String, val tokens: Int, val description: String) {
     OFF("Off", 0, "0 tokens • Direct response (no reasoning)"),
-    LOW("Low", 1024, "1,024 tokens (~4,000 chars) • Quick logic"),
-    MEDIUM("Med", 4096, "4,096 tokens (~16,000 chars) • Standard"),
-    HIGH("High", 8192, "8,192 tokens (~32,000 chars) • Deep thinking"),
+    LOW("Low", 4096, "4,096 tokens (~16,000 chars) • Quick logic"),
+    MEDIUM("Med", 16384, "16,384 tokens (~65,000 chars) • Standard"),
+    HIGH("High", 32768, "32,768 tokens (~130,000 chars) • Deep thinking"),
     CUSTOM("Custom", 0, "Custom token budget")
 }
 
 data class ThinkingPreference(
     val level: ThinkingLevel = ThinkingLevel.MEDIUM,
-    val customTokens: Int = 4096
+    val customTokens: Int = 16384
 ) {
     val activeTokens: Int
         get() = if (level == ThinkingLevel.CUSTOM) customTokens else level.tokens
@@ -226,9 +241,9 @@ data class ThinkingPreference(
     val displaySummary: String
         get() = when (level) {
             ThinkingLevel.OFF -> "Thinking: Off"
-            ThinkingLevel.LOW -> "Thinking: Low (1K)"
-            ThinkingLevel.MEDIUM -> "Thinking: Med (4K)"
-            ThinkingLevel.HIGH -> "Thinking: High (8K)"
+            ThinkingLevel.LOW -> "Thinking: Low (4K)"
+            ThinkingLevel.MEDIUM -> "Thinking: Med (16K)"
+            ThinkingLevel.HIGH -> "Thinking: High (32K)"
             ThinkingLevel.CUSTOM -> "Thinking: Custom (${activeTokens})"
         }
 }

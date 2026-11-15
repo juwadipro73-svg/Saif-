@@ -129,8 +129,13 @@ object AutoBuildOrchestrator {
         // Quick fixes (small repair on a working app) skip every expensive extra:
         // no idea expansion, and later no improvement rounds — one surgical pass only.
         val quickFix = BuildAgent.detectQuickFix(prompt, isNewApp)
+        // Small features / restyles count as edits too: one surgical pass, no audit rounds.
+        val incrementalEdit = !quickFix && BuildAgent.detectIncrementalEdit(prompt, isNewApp)
+        val fastEdit = quickFix || incrementalEdit
         if (quickFix) {
             onEvent(BuildEvent.Thought("Quick-fix mode: surgical repair only — skipping expansion and improvement rounds."))
+        } else if (incrementalEdit) {
+            onEvent(BuildEvent.Thought("Incremental edit mode: patching only the affected files — skipping expansion and improvement rounds."))
         }
 
         // Idea expansion for NEW apps only; follow-ups continue forward instead of
@@ -196,7 +201,7 @@ object AutoBuildOrchestrator {
             var bundle = runAudit(app, projectDir)
             onEvent(BuildEvent.QualityGate(bundle.audit.score, !bundle.audit.needsImprovement()))
             var rounds = 0
-            while (!quickFix && bundle.audit.needsImprovement() && rounds < MAX_AUTO_ROUNDS) {
+            while (!fastEdit && bundle.audit.needsImprovement() && rounds < MAX_AUTO_ROUNDS) {
                 rounds++
                 val roundSnapshot = rounds
                 BuildCheckpointStore.update(projectDir) {

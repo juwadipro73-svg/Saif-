@@ -161,9 +161,14 @@ object BuildAgent {
             // Quick-fix mode: small repairs skip the full-build machinery (spec regen,
             // fan-out, polish) and run one surgical file task instead of a scratch rebuild.
             val quickFix = detectQuickFix(prompt, !isExistingApp)
+            // Small feature / restyle asks on a working app are edits too: same fast path.
+            val incrementalEdit = !quickFix && detectIncrementalEdit(prompt, !isExistingApp)
+            val fastEdit = quickFix || incrementalEdit
             onEvent(BuildEvent.Thought("Detected intent: $intent (${detectLanguage(prompt)}), stack: $stack"))
             if (quickFix) {
                 onEvent(BuildEvent.Thought("Quick-fix mode: surgical repair only — no rebuild, no polish pass."))
+            } else if (incrementalEdit) {
+                onEvent(BuildEvent.Thought("Incremental edit mode: patching only the affected files — no re-plan, no polish pass."))
             }
             if (stack != BuildStack.HTML) {
                 onEvent(
@@ -181,8 +186,9 @@ object BuildAgent {
             // STAGE S1: SPECIFICATION ("Product Brain")
             // -------------------------------------------------------------
             trackPhase(BuildPhase.S1_SPEC, 2, 10)
-            // Quick fixes reuse the saved product spec instead of regenerating it.
-            val resumedSpec = if (resumeFromCheckpoint || quickFix) loadSpecFromDisk(saifDir) else null
+            // Edits reuse the saved product spec instead of regenerating it (a small change must
+            // never pay for a fresh spec + plan; rebuilding it was the main "slow edit" cost).
+            val resumedSpec = if (resumeFromCheckpoint || fastEdit) loadSpecFromDisk(saifDir) else null
             val spec = if (resumedSpec != null) {
                 onEvent(BuildEvent.Thought("Resuming: reusing the saved product spec (${resumedSpec.features.size} features, ${resumedSpec.screens.size} screens)..."))
                 resumedSpec
@@ -197,6 +203,9 @@ object BuildAgent {
 
             // App icon starts forging now (AI art via the user's key, else a category glyph),
             // in parallel with planning/generation; S8 awaits it before compiling the APK.
+            // Only a first build or an explicit icon ask redraws it — re-forging art on every
+            // small edit added up to ~2.5 minutes of pure waiting.
+            val wantsNewIcon = !isExistingApp || listOf("icon", "logo", "launcher icon").any { prompt.lowercase().contains(it) }
             val iconJob = async {
                 runCatching {
                     com.example.autobuild.AutoIconForge.ensureIcon(
@@ -207,7 +216,8 @@ object BuildAgent {
                         featuresText = spec.features.joinToString(" ") { it.title },
                         provider = provider,
                         apiKey = activeKey,
-                        model = activeModel
+                        model = activeModel,
+                        force = wantsNewIcon
                     )
                 }.getOrNull()
             }
@@ -223,7 +233,10 @@ object BuildAgent {
                 resumedPlan
             } else {
                 onEvent(BuildEvent.Thought("Splitting spec into modules for the agent swarm..."))
-                val fresh = generatePlan(spec, qualityMode, provider, activeModel, isExistingApp, intent, prompt, frozenFiles, stack, quickFix)
+                val fresh = generatePlan(
+                    spec, qualityMode, provider, activeModel, isExistingApp, intent, prompt,
+                    frozenFiles, stack, quickFix = quickFix, incrementalEdit = incrementalEdit
+                )
                 File(saifDir, "plan.json").writeText(planToJson(fresh).toString(2))
                 fresh
             }
@@ -380,7 +393,8 @@ object BuildAgent {
                 }
             }
 
-            if (parallelAgents > 1 && tasksToExecute.size > 1) {
+            // A fast edit is one or two files: a swarm would only add latency here.
+            if (!fastEdit && parallelAgents > 1 && tasksToExecute.size > 1) {
                 // Swarm mode: every lane is a named agent that owns its tasks round-robin.
                 val lanes = parallelAgents.coerceIn(1, MAX_PARALLEL_LANES).coerceAtMost(tasksToExecute.size)
                 for (i in 1..lanes) {
@@ -508,7 +522,11 @@ object BuildAgent {
             if (!testReport.passed && qualityMode != QualityMode.QUICK) {
                 trackPhase(BuildPhase.S6_FIX, 7, 10)
                 var fixRound = 0
-                val maxFixRounds = if (quickFix) 1 else 3
+                val maxFixRounds = when {
+                    quickFix -> 1
+                    incrementalEdit -> 2
+                    else -> 3
+                }
 
                 while (!testReport.passed && fixRound < maxFixRounds) {
                     fixRound++
@@ -536,7 +554,7 @@ object BuildAgent {
             // -------------------------------------------------------------
             // STAGE S7: POLISH PASS (Balanced & Max modes)
             // -------------------------------------------------------------
-            if (qualityMode == QualityMode.MAX && testReport.passed && !quickFix) {
+            if (qualityMode == QualityMode.MAX && testReport.passed && !fastEdit) {
                 trackPhase(BuildPhase.S7_POLISH, 8, 10)
                 onEvent(BuildEvent.Thought("Running visual polish, animation timing, and contrast check..."))
                 delay(300)
@@ -954,6 +972,56 @@ object BuildAgent {
     }
 
     /**
+     * A small change on a working app — a fix, a tiny feature ("add a dark mode toggle") or a
+     * restyle. These must finish in one surgical pass, not a full rebuild: users reported that a
+     * 5-word change took as long as creating the whole app. Pure logic, covered by unit tests.
+     */
+    fun detectIncrementalEdit(prompt: String, isNewApp: Boolean): Boolean {
+        if (isNewApp) return false
+        if (promptMentionsEverything(prompt)) return false
+        val lower = prompt.lowercase()
+        // "start over" / "from scratch" language means a real rebuild, not an edit.
+        if (REBUILD_WORDS.any { lower.contains(it) }) return false
+        val words = prompt.trim().split(Regex("\\s+")).filter { it.isNotBlank() }.size
+        if (words == 0 || words > 60) return false
+        val intent = classifyIntent(prompt, true)
+        return intent != BuildIntent.NEW_APP && intent != BuildIntent.RESET
+    }
+
+    private val REBUILD_WORDS = listOf(
+        "from scratch", "start over", "start from zero", "dobara banao", "naya app banao",
+        "new app", "rewrite the whole", "rebuild the whole", "poora naya"
+    )
+
+    /**
+     * One-to-two task plan for an incremental edit: the file the request targets, plus the shared
+     * style file when the ask is visual. The S6 fix round can still add files if verification
+     * fails, so a small plan never gets stuck. Pure logic, covered by unit tests.
+     */
+    fun incrementalTaskFor(prompt: String, stack: BuildStack = BuildStack.HTML): List<BuildTask> {
+        val target = guessDeltaTarget(prompt, stack)
+        val lower = prompt.lowercase()
+        val isVisual = listOf("color", "colour", "theme", "dark mode", "font", "style", "design", "ui", "rang", "design").any { lower.contains(it) } ||
+            classifyIntent(prompt, true) == BuildIntent.RESTYLE
+        // Paths live in the same src/<stack>/ trees the rest of the pipeline generates into.
+        val shared = when (stack) {
+            BuildStack.HTML -> "src/tokens.css"
+            BuildStack.NATIVE -> "src/native/app/src/main/res/values/colors.xml"
+            BuildStack.FLUTTER -> "src/flutter/lib/theme.dart"
+        }
+        val files = if (isVisual && shared != target) listOf(target, shared) else listOf(target)
+        val short = prompt.trim().replace(Regex("\\s+"), " ").take(60).ifBlank { "small change" }
+        return listOf(
+            BuildTask(
+                "task_edit_${(kotlin.math.abs(prompt.hashCode()) % 900) + 100}",
+                "Incremental edit: $short",
+                files,
+                expectedOutputTokens = 9000
+            )
+        )
+    }
+
+    /**
      * Single-task plan for a quick fix: only the file the request targets. The S6 fix round
      * can still add envelopes for other files if verification fails, so nothing gets stuck.
      */
@@ -1211,12 +1279,16 @@ object BuildAgent {
         prompt: String,
         frozenFiles: Set<String>,
         stack: BuildStack = BuildStack.HTML,
-        quickFix: Boolean = false
+        quickFix: Boolean = false,
+        incrementalEdit: Boolean = false
     ): BuildPlan {
         val ceiling = TokenBudgetManager.calculateBudgetCeiling(provider, model)
         val targetTier = if (ceiling <= 10_000) "TINY" else if (ceiling <= 60_000) "MEDIUM" else "RICH"
-        val tasks = if (quickFix) quickFixTaskFor(prompt, stack)
-        else createTaskPlan(spec, isExistingApp, intent, prompt, frozenFiles, stack)
+        val tasks = when {
+            quickFix -> quickFixTaskFor(prompt, stack)
+            incrementalEdit -> incrementalTaskFor(prompt, stack)
+            else -> createTaskPlan(spec, isExistingApp, intent, prompt, frozenFiles, stack)
+        }
         return BuildPlan(tasks = tasks, targetTier = targetTier)
     }
 

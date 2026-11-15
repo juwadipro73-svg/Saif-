@@ -655,6 +655,22 @@ class AgyChatBackend(
             }
         }
 
+        // The thinking selector must reach the request: mirror the stored value here (reading
+        // DataStore inline would block the sending thread).
+        backendScope.launch {
+            kotlinx.coroutines.flow.combine(authPrefs.thinkingLevel, authPrefs.thinkingCustomTokens) { lvl, custom -> lvl to custom }
+                .collect { (lvl, custom) ->
+                    val parsed = com.example.gemini.domain.model.ThinkingLevel.entries
+                        .firstOrNull { it.name.equals(lvl, ignoreCase = true) }
+                    if (parsed != null) {
+                        thinkingPref = com.example.gemini.domain.model.ThinkingPreference(
+                            level = parsed,
+                            customTokens = custom ?: thinkingPref.customTokens
+                        )
+                    }
+                }
+        }
+
         backendScope.launch {
             authPrefs.enabledModelIds.collect { ids ->
                 _enabledModelIds.value = ids
@@ -1515,6 +1531,12 @@ class AgyChatBackend(
         }
     }
 
+    /** Latest thinking selector value, kept in sync by the collector started in [start]. */
+    @Volatile
+    private var thinkingPref = com.example.gemini.domain.model.ThinkingPreference()
+
+    private fun currentThinkingPreference() = thinkingPref
+
     private suspend fun executeStream(
         conv: Conversation, 
         currentHistory: List<ChatMessage>,
@@ -1564,9 +1586,15 @@ class AgyChatBackend(
         val hubUrl = AuthPreferences.currentHubUrl
         val userPrompt = currentHistory.lastOrNull { it.role == MessageRole.USER }?.content ?: ""
         val modelEnum = com.example.gemini.data.remote.AgyHubClient.resolveModelEnum(_selectedModelId.value)
+        // Rules + stack pin travel with the turn; the chat still shows exactly what the user typed.
+        val enginePrompt = com.example.gemini.data.remote.AgyPromptDirectives.compile(userPrompt, modelEnum)
         val selectedModel = _enabledModels.value.find { it.id == modelEnum }
         val supportsThinking = selectedModel?.supportsThinking ?: (modelEnum.contains("thinking", ignoreCase = true) || modelEnum.contains("flash", ignoreCase = true) || modelEnum.contains("pro", ignoreCase = true))
-        val thinkingBudget = if (supportsThinking) 8192 else 0
+        // Honor the in-app thinking selector (it used to be a dead control while this stayed
+        // hard-coded at 8192, which is why the same models felt weaker than inside Antigravity).
+        val thinkingBudget = if (supportsThinking) {
+            com.example.gemini.data.remote.AgyThinkingBudget.resolve(modelEnum, currentThinkingPreference())
+        } else 0
 
         val convWorkspace = conv.workspaceUri
         val workspaceUri = if (convWorkspace.isNotBlank()) {
@@ -1643,7 +1671,7 @@ class AgyChatBackend(
 
                 var sendRes = agyHubClient.sendUserPrompt(
                     cascadeId = conv.id,
-                    text = userPrompt,
+                    text = enginePrompt,
                     modelEnum = modelEnum,
                     thinkingBudget = thinkingBudget,
                     autoExecutionPolicy = currentAutoExecPolicy,
@@ -1669,7 +1697,7 @@ class AgyChatBackend(
                             check(accountDenial() == null) { "App account changed before retrying Antigravity." }
                             sendRes = agyHubClient.sendUserPrompt(
                                 cascadeId = conv.id,
-                                text = userPrompt,
+                                text = enginePrompt,
                                 modelEnum = modelEnum,
                                 thinkingBudget = thinkingBudget,
                                 autoExecutionPolicy = currentAutoExecPolicy,

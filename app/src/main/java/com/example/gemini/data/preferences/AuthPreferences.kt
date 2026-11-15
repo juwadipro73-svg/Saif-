@@ -50,6 +50,8 @@ class AuthPreferences(private val context: Context) {
         val PREFERRED_MODEL_ID = stringPreferencesKey("preferred_model_id")
         val PREFERRED_MODEL_KEY = stringPreferencesKey("preferred_model_key")
         val PREFERRED_MODEL_NAME = stringPreferencesKey("preferred_model_name")
+        val THINKING_LEVEL = stringPreferencesKey("thinking_level")
+        val THINKING_CUSTOM_TOKENS = androidx.datastore.preferences.core.intPreferencesKey("thinking_custom_tokens")
         val APP_THEME_MODE = stringPreferencesKey("app_theme_mode") // "SYSTEM", "DARK", "LIGHT"
         val TERMINAL_FONT_SIZE = androidx.datastore.preferences.core.intPreferencesKey("terminal_font_size")
         val TERMINAL_CURSOR_STYLE = stringPreferencesKey("terminal_cursor_style")
@@ -165,6 +167,9 @@ class AuthPreferences(private val context: Context) {
     val preferredModelId: Flow<String?> = context.dataStore.data.map { it[PREFERRED_MODEL_ID] }
     val preferredModelKey: Flow<String?> = context.dataStore.data.map { it[PREFERRED_MODEL_KEY] }
     val preferredModelName: Flow<String?> = context.dataStore.data.map { it[PREFERRED_MODEL_NAME] }
+    /** Persisted thinking selector so a chosen reasoning depth survives app restarts. */
+    val thinkingLevel: Flow<String?> = context.dataStore.data.map { it[THINKING_LEVEL] }
+    val thinkingCustomTokens: Flow<Int?> = context.dataStore.data.map { it[THINKING_CUSTOM_TOKENS] }
     val useSshTerminal: Flow<Boolean> = context.dataStore.data.map { 
         it[USE_SSH_TERMINAL] ?: false
     }
@@ -523,6 +528,13 @@ class AuthPreferences(private val context: Context) {
             if (displayName.isNotBlank()) {
                 prefs[PREFERRED_MODEL_NAME] = displayName
             }
+        }
+    }
+
+    suspend fun saveThinkingPreference(level: String, customTokens: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[THINKING_LEVEL] = level
+            prefs[THINKING_CUSTOM_TOKENS] = customTokens
         }
     }
 

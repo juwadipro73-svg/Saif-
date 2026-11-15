@@ -427,6 +427,47 @@ class BuildStackUnitTest {
     }
 
     // ------------------------------------------------------------------
+    // Incremental edits: a small change must not pay for a full rebuild
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `small feature ask on a working app is an incremental edit`() {
+        assertTrue(BuildAgent.detectIncrementalEdit("add a dark mode toggle in settings", false))
+        assertTrue(BuildAgent.detectIncrementalEdit("change the button color to green", false))
+        assertTrue(BuildAgent.detectIncrementalEdit("fix the crash on the settings screen", false))
+    }
+
+    @Test
+    fun `new apps and rebuild requests are never incremental edits`() {
+        assertFalse(BuildAgent.detectIncrementalEdit("add a dark mode toggle", true))
+        assertFalse(BuildAgent.detectIncrementalEdit("start over and build a whole new app", false))
+        assertFalse(BuildAgent.detectIncrementalEdit("rebuild the whole app from scratch", false))
+    }
+
+    @Test
+    fun `everything-asks and long prompts stay full builds`() {
+        val everything = "make a beautiful app with login, dashboard, charts, chat, payments and settings"
+        assertFalse(BuildAgent.detectIncrementalEdit(everything, false))
+        val long = "add a small note field " + "and also check the flow ".repeat(30)
+        assertFalse(BuildAgent.detectIncrementalEdit(long, false))
+    }
+
+    @Test
+    fun `incremental plan touches at most two files`() {
+        val tasks = BuildAgent.incrementalTaskFor("add a dark mode toggle")
+        assertEquals(1, tasks.size)
+        assertTrue(tasks[0].targetFiles.isNotEmpty())
+        assertTrue(tasks[0].targetFiles.size <= 2)
+        assertTrue(tasks[0].expectedOutputTokens <= 9000)
+    }
+
+    @Test
+    fun `visual edits also patch the shared style file`() {
+        val files = BuildAgent.incrementalTaskFor("change the theme colors to teal").single().targetFiles
+        assertTrue(files.any { it.endsWith(".css") || it.contains("colors.xml") || it.contains("theme") })
+    }
+
+    // ------------------------------------------------------------------
     // Skill blocks survive distillation verbatim
     // ------------------------------------------------------------------
 

@@ -881,6 +881,30 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setThinkingPreference(pref: com.example.gemini.domain.model.ThinkingPreference) {
         _thinkingPreference.value = pref
+        // Persist so the chosen reasoning depth actually reaches the next Antigravity request
+        // (and survives restarts) instead of resetting to the default on every launch.
+        viewModelScope.launch {
+            runCatching { authPrefs.saveThinkingPreference(pref.level.name, pref.customTokens) }
+        }
+    }
+
+    private fun restoreThinkingPreference() {
+        viewModelScope.launch {
+            runCatching {
+                val level = authPrefs.thinkingLevel.first()
+                val custom = authPrefs.thinkingCustomTokens.first()
+                if (level != null) {
+                    val parsed = com.example.gemini.domain.model.ThinkingLevel.entries
+                        .firstOrNull { it.name.equals(level, ignoreCase = true) }
+                    if (parsed != null) {
+                        _thinkingPreference.value = com.example.gemini.domain.model.ThinkingPreference(
+                            level = parsed,
+                            customTokens = custom ?: _thinkingPreference.value.customTokens
+                        )
+                    }
+                }
+            }
+        }
     }
 
 
@@ -938,6 +962,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         agyBackend.start()
+        restoreThinkingPreference()
         if (isClaudeEnabled) claudeBackend.start()
         // the first chat follows the new-chat agent (Antigravity's own start-up chat only fills in when it is AGY)
         if (isClaudeEnabled && (newChatAgent.value == AgentKind.CLAUDE || AgentKind.AGY !in enabledAgents.value)) startNewChat()

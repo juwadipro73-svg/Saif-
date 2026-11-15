@@ -53,10 +53,28 @@ class AgyModelService {
                 }
             }
             if (defaultModelEnum.isBlank() || !allValidEnums.contains(defaultModelEnum)) {
-                defaultModelEnum = models.firstOrNull {
-                    it.displayName.contains("flash", ignoreCase = true) || it.key.contains("flash", ignoreCase = true)
-                }?.id ?: models.first().id
+                // Pick the STRONGEST model, not the cheapest one: silently defaulting to Flash made
+                // a fresh Antigravity login feel far weaker than the same account inside Antigravity.
+                defaultModelEnum = strongestModel(models).id
             }
+        }
+
+        /** Rank order used when no model was chosen: opus > pro > sonnet > anything > flash. */
+        fun strongestModel(models: List<AiModel>): AiModel {
+            fun rank(m: AiModel): Int {
+                val s = (m.id + " " + m.key + " " + m.displayName + " " + m.baseName).lowercase()
+                return when {
+                    s.contains("opus") -> 100
+                    s.contains("pro") -> 90
+                    s.contains("sonnet") -> 80
+                    s.contains("high") || s.contains("thinking") -> 70
+                    s.contains("medium") || s.contains("med") -> 60
+                    s.contains("flash") -> 20
+                    s.contains("low") || s.contains("lite") || s.contains("nano") -> 10
+                    else -> 50
+                }
+            }
+            return models.maxByOrNull { rank(it) } ?: models.first()
         }
 
         fun resolveModelEnum(rawInput: String?): String {
