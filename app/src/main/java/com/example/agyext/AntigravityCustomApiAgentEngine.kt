@@ -83,6 +83,14 @@ class AntigravityCustomApiAgentEngine(
     @Volatile
     private var lastBuiltDownload: Pair<String, String>? = null
 
+    /**
+     * Stack the user's current turn asked for ("NATIVE" / "FLUTTER" / "" = anything).
+     * Set by the chat before [executeTurn]; the APK tool forwards it to the Linux bridge,
+     * which refuses to build a mismatched tree (asked native, produced HTML).
+     */
+    @Volatile
+    var requestedBuildStack: String = ""
+
     /** Active turn's model profile + temperature, so the delegate_parallel tool can spawn workers. */
     @Volatile
     private var activeTurnProfile: AgyCustomApiProfile? = null
@@ -685,15 +693,15 @@ class AntigravityCustomApiAgentEngine(
                 .put("projectDir", projectDir)
                 .put("appName", appName)
                 .put("packageName", packageName)
+                .put("requestedStack", requestedBuildStack)
         )
         if (!res.optBoolean("success", false)) {
-            return Triple(
-                false,
-                "APK build failed: ${res.optString("error", "Unknown build error")}\n" +
-                    "The on-device builder accepts (a) a web app with an index.html in the project folder, or (b) Java files with an " +
-                    "AndroidManifest.xml (src/main/java, src/main/res). Kotlin or Gradle-only projects are not built here.",
-                1
-            )
+            // STACK_MISMATCH errors already tell the agent exactly how to fix the tree.
+            val err = res.optString("error", "Unknown build error")
+            val hint = if (err.startsWith("STACK_MISMATCH")) "" else "\n" +
+                "The on-device builder accepts (a) a web app with an index.html in the project folder, or (b) Java files with an " +
+                "AndroidManifest.xml (src/main/java, src/main/res). Kotlin or Gradle-only projects are not built here."
+            return Triple(false, "APK build failed: $err$hint", 1)
         }
         val hostApkPath = res.optString("hostApkPath")
         var downloadUrl = res.optString("downloadUrl")
@@ -705,6 +713,16 @@ class AntigravityCustomApiAgentEngine(
         }
         if (downloadUrl.isNotBlank()) {
             lastBuiltDownload = appName to downloadUrl
+        }
+        if (res.optString("deliverable") == "FLUTTER_PROJECT_ZIP") {
+            val summary = buildString {
+                appendLine("FLUTTER_PROJECT_READY=true")
+                appendLine("APP_NAME=$appName")
+                appendLine("DOWNLOAD_URL=$downloadUrl")
+                appendLine("This is a Flutter SOURCE PROJECT (ZIP + BUILD_GUIDE.md), not an APK: Flutter can only compile on a PC with the SDK.")
+                appendLine("Include [Download $appName Flutter project ZIP]($downloadUrl) in your final answer, plus: unzip, `flutter pub get`, `flutter build apk --release`.")
+            }
+            return Triple(true, summary.trim(), 0)
         }
         val summary = buildString {
             appendLine("APK_BUILT_SUCCESSFULLY=true")

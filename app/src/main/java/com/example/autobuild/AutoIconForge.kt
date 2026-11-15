@@ -102,16 +102,18 @@ object AutoIconForge {
         var bitmap: Bitmap? = null
         var source = SOURCE_PROCEDURAL
 
-        // 1) AI generation through the user's own key.
+        // 1) AI generation through the user's own key (bounded: never stall a build).
         if (ImageGen.canGenerate(provider, apiKey)) {
             try {
-                val art = ImageGen.generate(
-                    prompt = aiIconPrompt(appName, category),
-                    aspect = "1:1",
-                    provider = provider,
-                    apiKey = apiKey,
-                    activeModel = model
-                ).getOrNull()
+                val art = kotlinx.coroutines.withTimeoutOrNull(150_000L) {
+                    ImageGen.generate(
+                        prompt = aiIconPrompt(appName, category),
+                        aspect = "1:1",
+                        provider = provider,
+                        apiKey = apiKey,
+                        activeModel = model
+                    ).getOrNull()
+                }
                 val decoded = art?.let { decodeSquare(it, 1024) }
                 if (decoded != null) {
                     bitmap = decoded

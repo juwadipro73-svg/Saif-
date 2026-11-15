@@ -183,6 +183,23 @@ object BuildAgent {
                 fresh
             }
 
+            // App icon starts forging now (AI art via the user's key, else a category glyph),
+            // in parallel with planning/generation; S8 awaits it before compiling the APK.
+            val iconJob = async {
+                runCatching {
+                    com.example.autobuild.AutoIconForge.ensureIcon(
+                        context = context,
+                        projectDir = projectDir,
+                        appName = project.appName,
+                        vision = spec.vision,
+                        featuresText = spec.features.joinToString(" ") { it.title },
+                        provider = provider,
+                        apiKey = activeKey,
+                        model = activeModel
+                    )
+                }.getOrNull()
+            }
+
             // -------------------------------------------------------------
             // STAGE S2: TASK PLANNING & INTERFACE CONTRACT
             // -------------------------------------------------------------
@@ -517,6 +534,15 @@ object BuildAgent {
             // STAGE S8: ATOMIC COMMIT TO DISK
             // -------------------------------------------------------------
             trackPhase(BuildPhase.S8_COMMIT, 9, 10)
+            // The APK compile below embeds app_icon.png — make sure the forged icon is ready.
+            val forgedIcon = try {
+                iconJob.await()
+            } catch (_: Exception) {
+                null
+            }
+            if (forgedIcon?.created == true) {
+                onEvent(BuildEvent.Thought("App icon forged (${forgedIcon.category}, ${forgedIcon.source})."))
+            }
             // Deliverable lines surfaced in the S9 summary (chat) for non-HTML stacks.
             val deliverables = mutableListOf<String>()
             val commitResult = when (stack) {

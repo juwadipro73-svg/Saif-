@@ -330,6 +330,43 @@ object OnDeviceApkBuildManager {
             return@withContext stripped
         }
 
+        // Stack enforcement for marker builds: an HTML-only block for a NATIVE/FLUTTER request
+        // ("bola native, banaya HTML") is rebuilt properly through the stack-aware pipeline
+        // instead of shipping the wrong stack.
+        val requestedStack = com.example.builder.agent.BuildAgent.detectBuildStack(userPrompt)
+        if (requestedStack != com.example.builder.agent.BuildStack.HTML) {
+            val stackLabel = if (requestedStack == com.example.builder.agent.BuildStack.NATIVE) "NATIVE Android (Java)" else "Flutter (Dart)"
+            return@withContext try {
+                val rbExplicit = nameAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim()
+                val rbName = rbExplicit?.takeIf { it.isNotBlank() } ?: inferAppName(userPrompt, emptyList(), sessionTitle)
+                val rbPkgRaw = pkgAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim().orEmpty()
+                val rbProject = com.example.ui.components.ProjectData(
+                    appName = rbName,
+                    packageName = AppCompilerEngine.sanitizePackageName(rbPkgRaw, rbName),
+                    minSdk = 24,
+                    targetSdk = 34,
+                    buildStudio = "SAIF AI Studio",
+                    language = if (requestedStack == com.example.builder.agent.BuildStack.NATIVE) "Java" else "Dart",
+                    iconBitmap = ProjectDataManager.loadProjectIcon(context, rbName)
+                )
+                val rebuilt = AutonomousAppBuilder.buildOrModifyApp(
+                    context = context,
+                    project = rbProject,
+                    prompt = userPrompt
+                )
+                if (rebuilt.isSuccess) {
+                    "You asked for **$stackLabel** — the first draft came out as HTML, so I rebuilt it properly as **$stackLabel**:\n\n" +
+                        rebuilt.summary
+                } else {
+                    (assistantReply.replace(fullTag, "").trim() + "\n\n⚠️ ${rebuilt.summary}").trim()
+                }
+            } catch (e: Exception) {
+                (assistantReply.replace(fullTag, "").trim() +
+                    "\n\n⚠️ You asked for **$stackLabel** but the draft was HTML-only, and the automatic $stackLabel rebuild failed (${e.message}). " +
+                    "Reply **build it again** and I'll construct it with the full workspace tools.").trim()
+            }
+        }
+
         val explicitName = nameAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim()
         val appName = explicitName?.takeIf { it.isNotBlank() } ?: inferAppName(userPrompt, emptyList(), sessionTitle)
         val explicitPkg = pkgAttrRegex.find(headerPart)?.groupValues?.getOrNull(1)?.trim().orEmpty()

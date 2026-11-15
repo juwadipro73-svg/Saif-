@@ -208,10 +208,10 @@ fun QuickPromptChips(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
-                // Which APK is this? Clean version + build code (no hashes).
+                // Which APK is this? Clean version + CI build stamp (no raw version codes).
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "v${com.example.gemini.BuildConfig.VERSION_NAME.substringBeforeLast("-b")} \u2022 Build ${com.example.gemini.BuildConfig.VERSION_CODE}",
+                    text = "v${com.example.gemini.BuildConfig.VERSION_NAME.substringBeforeLast("-b")} \u2022 ${com.example.gemini.BuildConfig.BUILD_STAMP}",
                     fontSize = 11.sp,
                     color = SaifTheme.colors.textSecondary.copy(alpha = 0.5f),
                     textAlign = TextAlign.Center

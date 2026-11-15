@@ -18,6 +18,7 @@ import com.example.gemini.ui.chat.ChatFeedCache
 import com.example.gemini.ui.chat.ChatFeedItem
 import com.example.gemini.ui.components.*
 import com.example.gemini.domain.model.ChatMessage
+import com.example.gemini.domain.model.MessageRole
 import com.example.gemini.domain.model.ToolType
 
 /** Uses the same parsed blocks, tool cards and working animation as the editing engine. */
@@ -79,6 +80,17 @@ internal fun HomeAgentFeed(
         val layout = listState.layoutInfo
         val nearBottom = layout.totalItemsCount == 0 || (layout.visibleItemsInfo.lastOrNull()?.index ?: 0) >= layout.totalItemsCount - 3
         if (nearBottom && (feed.isNotEmpty() || generating)) {
+            withFrameNanos { }
+            val count = listState.layoutInfo.totalItemsCount
+            if (count > 0) listState.scrollToItem(count - 1)
+        }
+    }
+    // A freshly SENT message always pulls the screen down to the new chat — even when the
+    // user had scrolled up reading history. Sending means "take me to my new chat".
+    val sentCount = messages.count { it.role == MessageRole.USER }
+    LaunchedEffect(sentCount) {
+        if (sentCount > 0) {
+            withFrameNanos { }
             withFrameNanos { }
             val count = listState.layoutInfo.totalItemsCount
             if (count > 0) listState.scrollToItem(count - 1)

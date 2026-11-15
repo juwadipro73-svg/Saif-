@@ -315,6 +315,25 @@ object AppCompilerEngine {
             onStepChanged(BuildStep.APK_PACKAGING, 0.9f)
             emit("\n[4/5] Packaging & Signing APK...")
 
+            // 0. Icon safety net: chat/workspace builds never pass through the builder's icon
+            // forging, so forge here (AI art via the user's key, else a category glyph). A
+            // user-set icon is never overwritten. Without this the APK gets a random
+            // gradient + letters placeholder.
+            try {
+                val iconState = com.example.data.local.ProviderSettingsManager.loadState()
+                val iconKey = iconState.apiKeys.firstOrNull { it.isNotBlank() && !it.contains("MY_") } ?: ""
+                com.example.autobuild.AutoIconForge.ensureIcon(
+                    context = context,
+                    projectDir = projectDir,
+                    appName = project.appName,
+                    vision = "",
+                    featuresText = "",
+                    provider = iconState.providerName.ifBlank { "Gemini" },
+                    apiKey = iconKey,
+                    model = iconState.buildModel.ifBlank { iconState.activeModel }
+                )
+            } catch (_: Exception) { }
+
             // 1. Synthesize user's custom application HTML & metadata config
             val appHtml = AppHtmlSynthesizer.synthesize(project, projectDir)
             val appConfigJson = JSONObject().apply {
@@ -517,10 +536,49 @@ object AppCompilerEngine {
             }
 
             if (!signSuccessful) {
+                // Never ship an unsigned APK as "success": Android refuses to install it
+                // ("package appears to be corrupt"). Fail the build with an honest error.
                 emit("[ERROR] Could not apply cryptographic signatures. Check keystore configuration.", isError = true)
-                unsignedApk.copyTo(outputApk, overwrite = true)
+                try { if (outputApk.exists()) outputApk.delete() } catch (_: Exception) {}
+                if (unsignedApk.exists()) unsignedApk.delete()
+                return@withContext BuildResult.Error(
+                    message = "APK signing failed, so no installable APK was produced. Rebuild and check the keystore.",
+                    fileName = null,
+                    lineNumber = null,
+                    errorStep = BuildStep.APK_PACKAGING,
+                    logs = logs
+                )
             }
             if (unsignedApk.exists()) unsignedApk.delete()
+
+            // Final gate: ask Android itself whether the signed APK parses. A corrupt
+            // manifest/resources block must fail HERE with logs — never as "App not
+            // installed" on the user's screen.
+            val archiveInfo = try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.packageManager.getPackageArchiveInfo(
+                        outputApk.absolutePath,
+                        android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    context.packageManager.getPackageArchiveInfo(outputApk.absolutePath, 0)
+                }
+            } catch (_: Exception) {
+                null
+            }
+            if (archiveInfo == null || archiveInfo.packageName.isNullOrBlank()) {
+                emit("[ERROR] The signed APK failed Android's package verification (unparseable manifest or resources).", isError = true)
+                try { if (outputApk.exists()) outputApk.delete() } catch (_: Exception) {}
+                return@withContext BuildResult.Error(
+                    message = "Built APK failed Android's package verification and was discarded. Rebuild the app; if it repeats, the project manifest or resources are malformed.",
+                    fileName = null,
+                    lineNumber = null,
+                    errorStep = BuildStep.APK_PACKAGING,
+                    logs = logs
+                )
+            }
+            emit("✓ Package verified by Android (${archiveInfo.packageName}, version ${archiveInfo.versionName}).")
 
             emit("Packaging complete: ${outputApk.name} (${outputApk.length() / 1024} KB)")
             emit("Applied debug keystore signature (v1, v2 & v3 schemes).")

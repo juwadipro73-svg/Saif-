@@ -516,6 +516,73 @@ fun SettingsSheet(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Most-touched first: theme sits right below the profile card.
+            SectionHeader("APPEARANCE")
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxWidth().height(64.dp)
+                    .background(SaifTheme.colors.surfaceCard, RoundedCornerShape(16.dp))
+                    .padding(4.dp)
+            ) {
+                val segmentWidth = maxWidth / 3
+                val segmentWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { segmentWidth.toPx() }
+                val targetOffsetX = when (themeMode) {
+                    ThemeMode.LIGHT -> 0
+                    ThemeMode.DARK -> segmentWidthPx.roundToInt()
+                    ThemeMode.SYSTEM -> (segmentWidthPx * 2).roundToInt()
+                }
+                val offset by animateIntOffsetAsState(
+                    targetValue = IntOffset(targetOffsetX, 0),
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
+                    label = "AppearanceSegmentOffset"
+                )
+                Box(
+                    modifier = Modifier.width(segmentWidth).fillMaxHeight()
+                        .offset { offset }
+                        .background(PrimaryAccent, RoundedCornerShape(12.dp))
+                )
+                Row(Modifier.fillMaxSize()) {
+                    listOf(
+                        Triple("Light", Icons.Default.LightMode, ThemeMode.LIGHT),
+                        Triple("Dark", Icons.Default.DarkMode, ThemeMode.DARK),
+                        Triple("System", Icons.Default.Computer, ThemeMode.SYSTEM)
+                    ).forEach { (title, icon, mode) ->
+                        val selected = themeMode == mode
+                        Box(
+                            modifier = Modifier.weight(1f).fillMaxHeight()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { ThemeManager.setTheme(mode) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(icon, contentDescription = title,
+                                    tint = if (selected) Color.White else SaifTheme.colors.textSecondary,
+                                    modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.height(2.dp))
+                                Text(title, color = if (selected) Color.White else SaifTheme.colors.textSecondary,
+                                    fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            SectionHeader("COMMAND APPROVAL")
+            LiquidSurface(
+                color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
+                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Auto-approve commands", color = SaifTheme.colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text(if (autoApprove) "Commands may run without confirmation" else "Ask before running commands", color = SaifTheme.colors.textSecondary, fontSize = 12.sp)
+                        }
+                        Switch(checked = autoApprove, onCheckedChange = onAutoApproveChange)
+                    }
+                }
+            }
+            Spacer(Modifier.height(24.dp))
             SectionHeader("AI ACCOUNT CONNECTION")
             LiquidSurface(
                 color = SaifTheme.colors.surfaceCard,
@@ -530,39 +597,42 @@ fun SettingsSheet(
                 }
             }
             Spacer(Modifier.height(24.dp))
-
-            SectionHeader("VOICE RESPONSES")
+            SectionHeader("TERMINAL & AI PROVIDERS")
             LiquidSurface(
-                color = SaifTheme.colors.surfaceCard,
-                glassBorderBrush = glassBorderBrush,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
+                color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
+                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.AutoMirrored.Outlined.VolumeUp, contentDescription = null,
-                        tint = SaifTheme.colors.textSecondary, modifier = Modifier.size(22.dp))
-                    Spacer(Modifier.width(14.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text("Voice Responses", color = SaifTheme.colors.textPrimary,
-                            fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                        Text("Read SAIF AI replies aloud", color = SaifTheme.colors.textSecondary, fontSize = 12.sp)
-                    }
-                    Switch(
-                        checked = autoSpeak,
-                        onCheckedChange = {
-                            autoSpeak = it
-                            generalPrefs.edit().putBoolean("autoSpeak", it).apply()
-                        }
-                    )
+                Column {
+                    SettingsActionRow("Manage Terminal Providers", "Antigravity, OpenCode, Claude Code, local Ubuntu & custom providers", onClick = { showTerminalProviders = true })
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
+
             // AI Memory
+            SectionHeader("AI AGENTS & SKILLS")
+            LiquidSurface(
+                color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
+                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    SettingsActionRow("Specialist AI Agents", "Coding, research, automation, analysis & content", onClick = { showAgentsManager = true })
+                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
+                    SettingsActionRow("AI Skills (/commands)", "Import and manage saved skills", onClick = { showSkillsManager = true })
+                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
+                    SettingsActionRow("Custom Slash Commands", "Create and edit your own /commands", onClick = { onOpenEngineSettings("SLASH_COMMANDS") })
+                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
+                    SettingsActionRow("Custom SAIF AI Plugins", "Install and manage extensions", onClick = { onOpenEngineSettings("WEBVIEW_EXTENSIONS") })
+                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
+                    SettingsActionRow("MCP Servers", "Configure connected tools and integrations", onClick = { onOpenEngineSettings("MCP") })
+                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
+                    SettingsActionRow("GitHub Sync", "Connect repositories and sync skills", onClick = { onOpenEngineSettings("GITHUB") })
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
             SectionHeader("AI MEMORY")
             LiquidSurface(
                 color = SaifTheme.colors.surfaceCard,
@@ -620,98 +690,6 @@ fun SettingsSheet(
 
             Spacer(Modifier.height(24.dp))
 
-            SectionHeader("AI AGENTS & SKILLS")
-            LiquidSurface(
-                color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
-                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
-            ) {
-                Column {
-                    SettingsActionRow("Specialist AI Agents", "Coding, research, automation, analysis & content", onClick = { showAgentsManager = true })
-                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
-                    SettingsActionRow("AI Skills (/commands)", "Import and manage saved skills", onClick = { showSkillsManager = true })
-                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
-                    SettingsActionRow("Custom Slash Commands", "Create and edit your own /commands", onClick = { onOpenEngineSettings("SLASH_COMMANDS") })
-                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
-                    SettingsActionRow("Custom SAIF AI Plugins", "Install and manage extensions", onClick = { onOpenEngineSettings("WEBVIEW_EXTENSIONS") })
-                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
-                    SettingsActionRow("MCP Servers", "Configure connected tools and integrations", onClick = { onOpenEngineSettings("MCP") })
-                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
-                    SettingsActionRow("GitHub Sync", "Connect repositories and sync skills", onClick = { onOpenEngineSettings("GITHUB") })
-                    HorizontalDivider(color = SaifTheme.colors.cardBorder)
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text("Auto-approve commands", color = SaifTheme.colors.textPrimary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                            Text(if (autoApprove) "Commands may run without confirmation" else "Ask before running commands", color = SaifTheme.colors.textSecondary, fontSize = 12.sp)
-                        }
-                        Switch(checked = autoApprove, onCheckedChange = onAutoApproveChange)
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-            SectionHeader("TERMINAL & AI PROVIDERS")
-            LiquidSurface(
-                color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
-                shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()
-            ) {
-                Column {
-                    SettingsActionRow("Manage Terminal Providers", "Antigravity, OpenCode, Claude Code, local Ubuntu & custom providers", onClick = { showTerminalProviders = true })
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-            // SAIF AI's original Appearance control sits below the main settings; all other settings follow it.
-            SectionHeader("APPEARANCE")
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxWidth().height(64.dp)
-                    .background(SaifTheme.colors.surfaceCard, RoundedCornerShape(16.dp))
-                    .padding(4.dp)
-            ) {
-                val segmentWidth = maxWidth / 3
-                val segmentWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { segmentWidth.toPx() }
-                val targetOffsetX = when (themeMode) {
-                    ThemeMode.LIGHT -> 0
-                    ThemeMode.DARK -> segmentWidthPx.roundToInt()
-                    ThemeMode.SYSTEM -> (segmentWidthPx * 2).roundToInt()
-                }
-                val offset by animateIntOffsetAsState(
-                    targetValue = IntOffset(targetOffsetX, 0),
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow),
-                    label = "AppearanceSegmentOffset"
-                )
-                Box(
-                    modifier = Modifier.width(segmentWidth).fillMaxHeight()
-                        .offset { offset }
-                        .background(PrimaryAccent, RoundedCornerShape(12.dp))
-                )
-                Row(Modifier.fillMaxSize()) {
-                    listOf(
-                        Triple("Light", Icons.Default.LightMode, ThemeMode.LIGHT),
-                        Triple("Dark", Icons.Default.DarkMode, ThemeMode.DARK),
-                        Triple("System", Icons.Default.Computer, ThemeMode.SYSTEM)
-                    ).forEach { (title, icon, mode) ->
-                        val selected = themeMode == mode
-                        Box(
-                            modifier = Modifier.weight(1f).fillMaxHeight()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { ThemeManager.setTheme(mode) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(icon, contentDescription = title,
-                                    tint = if (selected) Color.White else SaifTheme.colors.textSecondary,
-                                    modifier = Modifier.size(20.dp))
-                                Spacer(Modifier.height(2.dp))
-                                Text(title, color = if (selected) Color.White else SaifTheme.colors.textSecondary,
-                                    fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
                         SectionHeader("ALL SETTINGS")
             LiquidSurface(
                 color = SaifTheme.colors.surfaceCard, glassBorderBrush = glassBorderBrush,
@@ -740,6 +718,37 @@ fun SettingsSheet(
             }
 
             Spacer(Modifier.height(24.dp))
+            SectionHeader("VOICE RESPONSES")
+            LiquidSurface(
+                color = SaifTheme.colors.surfaceCard,
+                glassBorderBrush = glassBorderBrush,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.AutoMirrored.Outlined.VolumeUp, contentDescription = null,
+                        tint = SaifTheme.colors.textSecondary, modifier = Modifier.size(22.dp))
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Voice Responses", color = SaifTheme.colors.textPrimary,
+                            fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Read SAIF AI replies aloud", color = SaifTheme.colors.textSecondary, fontSize = 12.sp)
+                    }
+                    Switch(
+                        checked = autoSpeak,
+                        onCheckedChange = {
+                            autoSpeak = it
+                            generalPrefs.edit().putBoolean("autoSpeak", it).apply()
+                        }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
             // Work in the Linux workspace downloads gigabytes of modules. They are removed again once a project
             // has been idle; the project itself is never removed.
             SectionHeader("STORAGE")
@@ -800,7 +809,7 @@ fun SettingsSheet(
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "SAIF AI ${com.example.gemini.BuildConfig.VERSION_NAME.substringBeforeLast("-b")} \u2022 Build ${com.example.gemini.BuildConfig.VERSION_CODE}",
+                text = "SAIF AI ${com.example.gemini.BuildConfig.VERSION_NAME.substringBeforeLast("-b")} \u2022 ${com.example.gemini.BuildConfig.BUILD_STAMP}",
                 fontSize = 11.sp,
                 color = SubtextMuted,
                 modifier = Modifier.fillMaxWidth(),

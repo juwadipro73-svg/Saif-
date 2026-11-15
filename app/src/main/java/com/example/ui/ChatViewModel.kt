@@ -471,6 +471,30 @@ class ChatViewModel(
         val attachments = _selectedAttachments.value.toList()
         if ((trimmed.isEmpty() && attachments.isEmpty()) || _isGenerating.value) return null
 
+        // Stack routing for chat builds: whatever the user asked (native / flutter / html),
+        // the agent must deliver THAT stack. The stash + directive below are enforced by the
+        // Linux build bridge, which refuses mismatched trees ("bola native, banaya HTML").
+        val requestedStack = com.example.builder.agent.BuildAgent.detectBuildStack(trimmed)
+        val stackDirective = when (requestedStack) {
+            com.example.builder.agent.BuildStack.NATIVE ->
+                "STACK REQUIREMENT (non-negotiable): the user asked for a NATIVE Android app. " +
+                    "You MUST write real Java sources + AndroidManifest.xml + res/ layouts (Android framework APIs only) " +
+                    "and build them with the APK build tool. NEVER answer this request with an HTML/WebView app, an " +
+                    "<saif-apk> HTML block, or pasted code — HTML output for this request is a failure and the build " +
+                    "tool will reject it."
+            com.example.builder.agent.BuildStack.FLUTTER ->
+                "STACK REQUIREMENT (non-negotiable): the user asked for a FLUTTER app. " +
+                    "You MUST write a complete Dart project (pubspec.yaml, lib/main.dart, lib/screens/, lib/features/ — " +
+                    "pure Dart + package:flutter/material.dart, zero third-party packages) and call the APK build tool, " +
+                    "which packages it as a project ZIP with a build guide. NEVER answer with HTML/WebView output — " +
+                    "HTML for this request is a failure and the build tool will reject it."
+            com.example.builder.agent.BuildStack.HTML -> ""
+        }
+        com.example.compiler.LinuxApkBuildBridge.requestedStackOverride =
+            if (requestedStack == com.example.builder.agent.BuildStack.HTML) null else requestedStack.name
+        customApiEngine.requestedBuildStack =
+            if (requestedStack == com.example.builder.agent.BuildStack.HTML) "" else requestedStack.name
+
         val customApiState = com.example.agyext.AntigravityCustomApiManager.getState(context)
         // The user's own API key never needs an Antigravity sign-in. When Antigravity is not connected, a key that
         // is already saved in the app (a paused API profile, or the AI provider settings) is switched on and used.
@@ -546,6 +570,7 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
+                        if (stackDirective.isNotBlank()) append(stackDirective).append("\n\n")
                         // NOTE: no build-marker rule here on purpose. The custom-API engine carries its own
                         // native-capable build instructions; an extra marker rule deroutes it into HTML/code dumps.
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
@@ -587,10 +612,21 @@ class ChatViewModel(
                         mainChatBackend.startNewChat()
                         check(mainChatBackend.currentConversation.value != null) { "Unable to create Antigravity conversation." }
                     } else {
-                        if (mainChatBackend.currentConversation.value?.id != savedCascade) mainChatBackend.selectConversation(savedCascade!!)
-                        kotlinx.coroutines.withTimeout(30_000L) {
-                            while (mainChatBackend.currentConversation.value?.id != savedCascade || mainChatBackend.isLoadingConversation.value) {
-                                kotlinx.coroutines.delay(100)
+                        // A slow server gets one reselect + one more wait before this turn gives up.
+                        var selected = false
+                        var selectAttempts = 0
+                        while (!selected && selectAttempts < 2) {
+                            selectAttempts++
+                            if (mainChatBackend.currentConversation.value?.id != savedCascade) mainChatBackend.selectConversation(savedCascade!!)
+                            try {
+                                kotlinx.coroutines.withTimeout(30_000L) {
+                                    while (mainChatBackend.currentConversation.value?.id != savedCascade || mainChatBackend.isLoadingConversation.value) {
+                                        kotlinx.coroutines.delay(100)
+                                    }
+                                }
+                                selected = true
+                            } catch (timeout: kotlinx.coroutines.TimeoutCancellationException) {
+                                if (selectAttempts >= 2) throw timeout
                             }
                         }
                         mainChatBackend.conversationError.value?.let { error(it) }
@@ -608,6 +644,7 @@ class ChatViewModel(
                         if (specialistDirective.isNotBlank()) append(specialistDirective).append("\n\n")
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
+                        if (stackDirective.isNotBlank()) append(stackDirective).append("\n\n")
                         append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
@@ -702,7 +739,30 @@ class ChatViewModel(
                 if (cancelled is kotlinx.coroutines.TimeoutCancellationException) {
                     customApiEngine.stopActiveExecution()
                     mainChatBackend.stopStreaming()
-                    sessionId?.let { repository.insertMessage(ChatMessageEntity(sessionId = it, role = "model", content = "Antigravity response timed out. Please check the server and try again.")) }
+                    // Never throw away a half-received answer: deliver what arrived with an
+                    // honest note instead of a bare timeout error.
+                    val partial = _currentStreamingContent.value.trim()
+                    if (partial.length > 40) {
+                        sessionId?.let {
+                            repository.insertMessage(
+                                ChatMessageEntity(
+                                    sessionId = it, role = "model",
+                                    content = partial + "\n\n_(The server stopped responding here, so this answer may be incomplete. Tap Regenerate to retry.)_"
+                                )
+                            )
+                        }
+                        workCompleted = true
+                    } else {
+                        sessionId?.let {
+                            repository.insertMessage(
+                                ChatMessageEntity(
+                                    sessionId = it, role = "model",
+                                    content = "Antigravity didn't answer in time (the server is slow or unreachable right now). " +
+                                        "Your message is saved — tap Regenerate to retry, or check the server status and try again."
+                                )
+                            )
+                        }
+                    }
                 } else throw cancelled
             } catch (cancelled: kotlinx.coroutines.CancellationException) {
                 throw cancelled
@@ -717,6 +777,9 @@ class ChatViewModel(
             } finally {
                 _currentStreamingContent.value = ""
                 _isGenerating.value = false
+                // This turn's stack requirement must never leak into the next turn.
+                com.example.compiler.LinuxApkBuildBridge.requestedStackOverride = null
+                customApiEngine.requestedBuildStack = ""
                 com.example.storage.ModuleAutoCleaner.onWorkFinished(context)
                 com.example.service.AgentWorkNotifier.end(context, workCompleted)
             }

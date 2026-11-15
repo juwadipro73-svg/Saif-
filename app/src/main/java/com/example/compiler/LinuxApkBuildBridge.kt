@@ -14,6 +14,70 @@ import java.util.Locale
 object LinuxApkBuildBridge {
 
     /**
+     * Stack the user's current turn asked for ("NATIVE" / "FLUTTER" / null = anything goes).
+     * Set by the chat before the agent works, read here when the agent calls the build tool.
+     * The tool request may also carry "requestedStack" explicitly, which wins over the stash.
+     */
+    @Volatile
+    var requestedStackOverride: String? = null
+
+    /** What a produced source tree contains, for stack enforcement. Pure logic, unit-tested. */
+    data class StackTreeStatus(
+        val hasManifest: Boolean,
+        val javaCount: Int,
+        val hasHtmlEntry: Boolean,
+        val hasPubspec: Boolean,
+        val hasMainDart: Boolean
+    )
+
+    fun inspectStackTree(hostSourceDir: File): StackTreeStatus {
+        val hasManifest = File(hostSourceDir, "app/src/main/AndroidManifest.xml").isFile ||
+            File(hostSourceDir, "AndroidManifest.xml").isFile
+        val javaCount = try {
+            hostSourceDir.walkTopDown().maxDepth(8)
+                .count { it.isFile && it.extension.equals("java", true) && !it.path.contains("/build/") }
+        } catch (_: Exception) {
+            0
+        }
+        val hasHtmlEntry = try {
+            listOf("index.html", "public/index.html", "dist/index.html", "www/index.html", "app/src/main/assets/index.html")
+                .any { File(hostSourceDir, it).isFile } ||
+                hostSourceDir.walkTopDown().maxDepth(3)
+                    .any { it.isFile && it.extension.equals("html", true) }
+        } catch (_: Exception) {
+            false
+        }
+        return StackTreeStatus(
+            hasManifest = hasManifest,
+            javaCount = javaCount,
+            hasHtmlEntry = hasHtmlEntry,
+            hasPubspec = File(hostSourceDir, "pubspec.yaml").isFile,
+            hasMainDart = File(hostSourceDir, "lib/main.dart").isFile
+        )
+    }
+
+    /**
+     * Corrective error when the produced tree doesn't match the requested stack (the agent
+     * reads it and regenerates correctly), or null when the tree satisfies the request.
+     */
+    fun stackMismatchError(requested: String, status: StackTreeStatus): String? {
+        return when (requested.trim().uppercase()) {
+            "NATIVE" -> if (status.hasManifest && status.javaCount > 0) null
+            else "STACK_MISMATCH: the user asked for a NATIVE Android app (Java + AndroidManifest.xml + res/), " +
+                "but this project folder has no native sources" +
+                (if (status.hasHtmlEntry) " (it has an HTML web app instead — do NOT ship HTML for this request)" else "") +
+                ". Write AndroidManifest.xml, Java activities under app/src/main/java (or src/main/java), and XML layouts " +
+                "under app/src/main/res (or src/main/res), then call this tool again."
+            "FLUTTER" -> if (status.hasPubspec && status.hasMainDart) null
+            else "STACK_MISMATCH: the user asked for a FLUTTER app (Dart project with pubspec.yaml + lib/main.dart), " +
+                "but this project folder doesn't have one. Write the complete Flutter project (pubspec.yaml, lib/main.dart, " +
+                "lib/screens/, lib/features/ — pure Dart + package:flutter/material.dart, zero third-party packages), " +
+                "then call this tool again."
+            else -> null
+        }
+    }
+
+    /**
      * Resolves a path seen inside the PRoot Ubuntu environment (`/root/workspace/...` or `/root/...`)
      * to its underlying Android host `File` inside `context.filesDir`.
      */
@@ -218,6 +282,62 @@ PY
      * into a signed v1/v2/v3 Android APK, copies the `.apk` back into `<projectDir>/build/`, saves to
      * Phone `Downloads/`, and returns JSON with `downloadUrl` and `linuxApkPath`.
      */
+    /**
+     * Honest Flutter delivery for workspace builds: copies the Dart project, writes a
+     * deterministic BUILD_GUIDE.md, zips it and registers a one-tap download. Never an APK.
+     */
+    private suspend fun packageFlutterProject(
+        context: Context,
+        hostSourceDir: File,
+        appName: String,
+        buildProjectDir: File
+    ): JSONObject = withContext(Dispatchers.IO) {
+        try {
+            val appDir = File(buildProjectDir, "flutter_app").apply { mkdirs() }
+            hostSourceDir.walkTopDown().forEach { f ->
+                if (!f.isFile) return@forEach
+                val rel = f.relativeTo(hostSourceDir).path.replace('\\', '/')
+                if (rel == "build" || rel.startsWith("build/") || rel.contains("/build/")) return@forEach
+                val out = File(appDir, rel)
+                out.parentFile?.mkdirs()
+                f.copyTo(out, overwrite = true)
+            }
+            val files = appDir.walkTopDown().filter { it.isFile }
+                .map { "flutter_app/" + it.relativeTo(appDir).path.replace('\\', '/') }
+            File(appDir, "BUILD_GUIDE.md").writeText(
+                com.example.builder.agent.FlutterStack.buildGuideText(appName, files)
+            )
+            val zipFile = File(buildProjectDir, "flutter_app.zip")
+            if (zipFile.exists()) zipFile.delete()
+            java.util.zip.ZipOutputStream(java.io.FileOutputStream(zipFile)).use { zos ->
+                appDir.walkTopDown().filter { it.isFile }.forEach { f ->
+                    val rel = f.relativeTo(buildProjectDir).path.replace('\\', '/')
+                    zos.putNextEntry(java.util.zip.ZipEntry(rel))
+                    f.inputStream().use { it.copyTo(zos) }
+                    zos.closeEntry()
+                }
+            }
+            val downloadUrl = try {
+                val clean = appName.replace(Regex("[^a-zA-Z0-9_]"), "_").trim('_').ifBlank { "FlutterApp" }
+                AndroidLocalBridgeServer.instance.registerDownloadFile(context, zipFile, "${clean}_Flutter_Project.zip")
+            } catch (_: Exception) { "" }
+            try {
+                com.example.builder.agent.FlutterStack.saveZipToDownloads(context, zipFile, appName)
+            } catch (_: Exception) { }
+            JSONObject()
+                .put("success", true)
+                .put("deliverable", "FLUTTER_PROJECT_ZIP")
+                .put("appName", appName)
+                .put("packageName", "")
+                .put("downloadUrl", downloadUrl)
+                .put("hostApkPath", "")
+                .put("linuxApkPath", "")
+                .put("note", "Flutter project packaged as source ZIP + BUILD_GUIDE.md (compile with the Flutter SDK on a PC: flutter build apk). This is NOT an APK.")
+        } catch (e: Exception) {
+            JSONObject().put("success", false).put("error", "Flutter packaging failed: ${e.message}")
+        }
+    }
+
     suspend fun compileLinuxDirectoryToApk(context: Context, requestJson: JSONObject): JSONObject =
         withContext(Dispatchers.IO) {
             val rawDir = requestJson.optString("projectDir").trim()
@@ -259,6 +379,20 @@ PY
             val buildProjectDir = File(File(context.filesDir, "projects"), safeFolder)
             if (buildProjectDir.exists()) buildProjectDir.deleteRecursively()
             buildProjectDir.mkdirs()
+
+            // Stack enforcement: "bola native, banaya HTML" must be impossible. The requested
+            // stack (explicit tool arg, else the chat turn's stash) is verified against the
+            // produced tree BEFORE anything builds.
+            val requestedStack = requestJson.optString("requestedStack").trim().ifBlank { requestedStackOverride?.trim().orEmpty() }
+            val treeStatus = inspectStackTree(hostSourceDir)
+            stackMismatchError(requestedStack, treeStatus)?.let { mismatch ->
+                return@withContext JSONObject()
+                    .put("success", false)
+                    .put("error", mismatch)
+            }
+            if (requestedStack.equals("FLUTTER", ignoreCase = true)) {
+                return@withContext packageFlutterProject(context, hostSourceDir, inferredName, buildProjectDir)
+            }
 
             // Detect whether source dir is a native Java Android project or a web/HTML5 app
             val hasManifest = File(hostSourceDir, "app/src/main/AndroidManifest.xml").isFile ||
