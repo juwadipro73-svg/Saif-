@@ -148,10 +148,8 @@ object DeviceActionParser {
                     val nav = obj.optString("navType", obj.optString("action", "back"))
                     DeviceAction.AccessibilityNav(nav)
                 }
-                "NOTIFICATIONS", "READ_NOTIFICATIONS" -> {
-                    val filter = obj.optString("filter", obj.optString("app", ""))
-                    DeviceAction.ReadNotifications(if (filter.isBlank()) null else filter)
-                }
+                // Notification access is removed in this build: never planned, never read.
+                "NOTIFICATIONS", "READ_NOTIFICATIONS" -> null
                 "VOLUME" -> {
                     val dir = obj.optString("direction", "up")
                     DeviceAction.VolumeControl(dir)
@@ -522,14 +520,7 @@ object DeviceActionParser {
         if (t.contains("gallery") || t.contains("photos")) return DeviceAction.OpenGallery
         if (t.contains("files") || t.contains("file manager")) return DeviceAction.OpenFiles
 
-        // 13. Messages & Notifications ("massage abhi kya kya aaye hai", "sms kya aaya hai")
-        val isCheckingMessages = t.contains("notification") || t.contains("suchna") || t.contains("suchnaye") ||
-                t.contains("massage") || t.contains("message") || t.contains("messages") || t.contains("msg") ||
-                t.contains("sms") || t.contains("unread") || t.contains("kya aaya") || t.contains("kya aaye")
-        if (isCheckingMessages && (t.contains("aaye") || t.contains("aaya") || t.contains("check") || t.contains("read") || t.contains("padho") || t.contains("batao") || t.contains("dikhao") || t.contains("kya") || t.contains("sunao"))) {
-            val filter = if (t.contains("whatsapp") || t.contains("watsapp")) "whatsapp" else null
-            return DeviceAction.ReadNotifications(filter)
-        }
+        // 13. Messages & notifications: removed in this build (no notification access / SMS read).
 
         // 14. Scrolling & Gestures ("scroll karo", "neeche scroll", "upar scroll")
         if (t.contains("scroll") || t.contains("neeche karo") || t.contains("upar karo") || t.contains("neeche jao") || t.contains("upar jao")) {

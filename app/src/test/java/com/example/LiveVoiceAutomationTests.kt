@@ -34,14 +34,15 @@ class LiveVoiceAutomationTests {
     }
 
     @Test
-    fun testCallPapaCommand() {
+    fun testCallPapaCommandIsNoLongerPlanned() {
+        // Calls were removed from the app (no CALL_PHONE/READ_CONTACTS), so the parser must not
+        // plan a DialPhone action even when the user asks for a call.
         val prompt = "papa ko call lagao"
         val actions = DeviceActionParser.parseFromUserPrompt(prompt)
-        assertTrue("Should parse call command", actions.isNotEmpty())
-        val callAction = actions.firstOrNull { it is DeviceAction.DialPhone } as? DeviceAction.DialPhone
-        assertNotNull("Should have DialPhone action", callAction)
-        assertEquals("papa", callAction!!.numberOrName.lowercase())
-        assertTrue("Should be direct call", callAction.directCall)
+        assertTrue(
+            "Calling must not be planned any more",
+            actions.none { it is DeviceAction.DialPhone }
+        )
     }
 
     @Test
@@ -55,11 +56,14 @@ class LiveVoiceAutomationTests {
     }
 
     @Test
-    fun testReadMessagesAndNotificationsCommand() {
+    fun testReadMessagesIsNoLongerPlanned() {
+        // Notification access is removed from the app, so no notification read can be planned.
         val prompt = "massage abhi kya kya aaye hai"
         val actions = DeviceActionParser.parseFromUserPrompt(prompt)
-        assertTrue("Should parse message read request", actions.isNotEmpty())
-        assertTrue("Should have ReadNotifications", actions.any { it is DeviceAction.ReadNotifications })
+        assertTrue(
+            "Notification reading must not be planned any more",
+            actions.none { it is DeviceAction.ReadNotifications }
+        )
     }
 
     @Test
