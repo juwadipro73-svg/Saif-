@@ -14,57 +14,134 @@ object PromptExpansion {
     private val TOKEN = Regex("(?<=^|\\s)/(plu:[A-Za-z0-9_-]+(?::[A-Za-z0-9._-]*)?|[A-Za-z0-9][A-Za-z0-9_-]{0,47})(?=\\s|$)")
     private val BLOCK = Regex("<$TAG command=\"([^\"]*)\">[\\s\\S]*?</$TAG>")
 
+    /**
+     * Expansion body for a saved GitHub skill: the downloaded rules verbatim plus the user's
+     * separate task. Shared by leading /command, mid-text /command and skill-mention triggers.
+     * Pure logic, covered by unit tests.
+     */
+    fun skillBody(skill: SavedAiSkill, task: String): String {
+        val safeRules = skill.instructions.replace("</$TAG>", "&lt;/$TAG>", ignoreCase = true)
+        val safeTask = task.replace("</$TAG>", "&lt;/$TAG>", ignoreCase = true)
+        return """
+            Apply the user-imported /${skill.name} skill (source: ${skill.sourceUrl}) to this request.
+            Skill instructions:
+            $safeRules
+
+            User request: ${safeTask.ifBlank { "No task was provided yet. Ask what to do before using tools." }}
+            Follow the skill's tone and workflow within the available tools and permissions. If you need a file,
+            workspace, credential or other missing input, ask the user rather than claiming it already exists.
+        """.trimIndent()
+    }
+
+    private fun phraseMatchOutsideBlocks(text: String, name: String): MatchResult? {
+        val blocked = BLOCK.findAll(text).map { it.range }.toList()
+        val rx = Regex(
+            """\b(skill\s+${Regex.escape(name)}|${Regex.escape(name)}\s+skill)\b""",
+            RegexOption.IGNORE_CASE
+        )
+        return rx.findAll(text).firstOrNull { m -> blocked.none { m.range.first in it } }
+    }
+
+    /**
+     * Names the saved skill a message asks for WITHOUT a slash ("use my python skill",
+     * "skill notes: ..."). Longest name wins; matches inside already-expanded blocks don't
+     * count, so expansion never nests. Pure logic, covered by unit tests.
+     */
+    fun findMentionedSkill(text: String, names: Set<String>): String? {
+        if (names.isEmpty() || !text.contains("skill", ignoreCase = true)) return null
+        return names.sortedByDescending { it.length }
+            .firstOrNull { phraseMatchOutsideBlocks(text, it) != null }
+    }
+
+    /**
+     * Expands explicit skill mentions without a slash ("use my python skill") in place, so a
+     * downloaded skill is actually used instead of silently ignored. Collapse restores the phrase.
+     */
+    fun expandSkillMentions(text: String): String {
+        val visible = SavedAiSkills.visibleSkills()
+        if (visible.isEmpty()) return text
+        var working = text
+        val byName = visible.associateBy { it.name.lowercase() }
+        repeat(5) {
+            val name = findMentionedSkill(working, byName.keys) ?: return@repeat
+            val skill = byName[name.lowercase()] ?: return@repeat
+            val at = phraseMatchOutsideBlocks(working, name) ?: return@repeat
+            working = working.replaceRange(at.range, block(at.value, skillBody(skill, collapse(working))))
+        }
+        return working
+    }
+
     fun expand(text: String): String {
-        if (!text.contains('/')) return text
-        // Saved GitHub skills are intentionally activated only by a leading /command. Give the engine the
-        // downloaded rules AND the user's separate task; preserve exactly what was typed in the chat history.
+        // A slash-less message can still name a saved skill ("use my python skill").
+        if (!text.contains('/')) return expandSkillMentions(text)
+        // A leading /command gives the engine the downloaded rules AND the user's separate task;
+        // mid-text /commands and plain skill mentions expand further below. The block preserves
+        // exactly what was typed so the chat history still shows the original message.
         SkillSlashParsing.parse(text)?.let { invocation ->
             SavedAiSkills.find(invocation.command)?.let { skill ->
-                val safeRules = skill.instructions.replace("</$TAG>", "&lt;/$TAG>", ignoreCase = true)
-                val safeTask = invocation.task.replace("</$TAG>", "&lt;/$TAG>", ignoreCase = true)
-                val body = """
-                    Apply the user-imported /${skill.name} skill (source: ${skill.sourceUrl}) to this request.
-                    Skill instructions:
-                    $safeRules
-
-                    User request: ${safeTask.ifBlank { "No task was provided yet. Ask what to do before using tools." }}
-                    Follow the skill's tone and workflow within the available tools and permissions. If you need a file,
-                    workspace, credential or other missing input, ask the user rather than claiming it already exists.
-                """.trimIndent()
-                return block(text.trim(), body)
+                return block(text.trim(), skillBody(skill, invocation.task))
             }
         }
+        val working = expandSkillMentions(text)
+        val blocked = BLOCK.findAll(working).map { it.range }.toList()
         val out = StringBuilder()
         var last = 0
-        for (match in TOKEN.findAll(text)) {
+        for (match in TOKEN.findAll(working)) {
             if (match.range.first < last) continue
+            // Never expand a /token that sits inside an already-expanded block.
+            if (blocked.any { match.range.first in it }) continue
             val token = match.groupValues[1]
             if (token.startsWith("plu:")) {
                 val parts = token.removePrefix("plu:").split(':')
                 val skill = parts.getOrNull(1)?.ifBlank { null }
                 val guide = pluginGuide(parts[0], skill) ?: continue
                 // The chat shows the command without the dangling colon
-                out.append(text, last, match.range.first).append(block(if (skill == null) "/plu:${parts[0]}" else match.value, guide))
+                out.append(working, last, match.range.first).append(block(if (skill == null) "/plu:${parts[0]}" else match.value, guide))
                 last = match.range.last + 1
                 continue
             }
-            val command = CustomSlashCommands.find(token) ?: continue
-            out.append(text, last, match.range.first)
-            val plugin = command.pluginId.takeIf { it.isNotBlank() }?.let { pluginGuide(it, command.skill.ifBlank { null }) }
-            if (command.expansion.contains("\$ARGUMENTS")) {
-                // The command takes the rest of the message as its arguments
-                val args = text.substring(match.range.last + 1).trim()
-                val body = listOfNotNull(plugin, command.expansion.replace("\$ARGUMENTS", args)).joinToString("\n\n")
-                out.append(block(if (args.isEmpty()) match.value else "${match.value} $args", body))
-                return out.toString()
+            // Mid-text /skill tokens trigger saved skills too (the composer already highlights
+            // them as commands) — the skill body goes in place of the token.
+            SavedAiSkills.find(token)?.let { skill ->
+                out.append(working, last, match.range.first)
+                val task = collapse(working.substring(match.range.last + 1)).trim()
+                out.append(block(match.value, skillBody(skill, task)))
+                last = match.range.last + 1
+                return@let
+            } ?: run {
+                val command = CustomSlashCommands.find(token) ?: return@run
+                out.append(working, last, match.range.first)
+                // $ARGUMENTS commands consume the rest of the line: the expansion is complete.
+                if (expandCustomCommand(working, match, command, out)) return out.toString()
+                last = match.range.last + 1
             }
-            out.append(block(match.value, listOfNotNull(plugin, command.expansion.takeIf { it.isNotBlank() }).joinToString("\n\n")))
-            last = match.range.last + 1
+            continue
         }
         if (last == 0) {
-            return com.example.slash.SaifSlashCommandRegistry.expandBuiltInCommandIfMatched(text) ?: text
+            val builtin = com.example.slash.SaifSlashCommandRegistry.expandBuiltInCommandIfMatched(working)
+            if (builtin != null) return builtin
+            return working
         }
-        return out.append(text, last, text.length).toString()
+        return out.append(working, last, working.length).toString()
+    }
+
+    /** Appends one custom-command expansion; returns true when it consumed the rest of the line. */
+    private fun expandCustomCommand(
+        text: String,
+        match: MatchResult,
+        command: CustomSlashCommand,
+        out: StringBuilder
+    ): Boolean {
+        val plugin = command.pluginId.takeIf { it.isNotBlank() }?.let { pluginGuide(it, command.skill.ifBlank { null }) }
+        if (command.expansion.contains("\$ARGUMENTS")) {
+            // The command takes the rest of the message as its arguments
+            val args = text.substring(match.range.last + 1).trim()
+            val body = listOfNotNull(plugin, command.expansion.replace("\$ARGUMENTS", args)).joinToString("\n\n")
+            out.append(block(if (args.isEmpty()) match.value else "${match.value} $args", body))
+            return true
+        }
+        out.append(block(match.value, listOfNotNull(plugin, command.expansion.takeIf { it.isNotBlank() }).joinToString("\n\n")))
+        return false
     }
 
     /** Where [text] (as the user typed it) has a command that expands: an enabled plugin's `/plu:` or a custom command. For highlighting. */

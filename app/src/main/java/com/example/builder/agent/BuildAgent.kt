@@ -145,10 +145,15 @@ object BuildAgent {
             )
             saveJobState(saifDir, job)
 
-            // If prompt is large, distill it into clean requirements
+            // If prompt is large, distill it into clean requirements — but NEVER distill away
+            // expanded skill blocks: a summarized skill loses the exact rules the user imported.
+            val (promptCore, skillBlocks) = splitExpansionBlocks(prompt)
             val distilledPrompt = if (prompt.length > 3500) {
                 File(saifDir, "original_prompt.txt").writeText(prompt)
-                distillLongPrompt(prompt, provider, activeKey, activeModel)
+                val distilledCore = distillLongPrompt(
+                    promptCore.ifBlank { prompt }, provider, activeKey, activeModel
+                )
+                restoreExpansionBlocks(distilledCore, skillBlocks)
             } else {
                 prompt
             }
@@ -702,6 +707,29 @@ object BuildAgent {
             else ->
                 BuildIntent.ADD_FEATURE
         }
+    }
+
+    private val EXPANSION_BLOCK_REGEX =
+        Regex("""<antigem-expansion\b[^>]*>[\s\S]*?</antigem-expansion>""")
+
+    /**
+     * Splits expanded skill blocks (`<antigem-expansion>…</antigem-expansion>`) out of a prompt so
+     * distillation only summarizes the user's own words. Returns (core text, verbatim blocks).
+     * Pure logic, covered by unit tests.
+     */
+    fun splitExpansionBlocks(prompt: String): Pair<String, List<String>> {
+        val blocks = EXPANSION_BLOCK_REGEX.findAll(prompt).map { it.value }.toList()
+        if (blocks.isEmpty()) return prompt to emptyList()
+        val core = EXPANSION_BLOCK_REGEX.replace(prompt, " ").replace(Regex("\\s+"), " ").trim()
+        return core to blocks
+    }
+
+    /**
+     * Re-attaches skill blocks verbatim after distillation. Pure logic, covered by unit tests.
+     */
+    fun restoreExpansionBlocks(distilled: String, blocks: List<String>): String {
+        if (blocks.isEmpty()) return distilled
+        return distilled.trimEnd() + blocks.joinToString("") { "\n\n$it" }
     }
 
     private suspend fun distillLongPrompt(prompt: String, provider: String, key: String, model: String): String {

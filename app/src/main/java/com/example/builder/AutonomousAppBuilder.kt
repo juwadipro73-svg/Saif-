@@ -57,6 +57,11 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
         } else {
             prompt
         }
+        // Skills work in the builder too: expand /commands and skill mentions so a downloaded
+        // GitHub skill's rules reach the planner + coders (chat-only expansion starved builds).
+        val skilledPrompt = runCatching {
+            com.example.gemini.data.remote.PromptExpansion.expand(fullPrompt)
+        }.getOrDefault(fullPrompt)
 
         // Stack routing: native / flutter requests keep their own source tree — the HTML
         // WebView container stubs are only for HTML builds.
@@ -167,7 +172,7 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
                 com.example.autobuild.AutoBuildOrchestrator.runAdvancedBuild(
                     context = context,
                     project = project,
-                    prompt = fullPrompt,
+                    prompt = skilledPrompt,
                     qualityMode = if (isGlitchFix) com.example.builder.agent.QualityMode.BALANCED else com.example.builder.agent.QualityMode.MAX,
                     base64Images = base64Images,
                     onEvent = handleEvent
@@ -179,7 +184,7 @@ EDITING: if the input has CURRENT_CODE and CHANGE_REQUEST, apply exactly that ch
             com.example.builder.agent.BuildAgent.run(
                 context = context,
                 project = project,
-                prompt = fullPrompt,
+                prompt = skilledPrompt,
                 qualityMode = if (isGlitchFix) com.example.builder.agent.QualityMode.BALANCED else com.example.builder.agent.QualityMode.MAX,
                 base64Images = base64Images,
                 onEvent = handleEvent

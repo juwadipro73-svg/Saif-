@@ -490,6 +490,25 @@ class ChatViewModel(
                     "HTML for this request is a failure and the build tool will reject it."
             com.example.builder.agent.BuildStack.HTML -> ""
         }
+        // Concrete override for stack-pinned turns: appended AFTER the generic build paragraphs
+        // (which offer an "HTML or native" choice), so the model follows THIS specific tree instead
+        // of drifting into HTML and dying at the bridge gate.
+        val stackBuildRule = when (requestedStack) {
+            com.example.builder.agent.BuildStack.NATIVE ->
+                "STACK BUILD RULE (it overrides any format choice above — follow THIS, not the generic build paragraph): " +
+                    "this turn builds a NATIVE Android app ONLY. Inside `/root/workspace/<app-slug>/` create the native tree " +
+                    "`app/src/main/AndroidManifest.xml`, `app/src/main/java/<package-path>/MainActivity.java` (+ more activities as needed), " +
+                    "`app/src/main/res/layout/*.xml` and `app/src/main/res/values/*.xml` using Android framework APIs only. " +
+                    "NEVER create index.html or any WebView wrapper — HTML output here is rejected by the build tool and fails the turn. " +
+                    "Then build with the APK build tool and finish with the download-link last line."
+            com.example.builder.agent.BuildStack.FLUTTER ->
+                "STACK BUILD RULE (it overrides any format choice above — follow THIS, not the generic build paragraph): " +
+                    "this turn builds a FLUTTER app ONLY. Inside `/root/workspace/<app-slug>/` create a complete Dart project: " +
+                    "`pubspec.yaml`, `lib/main.dart`, `lib/screens/` and `lib/features/` (pure Dart + package:flutter/material.dart, " +
+                    "zero third-party packages). NEVER create HTML or native Java output here — anything else is rejected. " +
+                    "Then call the APK build tool (it packages the project as a ZIP with a build guide) and finish with the download-link last line."
+            com.example.builder.agent.BuildStack.HTML -> ""
+        }
         com.example.compiler.LinuxApkBuildBridge.requestedStackOverride =
             if (requestedStack == com.example.builder.agent.BuildStack.HTML) null else requestedStack.name
         customApiEngine.requestedBuildStack =
@@ -571,6 +590,7 @@ class ChatViewModel(
                         append(com.example.util.SaifIdentity.RULE).append("\n\n")
                         append(DIRECT_ANSWER_RULE).append("\n\n")
                         if (stackDirective.isNotBlank()) append(stackDirective).append("\n\n")
+                        if (stackBuildRule.isNotBlank()) append(stackBuildRule).append("\n\n")
                         // NOTE: no build-marker rule here on purpose. The custom-API engine carries its own
                         // native-capable build instructions; an extra marker rule deroutes it into HTML/code dumps.
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
@@ -646,6 +666,7 @@ class ChatViewModel(
                         append(DIRECT_ANSWER_RULE).append("\n\n")
                         if (stackDirective.isNotBlank()) append(stackDirective).append("\n\n")
                         append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
+                        if (stackBuildRule.isNotBlank()) append(stackBuildRule).append("\n\n")
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")

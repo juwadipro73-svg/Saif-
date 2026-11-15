@@ -425,4 +425,44 @@ class BuildStackUnitTest {
         assertTrue(tasks[0].targetFiles.isNotEmpty())
         assertTrue(tasks[0].expectedOutputTokens <= 6000)
     }
+
+    // ------------------------------------------------------------------
+    // Skill blocks survive distillation verbatim
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `split keeps plain prompts untouched`() {
+        val (core, blocks) = BuildAgent.splitExpansionBlocks("build me a todo app")
+        assertEquals("build me a todo app", core)
+        assertTrue(blocks.isEmpty())
+    }
+
+    @Test
+    fun `split extracts skill blocks verbatim`() {
+        val block = "<antigem-expansion command=\"/py\">Rules: type-annotate.</antigem-expansion>"
+        val (core, blocks) = BuildAgent.splitExpansionBlocks("build X $block now")
+        assertEquals(1, blocks.size)
+        assertEquals(block, blocks[0])
+        assertEquals("build X now", core)
+        assertFalse(core.contains("type-annotate"))
+    }
+
+    @Test
+    fun `split handles multiple blocks`() {
+        val prompt = "a <antigem-expansion command=\"/one\">1</antigem-expansion> b " +
+            "<antigem-expansion command=\"/two\">2</antigem-expansion> c"
+        val (core, blocks) = BuildAgent.splitExpansionBlocks(prompt)
+        assertEquals(2, blocks.size)
+        assertEquals("a b c", core)
+    }
+
+    @Test
+    fun `restore reattaches blocks verbatim`() {
+        val block = "<antigem-expansion command=\"/py\">Rules.</antigem-expansion>"
+        assertEquals("core", BuildAgent.restoreExpansionBlocks("core", emptyList()))
+        assertEquals(
+            "core\n\n$block",
+            BuildAgent.restoreExpansionBlocks("core  ", listOf(block))
+        )
+    }
 }

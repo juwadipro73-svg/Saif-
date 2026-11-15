@@ -65,14 +65,19 @@ object LinuxApkBuildBridge {
             "NATIVE" -> if (status.hasManifest && status.javaCount > 0) null
             else "STACK_MISMATCH: the user asked for a NATIVE Android app (Java + AndroidManifest.xml + res/), " +
                 "but this project folder has no native sources" +
-                (if (status.hasHtmlEntry) " (it has an HTML web app instead — do NOT ship HTML for this request)" else "") +
-                ". Write AndroidManifest.xml, Java activities under app/src/main/java (or src/main/java), and XML layouts " +
-                "under app/src/main/res (or src/main/res), then call this tool again."
+                (if (status.hasHtmlEntry) " (it has an HTML web app instead — DELETE every .html file, do NOT ship HTML for this request)" else "") +
+                ". Write AT LEAST these exact files, then call this tool again: " +
+                "(1) app/src/main/AndroidManifest.xml declaring package <package_name> with MainActivity as LAUNCHER, " +
+                "(2) app/src/main/java/<package-path>/MainActivity.java extending android.app.Activity with setContentView, " +
+                "(3) app/src/main/res/layout/activity_main.xml with a real View hierarchy, " +
+                "(4) app/src/main/res/values/strings.xml with app_name. Android framework APIs only, zero placeholders."
             "FLUTTER" -> if (status.hasPubspec && status.hasMainDart) null
             else "STACK_MISMATCH: the user asked for a FLUTTER app (Dart project with pubspec.yaml + lib/main.dart), " +
-                "but this project folder doesn't have one. Write the complete Flutter project (pubspec.yaml, lib/main.dart, " +
-                "lib/screens/, lib/features/ — pure Dart + package:flutter/material.dart, zero third-party packages), " +
-                "then call this tool again."
+                "but this project folder doesn't have one. Write AT LEAST these exact files, then call this tool again: " +
+                "(1) pubspec.yaml (name, flutter sdk constraint, uses-material-design), " +
+                "(2) lib/main.dart with void main() => runApp(...) and a MaterialApp home screen, " +
+                "(3) one screen under lib/screens/ and one feature file under lib/features/. " +
+                "Pure Dart + package:flutter/material.dart, zero third-party packages, zero placeholders."
             else -> null
         }
     }

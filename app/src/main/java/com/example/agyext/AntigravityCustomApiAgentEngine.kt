@@ -845,7 +845,7 @@ Workspace paths:
 - Quality rule: do every task in full detail with no shortcuts, no placeholders and no TODOs. For heavy or complex multi-part tasks, split the work with `delegate_parallel` (up to 4 specialists at once, one subtask each), then merge every detail of their results into your final answer and files.
 - Format rule: deliver the download in exactly the format the user asked for (APK, ZIP, HTML, MP4, PDF...). If they asked for a ZIP, zip the project and publish it with `saif-apk-link`; if they asked for a single HTML/video/file, publish that file - then end with the `⬇️ **Download link:**` line.
 - Download-link rule (applies to EVERY successful build — APK, video, ZIP or any file): if no DOWNLOAD_URL was returned for a produced file, publish it with `saif-apk-link <absolute-path>` via `run_command`, and ALWAYS end your final answer with a last line `⬇️ **Download link:** [Download <file-name>](URL)` using the real URL. The user must never have to ask for the link.
-""".trimIndent()
+""".trimIndent() + stackSystemOverride()
         if (!useXmlToolMode) return base
         return base + "\n\n" + """
 TOOL CALL FORMAT (when you need a tool, output one or more `<agy_tool>` blocks and wait for the result):
@@ -861,6 +861,35 @@ Available tools:
 - `build_android_apk`: `{"project_dir": "/root/workspace/app", "app_name": "My App", "package_name": "com.saifai.myapp"}`
 - `delegate_parallel`: `{"subtasks": [{"id": "ui", "task": "Design..."}, {"id": "logic", "task": "Write..."}], "context": "shared background"}`
 """.trimIndent()
+    }
+
+    /**
+     * Stack override for stack-pinned turns: kills the "either HTML or native" choice in the
+     * base prompt so a weak model cannot drift into HTML and die at the bridge gate. The exact
+     * required tree is spelled out so the model succeeds on the FIRST build attempt.
+     */
+    private fun stackSystemOverride(): String = when (requestedBuildStack.trim().uppercase()) {
+        "NATIVE" -> "\n\nSTACK OVERRIDE (this turn is NATIVE-ONLY — it cancels any HTML option above): the user " +
+            "asked for a NATIVE Android app. You MUST create a native Java project under " +
+            "`/root/workspace/<app-slug>/app/src/main/` with these exact files: `AndroidManifest.xml`, " +
+            "`java/<package-path>/MainActivity.java` (plus more activities as needed), " +
+            "`res/layout/activity_main.xml`, `res/values/strings.xml` and `res/values/colors.xml`. " +
+            "NEVER write an index.html/WebView app for this request — the build tool rejects HTML " +
+            "here and the turn fails. Then call `build_android_apk` and end with the download-link line."
+        "FLUTTER" -> "\n\nSTACK OVERRIDE (this turn is FLUTTER-ONLY — it cancels any HTML/native option above): " +
+            "the user asked for a FLUTTER app. You MUST create a complete Dart project under " +
+            "`/root/workspace/<app-slug>/` with `pubspec.yaml`, `lib/main.dart`, `lib/screens/` and " +
+            "`lib/features/` (pure Dart + package:flutter/material.dart, zero third-party packages). " +
+            "NEVER write HTML or native Java for this request. Then call `build_android_apk` (it " +
+            "packages the project as a ZIP with a build guide) and end with the download-link line."
+        else -> ""
+    }
+
+    /** Stack requirement suffix for the build tool, so the pinned stack is visible at call time. */
+    private fun stackToolSuffix(): String = when (requestedBuildStack.trim().uppercase()) {
+        "NATIVE" -> " THIS TURN IS NATIVE-ONLY: project_dir must contain a native Java tree (app/src/main/AndroidManifest.xml + java/ + res/) — HTML projects are rejected."
+        "FLUTTER" -> " THIS TURN IS FLUTTER-ONLY: project_dir must contain a Dart project (pubspec.yaml + lib/main.dart) — anything else is rejected."
+        else -> ""
     }
 
     private fun openAiToolDefinitions(): JSONArray {
@@ -955,7 +984,7 @@ Available tools:
             .put(
                 fn(
                     "build_android_apk",
-                    "Compile and sign an installable Android APK from a project folder in /root/workspace/<slug> and mint a browser download link.",
+                    "Compile and sign an installable Android APK from a project folder in /root/workspace/<slug> and mint a browser download link." + stackToolSuffix(),
                     JSONObject()
                         .put("project_dir", prop("string", "Project directory, e.g. /root/workspace/calculator"))
                         .put("app_name", prop("string", "Display name of the Android app"))
@@ -1653,7 +1682,7 @@ Available tools:
     }
 
     companion object {
-        private const val MAX_HTTP_RETRIES = 4
+        private const val MAX_HTTP_RETRIES = 6
         private const val MAX_RETRY_WAIT_MS = 60_000L
         private const val MAX_TOOL_RESULT_CHARS = 24_000
 
@@ -1662,13 +1691,13 @@ Available tools:
         private const val OUTPUT_MIN_TOKENS = 2048
 
         /** Extra "continue where you stopped" rounds when an answer is cut off mid-way. */
-        private const val MAX_OUTPUT_CONTINUATIONS = 3
+        private const val MAX_OUTPUT_CONTINUATIONS = 12
         private const val CONTINUE_PROMPT =
             "Continue exactly where you stopped. Output ONLY the remaining content - do not repeat " +
                 "anything, no intro, no summary, no commentary."
 
-        /** Agent loop budget: heavy builds get twice the room they had before. */
-        private const val MAX_AGENT_STEPS = 60
+        /** Agent loop budget: heavy native builds + repair loops get full room to finish. */
+        private const val MAX_AGENT_STEPS = 80
 
         /** Parallel helper subagents (delegate_parallel tool). */
         private const val MAX_PARALLEL_SUBAGENTS = 4

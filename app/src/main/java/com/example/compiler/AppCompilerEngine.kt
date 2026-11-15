@@ -512,27 +512,44 @@ object AppCompilerEngine {
                 }
             }
 
-            // Cryptographically sign APK with v1, v2 & v3 schemes using ApkSigner
-            emit("Applying Android cryptographic signature (v1, v2 & v3 schemes)...")
+            // Cryptographically sign APK using ApkSigner. A full v1+v2+v3 pass is tried first;
+            // if the device's signer chokes on a scheme, fall back down the ladder (v1+v2, then
+            // v1-only) instead of failing the whole build — every rung still ships a SIGNED apk.
             var signSuccessful = false
-            try {
-                val signerConfig = loadDebugSignerConfig(context)
-
-                if (outputApk.exists()) outputApk.delete()
-
-                val signer = ApkSigner.Builder(listOf(signerConfig))
-                    .setInputApk(unsignedApk)
-                    .setOutputApk(outputApk)
-                    .setMinSdkVersion(24)
-                    .setV1SigningEnabled(true)
-                    .setV2SigningEnabled(true)
-                    .setV3SigningEnabled(true)
-                    .build()
-                signer.sign()
-                signSuccessful = true
-                emit("✓ Verified Android cryptographic signatures (v1, v2 & v3) applied successfully.")
-            } catch (signEx: Throwable) {
-                emit("ApkSigner error: ${signEx.message}")
+            var signedSchemes = ""
+            val signerConfig = try {
+                loadDebugSignerConfig(context)
+            } catch (ksEx: Throwable) {
+                emit("Keystore load error: ${ksEx.message}")
+                null
+            }
+            if (signerConfig != null) {
+                val ladder = listOf(
+                    Triple(true, true, true) to "v1, v2 & v3",
+                    Triple(true, true, false) to "v1 & v2",
+                    Triple(true, false, false) to "v1 only"
+                )
+                for ((schemes, label) in ladder) {
+                    try {
+                        if (outputApk.exists()) outputApk.delete()
+                        emit("Applying Android cryptographic signature ($label schemes)...")
+                        val signer = ApkSigner.Builder(listOf(signerConfig))
+                            .setInputApk(unsignedApk)
+                            .setOutputApk(outputApk)
+                            .setMinSdkVersion(24)
+                            .setV1SigningEnabled(schemes.first)
+                            .setV2SigningEnabled(schemes.second)
+                            .setV3SigningEnabled(schemes.third)
+                            .build()
+                        signer.sign()
+                        signSuccessful = true
+                        signedSchemes = label
+                        emit("✓ Verified Android cryptographic signatures ($label) applied successfully.")
+                        break
+                    } catch (signEx: Throwable) {
+                        emit("ApkSigner error ($label): ${signEx.message}")
+                    }
+                }
             }
 
             if (!signSuccessful) {
@@ -581,7 +598,7 @@ object AppCompilerEngine {
             emit("✓ Package verified by Android (${archiveInfo.packageName}, version ${archiveInfo.versionName}).")
 
             emit("Packaging complete: ${outputApk.name} (${outputApk.length() / 1024} KB)")
-            emit("Applied debug keystore signature (v1, v2 & v3 schemes).")
+            emit("Applied debug keystore signature ($signedSchemes schemes).")
             delay(200)
 
             // =========================================================================
