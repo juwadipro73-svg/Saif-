@@ -46,6 +46,19 @@ class AgyPromptDirectivesTest {
     }
 
     @Test
+    fun `build turns carry a deliverable format pin`() {
+        assertTrue(AgyPromptDirectives.compile("make a todo app").contains("- FORMAT:"))
+        assertTrue(AgyPromptDirectives.compile("project ka zip do").contains(".zip"))
+        assertTrue(AgyPromptDirectives.compile("website banao").contains("Live link"))
+    }
+
+    @Test
+    fun `casual chat carries no format pin`() {
+        val out = AgyPromptDirectives.compile("what is kotlin?")
+        assertFalse(out.contains("- FORMAT:"))
+    }
+
+    @Test
     fun `plain chat carries no stack pin`() {
         assertNull(AgyPromptDirectives.stackRule("what is the capital of India?"))
         val out = AgyPromptDirectives.compile("hello there")

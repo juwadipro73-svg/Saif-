@@ -91,6 +91,13 @@ class AntigravityCustomApiAgentEngine(
     @Volatile
     var requestedBuildStack: String = ""
 
+    /**
+     * Artifact the user wants back this turn (APK / ZIP / WEBSITE / VIDEO / ...), resolved by
+     * [com.example.builder.agent.DeliverableFormat]. Empty means "use the defaults".
+     */
+    @Volatile
+    var requestedFormat: String = ""
+
     /** Active turn's model profile + temperature, so the delegate_parallel tool can spawn workers. */
     @Volatile
     private var activeTurnProfile: AgyCustomApiProfile? = null
@@ -846,7 +853,7 @@ Workspace paths:
 - Quality rule: do every task in full detail with no shortcuts, no placeholders and no TODOs. For heavy or complex multi-part tasks, split the work with `delegate_parallel` (up to 4 specialists at once, one subtask each), then merge every detail of their results into your final answer and files. Never use `delegate_parallel` for a small edit.
 - Format rule: deliver the download in exactly the format the user asked for (APK, ZIP, HTML, MP4, PDF...). If they asked for a ZIP, zip the project and publish it with `saif-apk-link`; if they asked for a single HTML/video/file, publish that file - then end with the `⬇️ **Download link:**` line.
 - Download-link rule (applies to EVERY successful build — APK, video, ZIP or any file): if no DOWNLOAD_URL was returned for a produced file, publish it with `saif-apk-link <absolute-path>` via `run_command`, and ALWAYS end your final answer with a last line `⬇️ **Download link:** [Download <file-name>](URL)` using the real URL. The user must never have to ask for the link.
-""".trimIndent() + stackSystemOverride()
+""".trimIndent() + stackSystemOverride() + formatSystemOverride()
         if (!useXmlToolMode) return base
         return base + "\n\n" + """
 TOOL CALL FORMAT (when you need a tool, output one or more `<agy_tool>` blocks and wait for the result):
@@ -884,6 +891,20 @@ Available tools:
             "NEVER write HTML or native Java for this request. Then call `build_android_apk` (it " +
             "packages the project as a ZIP with a build guide) and end with the download-link line."
         else -> ""
+    }
+
+    /**
+     * Deliverable-format override: an app request defaults to an APK link, a website to a
+     * Chrome-openable live link, a video to an MP4 link — unless the user named a format, in
+     * which case that format wins and the model must not substitute an APK.
+     */
+    private fun formatSystemOverride(): String {
+        val defaults = "\n\n" + com.example.builder.agent.DeliverableFormat.DEFAULTS_RULE +
+            " Publish a website with `" + com.example.builder.agent.DeliverableFormat.WEB_LINK_COMMAND + "`."
+        val explicit = requestedFormat.trim().uppercase().let { raw ->
+            runCatching { com.example.builder.agent.DeliverableFormat.valueOf(raw) }.getOrNull()
+        } ?: return defaults
+        return defaults + "\n" + com.example.builder.agent.DeliverableFormat.instruction(explicit)
     }
 
     /** Stack requirement suffix for the build tool, so the pinned stack is visible at call time. */

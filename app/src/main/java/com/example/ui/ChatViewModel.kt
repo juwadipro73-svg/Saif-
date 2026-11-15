@@ -509,6 +509,11 @@ class ChatViewModel(
                     "Then call the APK build tool (it packages the project as a ZIP with a build guide) and finish with the download-link last line."
             com.example.builder.agent.BuildStack.HTML -> ""
         }
+        // Deliverable format: an explicit ask (ZIP / APK / website / video / PDF...) always wins;
+        // with no ask, an app is an APK, a site is a Chrome link and a video is an MP4 link.
+        val formatRule = com.example.builder.agent.DeliverableFormat.ruleFor(trimmed)
+        customApiEngine.requestedFormat =
+            if (formatRule.isBlank()) "" else com.example.builder.agent.DeliverableFormat.resolve(trimmed).name
         com.example.compiler.LinuxApkBuildBridge.requestedStackOverride =
             if (requestedStack == com.example.builder.agent.BuildStack.HTML) null else requestedStack.name
         customApiEngine.requestedBuildStack =
@@ -591,6 +596,7 @@ class ChatViewModel(
                         append(DIRECT_ANSWER_RULE).append("\n\n")
                         if (stackDirective.isNotBlank()) append(stackDirective).append("\n\n")
                         if (stackBuildRule.isNotBlank()) append(stackBuildRule).append("\n\n")
+                        if (formatRule.isNotBlank()) append(formatRule).append("\n\n")
                         // NOTE: no build-marker rule here on purpose. The custom-API engine carries its own
                         // native-capable build instructions; an extra marker rule deroutes it into HTML/code dumps.
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
@@ -667,6 +673,7 @@ class ChatViewModel(
                         if (stackDirective.isNotBlank()) append(stackDirective).append("\n\n")
                         append(com.example.compiler.OnDeviceApkBuildManager.CHAT_APK_BUILD_RULE).append("\n\n")
                         if (stackBuildRule.isNotBlank()) append(stackBuildRule).append("\n\n")
+                        if (formatRule.isNotBlank()) append(formatRule).append("\n\n")
                         append(com.example.storage.ModuleCleanupRules.AGENT_RULE).append("\n\n")
                         val memory = com.example.util.SaifMemoryCore.promptBlock(com.example.util.SaifMemoryCore.Features.CHAT)
                         if (memory.isNotBlank()) append(memory).append("\n\n")

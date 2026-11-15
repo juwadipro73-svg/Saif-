@@ -37,8 +37,22 @@ object AgyPromptDirectives {
             appendLine(NO_PLACEHOLDER_RULE)
             appendLine(DOWNLOAD_RULE)
             stackRule(text)?.let { appendLine(it) }
+            formatRule(text)?.let { appendLine(it) }
         }
         return rules + "\nUSER REQUEST:\n" + text
+    }
+
+    /**
+     * Deliverable pin: ZIP when the user asked for source, the Chrome live link for a website,
+     * an MP4 for a video — and an APK link when the user named no format for an app build.
+     * Null for turns that produce no artifact (casual chat).
+     */
+    fun formatRule(userText: String): String? = try {
+        val format = com.example.builder.agent.DeliverableFormat
+        if (!format.isBuildRequest(userText)) null
+        else "- FORMAT: " + format.instruction(format.resolve(userText)).removePrefix("FORMAT RULE (this turn): ")
+    } catch (_: Throwable) {
+        null
     }
 
     /** Stack pin for native / flutter asks; null for ordinary (HTML/web or non-build) turns. */

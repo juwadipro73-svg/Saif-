@@ -651,6 +651,33 @@ object BuildAgent {
                 }
             }
 
+            // Deliverable format: when the user asked for the SOURCE (zip/source code), export the
+            // project as a ZIP and put it in Downloads instead of only handing back an APK.
+            if (com.example.builder.agent.DeliverableFormat.detect(prompt) == com.example.builder.agent.DeliverableFormat.ZIP &&
+                commitResult.isSuccess
+            ) {
+                try {
+                    val zip = com.example.compiler.AppCompilerEngine.exportProjectAsZip(context, project)
+                    val saved = zip?.let {
+                        com.example.compiler.AppCompilerEngine.saveFileToDownloads(
+                            context,
+                            it,
+                            "${project.appName.replace(Regex("[^A-Za-z0-9_]"), "_")}_Source.zip"
+                        )
+                    }
+                    deliverables.add(
+                        when {
+                            saved != null -> "Project source ZIP saved to Downloads: ${saved.absolutePath}"
+                            zip != null -> "Project source ZIP ready: ${zip.absolutePath}"
+                            else -> "Source ZIP export skipped — project files are in the project folder."
+                        }
+                    )
+                    onEvent(BuildEvent.Thought("Source ZIP exported for this request."))
+                } catch (e: Exception) {
+                    deliverables.add("Source ZIP export failed (${e.message}) — project files are still committed.")
+                }
+            }
+
             // -------------------------------------------------------------
             // STAGE S9: SUMMARY REPORT & NEXT FEATURE IDEAS
             // -------------------------------------------------------------

@@ -67,7 +67,9 @@ class AndroidLocalBridgeServer private constructor() {
         val file: File,
         val fileName: String,
         val mimeType: String,
-        val createdAt: Long
+        val createdAt: Long,
+        /** Served inline (rendered by the browser) instead of as an attachment download. */
+        val inline: Boolean = false
     )
     private val registeredDownloads = java.util.concurrent.ConcurrentHashMap<String, RegisteredDownload>()
     private val secureRandom = java.security.SecureRandom()
@@ -77,7 +79,12 @@ class AndroidLocalBridgeServer private constructor() {
      * localhost HTTP server and returns a direct browser-downloadable URL protected by
      * an unguessable 128-bit capability token.
      */
-    fun registerDownloadFile(context: Context, file: File, desiredFileName: String? = null): String {
+    fun registerDownloadFile(
+        context: Context,
+        file: File,
+        desiredFileName: String? = null,
+        inline: Boolean = false
+    ): String {
         start(context)
         val deadline = System.currentTimeMillis() + 2_000L
         while (!isRunning && System.currentTimeMillis() < deadline) {
@@ -91,6 +98,19 @@ class AndroidLocalBridgeServer private constructor() {
             "apk" -> "application/vnd.android.package-archive"
             "zip" -> "application/zip"
             "mp4" -> "video/mp4"
+            "webm" -> "video/webm"
+            "mp3" -> "audio/mpeg"
+            "wav" -> "audio/wav"
+            "pdf" -> "application/pdf"
+            "png" -> "image/png"
+            "jpg", "jpeg" -> "image/jpeg"
+            // Website previews must render in Chrome, so HTML/CSS/JS get real web mime types.
+            "html", "htm" -> "text/html; charset=utf-8"
+            "css" -> "text/css; charset=utf-8"
+            "js" -> "application/javascript; charset=utf-8"
+            "json" -> "application/json"
+            "svg" -> "image/svg+xml"
+            "woff2" -> "font/woff2"
             else -> "application/octet-stream"
         }
 
@@ -105,7 +125,7 @@ class AndroidLocalBridgeServer private constructor() {
         val canonical = runCatching { file.canonicalPath }.getOrDefault(file.absolutePath)
         val existing = registeredDownloads.values.firstOrNull {
             val p = runCatching { it.file.canonicalPath }.getOrDefault(it.file.absolutePath)
-            p == canonical && it.fileName == rawName && it.file.exists()
+            p == canonical && it.fileName == rawName && it.inline == inline && it.file.exists()
         }
         val token = if (existing != null) {
             existing.token
@@ -113,10 +133,12 @@ class AndroidLocalBridgeServer private constructor() {
             val bytes = ByteArray(16)
             secureRandom.nextBytes(bytes)
             val tok = bytes.joinToString("") { "%02x".format(it) }
-            registeredDownloads[tok] = RegisteredDownload(tok, file, rawName, mime, now)
+            registeredDownloads[tok] = RegisteredDownload(tok, file, rawName, mime, now, inline)
             tok
         }
-        return "http://127.0.0.1:$boundPort/downloads/$token/$rawName"
+        // Inline files live under /view/ so a website opens in Chrome instead of downloading.
+        val kind = if (inline) "view" else "downloads"
+        return "http://127.0.0.1:$boundPort/$kind/$token/$rawName"
     }
 
     fun start(context: Context, port: Int = DEFAULT_PORT) {
@@ -310,8 +332,13 @@ class AndroidLocalBridgeServer private constructor() {
             }
 
             // Direct capability-token file downloads (e.g. compiled .apk / .zip opened in browser)
+            // and inline website previews (/view/... rendered by Chrome).
             if (path.startsWith("/downloads/")) {
                 handleTokenizedDownload(method, path.removePrefix("/downloads/"), out)
+                return
+            }
+            if (path.startsWith("/view/")) {
+                handleTokenizedDownload(method, path.removePrefix("/view/"), out)
                 return
             }
 
@@ -470,10 +497,12 @@ class AndroidLocalBridgeServer private constructor() {
             return
         }
         val size = entry.file.length()
+        // Inline previews render in the browser; everything else downloads.
+        val disposition = if (entry.inline) "" else "Content-Disposition: attachment; filename=\"${entry.fileName}\"\r\n"
         val header = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: ${entry.mimeType}\r\n" +
             "Content-Length: $size\r\n" +
-            "Content-Disposition: attachment; filename=\"${entry.fileName}\"\r\n" +
+            disposition +
             "Cache-Control: no-store\r\n" +
             "Access-Control-Allow-Origin: *\r\n" +
             "Connection: close\r\n\r\n"

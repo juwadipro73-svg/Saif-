@@ -990,6 +990,46 @@ object AppCompilerEngine {
         }
     }
 
+    /**
+     * Copies any produced file (ZIP, MP4, PDF, PNG...) into the public Downloads folder so the
+     * user can actually take it away, regardless of which chat/engine asked for it.
+     * Returns the saved file when the platform exposes it, else null.
+     */
+    fun saveFileToDownloads(context: Context, file: File, displayName: String? = null): File? {
+        return try {
+            if (!file.exists() || !file.isFile) return null
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return file
+            val name = (displayName ?: file.name).replace(Regex("[^A-Za-z0-9._-]"), "_")
+            val mime = when (file.extension.lowercase()) {
+                "zip" -> "application/zip"
+                "apk" -> "application/vnd.android.package-archive"
+                "mp4" -> "video/mp4"
+                "pdf" -> "application/pdf"
+                "png" -> "image/png"
+                "jpg", "jpeg" -> "image/jpeg"
+                "mp3" -> "audio/mpeg"
+                "html", "htm" -> "text/html"
+                else -> "application/octet-stream"
+            }
+            val values = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.Downloads.DISPLAY_NAME, name)
+                put(android.provider.MediaStore.Downloads.MIME_TYPE, mime)
+                put(android.provider.MediaStore.Downloads.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
+            }
+            val resolver = context.contentResolver
+            val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return null
+            resolver.openOutputStream(uri)?.use { out ->
+                file.inputStream().use { it.copyTo(out) }
+            } ?: return null
+            File(
+                android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS),
+                name
+            ).takeIf { it.exists() } ?: file
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     internal fun generateRJavaSource(project: ProjectData, projectDir: File): String {
         val idSet = mutableSetOf(
             "main", "text_title", "btn_action", "title_text", "tv_title", "tv_subtitle",

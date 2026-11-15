@@ -279,6 +279,55 @@ PY
             )
             linkScript.setExecutable(true, false)
             linkScript.setReadable(true, false)
+
+            // Website publisher: serves the page inline so the printed URL opens in Chrome.
+            val webScript = File(binDir, "saif-web-link")
+            webScript.writeText(
+                """#!/bin/sh
+set -e
+ENV_FILE="/root/.config/saif-bridge.env"
+[ -f "${'$'}ENV_FILE" ] || ENV_FILE="/root/workspace/.config/saif-bridge.env"
+. "${'$'}ENV_FILE"
+
+TARGET="${'$'}1"
+if [ -z "${'$'}TARGET" ]; then
+  echo "Usage: saif-web-link <index.html>" >&2
+  exit 1
+fi
+case "${'$'}TARGET" in
+  /*) ;;
+  *) TARGET="${'$'}(cd "${'$'}(dirname "${'$'}TARGET")" && pwd)/${'$'}(basename "${'$'}TARGET")" ;;
+esac
+
+python3 - "${'$'}SAIF_BRIDGE_URL/api/builder/publish-file" "${'$'}SAIF_DEVICE_ID" "${'$'}TARGET" <<'PY'
+import json, sys, urllib.request, urllib.error
+
+url, dev_id, target = sys.argv[1:4]
+payload = json.dumps({"linuxPath": target, "inline": True}).encode("utf-8")
+req = urllib.request.Request(
+    url,
+    data=payload,
+    headers={"Content-Type": "application/json", "X-Device-Id": dev_id},
+    method="POST"
+)
+try:
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+except urllib.error.HTTPError as e:
+    print("PUBLISH_FAILED: " + e.read().decode("utf-8", errors="replace"), file=sys.stderr)
+    sys.exit(1)
+
+if not data.get("success"):
+    print("PUBLISH_FAILED: " + str(data.get("error", "Unknown error")), file=sys.stderr)
+    sys.exit(1)
+
+link = str(data.get("url") or data.get("downloadUrl", ""))
+print("LIVE_URL=" + link)
+PY
+"""
+            )
+            webScript.setExecutable(true, false)
+            webScript.setReadable(true, false)
         }
     }
 
@@ -507,6 +556,16 @@ PY
         if (!hostFile.isFile) {
             return JSONObject().put("success", false).put("error", "Not a regular file: $rawPath")
         }
+        // Website mode: serve the page inline so the link opens as a real page in Chrome
+        // instead of downloading the .html file.
+        val inline = requestJson.optBoolean("inline", false) || requestJson.optString("mode") == "view"
+        if (inline) {
+            val webExts = setOf("html", "htm", "css", "js", "json", "svg", "png", "jpg", "jpeg", "woff2")
+            if (hostFile.extension.lowercase() !in webExts) {
+                return JSONObject().put("success", false)
+                    .put("error", "Only web files can be previewed inline (got .${hostFile.extension})")
+            }
+        }
         if (hostFile.extension.equals("apk", true)) {
             runCatching {
                 AppCompilerEngine.saveApkToDownloads(
@@ -520,13 +579,16 @@ PY
         val url = AndroidLocalBridgeServer.instance.registerDownloadFile(
             context = context,
             file = hostFile,
-            desiredFileName = hostFile.name
+            desiredFileName = hostFile.name,
+            inline = inline
         )
         return JSONObject()
             .put("success", true)
             .put("fileName", hostFile.name)
             .put("sizeBytes", hostFile.length())
             .put("downloadUrl", url)
+            .put("url", url)
+            .put("inline", inline)
     }
 
     private fun copyDirectorySafe(src: File, dst: File) {
