@@ -20,19 +20,26 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -793,6 +800,81 @@ private fun formatCompactTokens(count: Int): String {
 }
 
 @Composable
+private fun UsageStatCell(
+    icon: ImageVector,
+    tint: Color,
+    value: String,
+    label: String,
+    badge: String? = null
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(tint.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(12.dp)
+            )
+        }
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Text(
+                    text = value,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    color = tint
+                )
+                if (badge != null) {
+                    Text(
+                        text = badge,
+                        fontSize = 8.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = tint,
+                        modifier = Modifier
+                            .background(tint.copy(alpha = 0.14f), RoundedCornerShape(4.dp))
+                            .padding(horizontal = 3.dp, vertical = 0.5.dp)
+                    )
+                }
+            }
+            Text(
+                text = label,
+                fontSize = 8.sp,
+                letterSpacing = 0.7.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun UsageStatDivider() {
+    Box(
+        Modifier
+            .width(1.dp)
+            .height(20.dp)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
+    )
+}
+
+/**
+ * End-of-run usage card: tokens in / out, prompt-cache hit and wall time, each as a labelled
+ * stat cell with its own tinted icon chip, on a soft gradient shell with a coloured hairline.
+ */
+@Composable
 fun TokenUsageTelemetryPill(
     usage: com.example.gemini.domain.model.TokenUsage,
     onViewPayload: (() -> Unit)? = null
@@ -802,69 +884,63 @@ fun TokenUsageTelemetryPill(
     } else 0
 
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val inputColor = if (isDark) Color(0xFFA07CDE) else Color(0xFF592BAA)
-    val outputColor = if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
-    val cacheColor = if (isDark) Color(0xFF9870DE) else Color(0xFF4F2499)
+    val inColor = if (isDark) Color(0xFFB39DFF) else Color(0xFF6439C7)
+    val outColor = if (isDark) Color(0xFF86D9A4) else Color(0xFF2E7D32)
+    val cacheColor = if (isDark) Color(0xFFFBC02D) else Color(0xFF9A6700)
+    val timeColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (isDark) 0.45f else 0.7f),
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.12f else 0.18f)),
+    val shape = RoundedCornerShape(12.dp)
+    Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(shape)
             .then(if (onViewPayload != null) Modifier.clickable { onViewPayload() } else Modifier)
+            .border(1.dp, Brush.horizontalGradient(
+                listOf(inColor.copy(alpha = 0.40f), outColor.copy(alpha = 0.35f), cacheColor.copy(alpha = 0.40f))
+            ), shape)
+            .background(
+                Brush.horizontalGradient(
+                    if (isDark) listOf(Color(0xFF262130), Color(0xFF1F2531)) else listOf(Color(0xFFF5F1FF), Color(0xFFEFF6F0))
+                ),
+                shape
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(9.dp)
         ) {
-            Text(
-                text = "📥 ${formatCompactTokens(usage.promptTokens)}",
-                fontSize = 10.5.sp,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.SemiBold,
-                color = inputColor
-            )
-            Text(
-                text = "📤 ${formatCompactTokens(usage.outputTokens)}",
-                fontSize = 10.5.sp,
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.SemiBold,
-                color = outputColor
-            )
+            UsageStatCell(Icons.Outlined.ArrowDownward, inColor, formatCompactTokens(usage.promptTokens), "INPUT")
+            UsageStatDivider()
+            UsageStatCell(Icons.Outlined.ArrowUpward, outColor, formatCompactTokens(usage.outputTokens), "OUTPUT")
             if (usage.cachedTokens > 0) {
-                Text(
-                    text = "⚡ ${formatCompactTokens(usage.cachedTokens)} ($cachePct%)",
-                    fontSize = 10.5.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = cacheColor
+                UsageStatDivider()
+                UsageStatCell(
+                    Icons.Outlined.Bolt, cacheColor,
+                    formatCompactTokens(usage.cachedTokens), "CACHE", badge = "$cachePct%"
                 )
             }
             if (usage.durationMs > 0) {
-                Text(
-                    text = "⏱️ ${formatDuration(usage.durationMs)}",
-                    fontSize = 10.5.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                UsageStatDivider()
+                UsageStatCell(Icons.Outlined.Timer, timeColor, formatDuration(usage.durationMs), "TIME")
             }
-            usage.model?.let { model ->
-                Text(
-                    text = model.removePrefix("claude-"),
-                    fontSize = 10.5.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (usage.isEstimated) {
-                Text(
-                    text = "(est.)",
-                    fontSize = 9.5.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
+            if (usage.model != null || usage.isEstimated) {
+                UsageStatDivider()
+                Column {
+                    Text(
+                        text = usage.model?.removePrefix("claude-") ?: "tokens",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.SemiBold,
+                        color = timeColor
+                    )
+                    Text(
+                        text = if (usage.isEstimated) "ESTIMATED" else "MODEL",
+                        fontSize = 8.sp,
+                        letterSpacing = 0.7.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
+                }
             }
         }
     }

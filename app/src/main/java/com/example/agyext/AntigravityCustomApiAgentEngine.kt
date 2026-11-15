@@ -122,6 +122,7 @@ class AntigravityCustomApiAgentEngine(
     private val runningProcesses = ConcurrentHashMap<String, Process>()
     /** Set by Stop so a rate-limit wait ends at once instead of running out its clock. */
     @Volatile private var stopRequested = false
+    private val userTerminatedLabels = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
     @Volatile
     private var sessionAllowAll = false
 
@@ -185,6 +186,7 @@ class AntigravityCustomApiAgentEngine(
     }
 
     fun terminateRunningTool(tool: ToolCall) {
+        userTerminatedLabels.add(tool.command.take(200))
         runningProcesses.remove(tool.id)?.destroyForcibly()
         pendingDecisions.remove(tool.id)?.complete(ApprovalDecision.Rejected("Terminated by user"))
     }
@@ -212,6 +214,7 @@ class AntigravityCustomApiAgentEngine(
         onStreamingText: (String) -> Unit
     ): String = withContext(Dispatchers.IO) {
         stopRequested = false
+        userTerminatedLabels.clear()
         sessionAllowAll = false
         lastBuiltDownload = null
         activeTurnProfile = profile
@@ -261,6 +264,10 @@ class AntigravityCustomApiAgentEngine(
         val collectedThoughts = mutableListOf<String>()
         var stepCounter = 0
         var forceXmlToolFallback = false
+        // Commands that died mid-way (timeout / kill). If the model then ends the turn anyway,
+        // the run auto-resumes instead of leaving the task half done.
+        val pendingStoppedCommands = mutableListOf<String>()
+        var autoResumesLeft = MAX_AUTO_RESUMES
 
         val maxAgentSteps = MAX_AGENT_STEPS
         while (stepCounter < maxAgentSteps) {
@@ -286,6 +293,28 @@ class AntigravityCustomApiAgentEngine(
 
             if (parsedTurn.toolInvocations.isEmpty()) {
                 val finalPiece = parsedTurn.text.trim()
+                val wantsResume = !stopRequested && autoResumesLeft > 0 &&
+                    (pendingStoppedCommands.isNotEmpty() || (finalPiece.isBlank() && stepCounter > 1))
+                if (wantsResume) {
+                    autoResumesLeft--
+                    val resumeHint = if (pendingStoppedCommands.isNotEmpty()) {
+                        "These commands were stopped or timed out before they finished: " +
+                            pendingStoppedCommands.joinToString("; ").take(600) +
+                            ". Resume the task from exactly where it stopped: re-run or repair those commands, " +
+                            "then complete EVERY remaining step of my original request in this same turn. " +
+                            "Do not end the turn while work is still unfinished."
+                    } else {
+                        "Your last reply was empty while my request is still incomplete. Continue exactly where " +
+                            "you stopped and finish every remaining step now, in this same turn."
+                    }
+                    pendingStoppedCommands.clear()
+                    conversationHistory.put(JSONObject().put("role", "user").put("content", resumeHint))
+                    onStreamingText(
+                        stripToolMarkers(accumulatedNarrative.toString()).trim() +
+                            "\n\n↻ A step stopped early - resuming until the work is finished…"
+                    )
+                    continue
+                }
                 if (finalPiece.isNotBlank()) {
                     if (accumulatedNarrative.isNotEmpty() && !accumulatedNarrative.endsWith("\n\n")) {
                         accumulatedNarrative.append("\n\n")
@@ -407,6 +436,18 @@ class AntigravityCustomApiAgentEngine(
                     }
                 )
                 val execDuration = System.currentTimeMillis() - execStart
+                val cmdLabel = displayCmd.take(200)
+                val stoppedLike = !ok && (
+                    exitCode == 124 || exitCode == 130 || exitCode == 137 || exitCode == 143 ||
+                    toolResultText.contains("[Timed out", ignoreCase = true) ||
+                    toolResultText.contains("terminated", ignoreCase = true) ||
+                    toolResultText.contains("stopped", ignoreCase = true)
+                )
+                when {
+                    stoppedLike && !stopRequested && !userTerminatedLabels.contains(cmdLabel) ->
+                        if (!pendingStoppedCommands.contains(cmdLabel)) pendingStoppedCommands.add(cmdLabel)
+                    ok -> pendingStoppedCommands.remove(cmdLabel)
+                }
                 liveTool = liveTool.copy(
                     status = if (ok) "SUCCESS" else "FAILED",
                     output = toolResultText.take(16_000),
@@ -1714,6 +1755,8 @@ Available tools:
 
         /** Extra "continue where you stopped" rounds when an answer is cut off mid-way. */
         private const val MAX_OUTPUT_CONTINUATIONS = 12
+        /** How many times a run may pick itself back up after a step died mid-way. */
+        private const val MAX_AUTO_RESUMES = 3
         private const val CONTINUE_PROMPT =
             "Continue exactly where you stopped. Output ONLY the remaining content - do not repeat " +
                 "anything, no intro, no summary, no commentary."

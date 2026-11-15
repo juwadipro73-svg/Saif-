@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -67,7 +68,7 @@ private val SPHERE_XYZ: FloatArray = FloatArray(SPHERE_POINTS * 3).also { a ->
     }
 }
 
-private fun DrawScope.drawDotSphere(center: Offset, radius: Float, spin: Float, color: Color) {
+private fun DrawScope.drawDotSphere(center: Offset, radius: Float, spin: Float, color: Color, wave: Float = 0f) {
     val cosA = Math.cos(spin.toDouble()).toFloat()
     val sinA = Math.sin(spin.toDouble()).toFloat()
     val tilt = 0.35f
@@ -83,7 +84,9 @@ private fun DrawScope.drawDotSphere(center: Offset, radius: Float, spin: Float, 
         val y2 = y * cosT - z1 * sinT
         val z2 = y * sinT + z1 * cosT
         val depth = (z2 + 1f) / 2f
-        val dotColor = lerp(color, Color.White, depth * 0.45f).copy(alpha = 0.22f + 0.78f * depth)
+        // a light wave travels over the dots so the sphere shimmers while it turns
+        val shimmer = 0.78f + 0.22f * Math.sin((wave + i * 0.37).toDouble()).toFloat()
+        val dotColor = lerp(color, Color.White, depth * 0.45f).copy(alpha = (0.22f + 0.78f * depth) * shimmer)
         drawCircle(
             color = dotColor,
             radius = dotBase * (0.55f + 0.65f * depth),
@@ -139,6 +142,19 @@ fun AgentWorkingSpinner(color: Color, modifier: Modifier = Modifier, compacting:
         animationSpec = infiniteRepeatable(tween(durationMillis = 7000, easing = LinearEasing), RepeatMode.Restart),
         label = "thinkingSphereSpin"
     )
+    // the sphere breathes and slowly drifts towards a violet highlight while thinking
+    val pulse = spinTransition.animateFloat(
+        initialValue = 0.94f,
+        targetValue = 1.07f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 2600), RepeatMode.Reverse),
+        label = "thinkingSpherePulse"
+    )
+    val hue = spinTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 5200), RepeatMode.Reverse),
+        label = "thinkingSphereHue"
+    )
 
     Canvas(
         modifier
@@ -147,7 +163,16 @@ fun AgentWorkingSpinner(color: Color, modifier: Modifier = Modifier, compacting:
             .graphicsLayer()
     ) {
         // state is read here only: a tick redraws this layer and nothing else
-        drawDotSphere(Offset(glyphBox / 2f, size.height / 2f), glyphBox / 2f - 1f, spin.value, color)
+        val sphereColor = lerp(color, Color(0xFF9A7BFF), hue.value * 0.55f)
+        scale(pulse.value, pivot = Offset(glyphBox / 2f, size.height / 2f)) {
+            drawDotSphere(
+                Offset(glyphBox / 2f, size.height / 2f),
+                glyphBox / 2f - 1f,
+                spin.value,
+                sphereColor,
+                wave = spin.value * 2.2f
+            )
+        }
         val word = measurer.measure(shown.value, wordStyle, softWrap = false, maxLines = 1)
         drawText(word, topLeft = Offset((glyphBox + gapPx).toFloat(), wordBaseline - word.firstBaseline))
     }

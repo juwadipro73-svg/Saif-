@@ -7,8 +7,12 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +56,69 @@ import com.example.gemini.domain.model.ToolType
 import com.example.gemini.theme.*
 
 private val IMAGE_FILE_REGEX = Regex(".*\\.(png|jpe?g|webp|gif)(\\?.*)?$", RegexOption.IGNORE_CASE)
+
+/**
+ * A tiny animated terminal: rounded shell, ">" prompt and a blinking block cursor while the
+ * command runs; the cursor settles into an underscore once it is done. The shell breathes with
+ * a soft glow so a running command reads at a glance.
+ */
+@Composable
+private fun AnimatedTerminalGlyph(
+    running: Boolean,
+    tint: Color,
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition(label = "terminalGlyph")
+    val cursorAlpha by transition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0.15f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 460), RepeatMode.Reverse),
+        label = "cursorBlink"
+    )
+    val shellGlow by transition.animateFloat(
+        initialValue = 0.10f,
+        targetValue = 0.26f,
+        animationSpec = infiniteRepeatable(tween(durationMillis = 900), RepeatMode.Reverse),
+        label = "shellGlow"
+    )
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        val stroke = 1.1.dp.toPx()
+        drawRoundRect(
+            color = tint.copy(alpha = if (running) shellGlow else 0.10f),
+            size = size,
+            cornerRadius = CornerRadius(3.5.dp.toPx())
+        )
+        drawRoundRect(
+            color = tint.copy(alpha = if (running) 0.95f else 0.65f),
+            size = size,
+            cornerRadius = CornerRadius(3.5.dp.toPx()),
+            style = Stroke(stroke)
+        )
+        val prompt = Path().apply {
+            moveTo(w * 0.20f, h * 0.30f)
+            lineTo(w * 0.38f, h * 0.50f)
+            lineTo(w * 0.20f, h * 0.70f)
+        }
+        drawPath(prompt, tint, style = Stroke(stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+        if (running) {
+            drawRect(
+                color = tint.copy(alpha = cursorAlpha),
+                topLeft = androidx.compose.ui.geometry.Offset(w * 0.48f, h * 0.56f),
+                size = androidx.compose.ui.geometry.Size(w * 0.26f, h * 0.18f)
+            )
+        } else {
+            drawLine(
+                color = tint.copy(alpha = 0.85f),
+                start = androidx.compose.ui.geometry.Offset(w * 0.48f, h * 0.66f),
+                end = androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.66f),
+                strokeWidth = stroke,
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
+        }
+    }
+}
 
 /**
  * Clean, professional inline tool call component matching Cursor & Claude developer UI.
@@ -217,7 +287,19 @@ fun AgentToolCallCard(
             }
 
             // Tool / State Icon
-            if (isPendingApproval) {
+            if (isBash) {
+                AnimatedTerminalGlyph(
+                    running = isRunning || isPendingApproval,
+                    tint = when {
+                        isPendingApproval -> Color(0xFF6B31CF)
+                        isRunning -> ClaudeTerracotta
+                        isTerminated || isFailed -> Color(0xFFEF4444)
+                        isRejected -> Color.Gray
+                        else -> QuotaGreen
+                    },
+                    modifier = Modifier.size(16.dp)
+                )
+            } else if (isPendingApproval) {
                 Icon(
                     imageVector = Icons.Default.HourglassEmpty,
                     contentDescription = "Pending Approval",
