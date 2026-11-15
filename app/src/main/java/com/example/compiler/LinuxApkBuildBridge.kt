@@ -304,6 +304,7 @@ PY
             }
             val files = appDir.walkTopDown().filter { it.isFile }
                 .map { "flutter_app/" + it.relativeTo(appDir).path.replace('\\', '/') }
+                .toList()
             File(appDir, "BUILD_GUIDE.md").writeText(
                 com.example.builder.agent.FlutterStack.buildGuideText(appName, files)
             )
