@@ -107,6 +107,12 @@ class AgyChatBackend(
     private val _isStreaming = MutableStateFlow(false)
     override val isStreaming: StateFlow<Boolean> = _isStreaming.asStateFlow()
 
+    // Auto-continue budgets for the hub route: a run that died on a stopped step, or a big
+    // request that ended without its numbered audit, gets continued automatically.
+    private var agyResumeLeft = 0
+    private var agyAuditLeft = 0
+    @Volatile private var agyUserStop = false
+
     private val _availableModels = MutableStateFlow<List<AiModel>>(AiModel.DEFAULT_MODELS)
     val availableModels: StateFlow<List<AiModel>> = _availableModels.asStateFlow()
 
@@ -565,6 +571,20 @@ class AgyChatBackend(
     }
 
     init {
+        // When a hub run goes quiet, check whether it stopped early or skipped the audit and
+        // continue it automatically - the user should never have to type "continue the work".
+        backendScope.launch {
+            var wasStreaming = false
+            _isStreaming.collect { now ->
+                if (wasStreaming && !now) {
+                    kotlinx.coroutines.delay(1_500)
+                    if (!trajectoryEngine.isRunning && !trajectoryEngine.isWaitingInteraction && !_isStreaming.value) {
+                        runCatching { maybeAutoContinueTurn() }
+                    }
+                }
+                wasStreaming = now
+            }
+        }
         // The engine ViewModel survives a Firebase account switch within the same Activity.
         // Both the embedded and main-chat backends must drop old hub conversations immediately.
         backendScope.launch {
@@ -1247,7 +1267,9 @@ class AgyChatBackend(
     }
 
 
-    override fun sendMessage(content: String) {
+    override fun sendMessage(content: String) = sendMessageInternal(content, resetBudgets = true)
+
+    private fun sendMessageInternal(content: String, resetBudgets: Boolean) {
         if ((content.isBlank() && _attachments.value.isEmpty()) || isCurrentChatActivelyRunning.value) return
         if (!requireMatchingAccount()) return
 
@@ -1267,10 +1289,31 @@ class AgyChatBackend(
         }
 
         val currentAtts = _attachments.value
-        val finalPrompt = content.trim().ifBlank {
+        var finalPrompt = content.trim().ifBlank {
             if (currentAtts.any { it.isAudio }) "Voice note" else if (currentAtts.any { it.isImage }) "Image" else "Attachment"
         }
         _attachments.value = emptyList()
+
+        if (resetBudgets) {
+            agyUserStop = false
+            agyResumeLeft = 2
+            val listed = finalPrompt.lines().count { line ->
+                val t = line.trim()
+                t.isNotBlank() && (Regex("^([0-9]+[.)]|[-•*])\\s").containsMatchIn(t) || t.length > 60)
+            }
+            agyAuditLeft = when {
+                finalPrompt.length > 1500 -> 2
+                finalPrompt.length > 400 || listed >= 3 -> 1
+                else -> 0
+            }
+            val isFirst = _messages.value.none { it.role == MessageRole.USER }
+            val directives = PowerDirectives.blockFor(
+                text = finalPrompt,
+                freshSession = isFirst,
+                oldDirs = if (isFirst) oldWorkspaceDirs() else emptyList()
+            )
+            if (directives.isNotBlank()) finalPrompt = finalPrompt + "\n\n" + directives
+        }
 
         val conv = _currentConversation.value ?: return
         val userMsg = ChatMessage(
@@ -1857,6 +1900,7 @@ class AgyChatBackend(
     }
 
     override fun stopStreaming() {
+        agyUserStop = true
         val conv = _currentConversation.value
         streamingJob?.cancel()
         isPromptInFlight = false
@@ -2343,5 +2387,42 @@ class AgyChatBackend(
     fun dispose() {
         persistentStreamJob?.cancel()
         streamingJob?.cancel()
+    }
+
+    /** Project directories left behind by older conversations, for new-chat isolation. */
+    private fun oldWorkspaceDirs(): List<String> = runCatching {
+        com.example.compiler.LinuxApkBuildBridge.resolveLinuxPathOnHost(application, "/root/workspace")
+            ?.listFiles()?.filter { it.isDirectory }?.map { it.name }?.take(12) ?: emptyList()
+    }.getOrDefault(emptyList())
+
+    /**
+     * Run-finished guard: a hub turn that died on a stopped step resumes by itself, and a big
+     * request that ended without its numbered DONE audit is sent back to finish every item.
+     */
+    private fun maybeAutoContinueTurn() {
+        if (agyUserStop) return
+        val lastAssistant = _messages.value.lastOrNull { it.role == MessageRole.ASSISTANT } ?: return
+        val stopped = lastAssistant.toolCalls.any { it.status == "TERMINATED" }
+        when {
+            stopped && agyResumeLeft > 0 -> {
+                agyResumeLeft--
+                sendMessageInternal(
+                    "A command was stopped before it finished. Resume the task from exactly where it stopped, " +
+                        "re-run or repair that command, and complete EVERY remaining requirement of my original " +
+                        "message in this same turn.",
+                    resetBudgets = false
+                )
+            }
+            agyAuditLeft > 0 && !lastAssistant.content.contains("DONE", ignoreCase = true) -> {
+                agyAuditLeft--
+                sendMessageInternal(
+                    "AUDIT BEFORE ANSWERING: re-read my original message and go through EVERY requirement in it " +
+                        "one by one. Anything not fully implemented and verified must be completed NOW, in this " +
+                        "same turn. Only when every requirement is truly done, answer with a numbered audit list " +
+                        "marking each requirement DONE.",
+                    resetBudgets = false
+                )
+            }
+        }
     }
 }
