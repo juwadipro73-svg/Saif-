@@ -123,6 +123,8 @@ class AntigravityCustomApiAgentEngine(
     /** Set by Stop so a rate-limit wait ends at once instead of running out its clock. */
     @Volatile private var stopRequested = false
     private val userTerminatedLabels = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+    /** Per-turn notes (e.g. old project dirs a fresh chat must not touch), folded into the system prompt. */
+    @Volatile private var dynamicSessionNotes = ""
     @Volatile
     private var sessionAllowAll = false
 
@@ -279,9 +281,27 @@ class AntigravityCustomApiAgentEngine(
             val t = line.trim()
             t.isNotBlank() && (Regex("^([0-9]+[.)]|[-•*])\\s").containsMatchIn(t) || t.length > 60)
         }
-        var auditPassesLeft = if (displayUserText.length > 400 || listedItems >= 3) 1 else 0
+        val bigRequest = displayUserText.length > 400 || listedItems >= 3
+        var auditPassesLeft = when {
+            displayUserText.length > 1500 -> 2
+            bigRequest -> 1
+            else -> 0
+        }
+        // A brand-new chat must not inherit older conversations' project directories.
+        dynamicSessionNotes = if (priorLoaded.isEmpty()) {
+            val oldDirs = runCatching {
+                com.example.compiler.LinuxApkBuildBridge.resolveLinuxPathOnHost(appContext, "/root/workspace")
+                    ?.listFiles()?.filter { it.isDirectory }?.map { it.name }?.take(12) ?: emptyList()
+            }.getOrDefault(emptyList())
+            if (oldDirs.isNotEmpty()) {
+                "SESSION CONTEXT: this is a NEW conversation. Directories already present in the workspace from " +
+                    "OLDER conversations: " + oldDirs.joinToString(", ") +
+                    ". They are off-limits for this request - build any new app in a fresh directory " +
+                    "(use the next free `-2`, `-3` suffix if the name collides)."
+            } else ""
+        } else ""
 
-        val maxAgentSteps = MAX_AGENT_STEPS
+        val maxAgentSteps = if (bigRequest) MAX_AGENT_STEPS_BIG else MAX_AGENT_STEPS
         while (stepCounter < maxAgentSteps) {
             currentCoroutineContext().ensureActive()
             stepCounter++
@@ -543,6 +563,7 @@ class AntigravityCustomApiAgentEngine(
             )
         }
         persistSessionMessages(sessionId)
+        dynamicSessionNotes = ""
         fallbackText
     }
 
@@ -948,7 +969,9 @@ class AntigravityCustomApiAgentEngine(
     }
 
     private fun buildSystemPrompt(useXmlToolMode: Boolean): String {
-        val base = com.example.util.SaifIdentity.RULE + "\n\n" + """
+        val notes = dynamicSessionNotes
+        val base = com.example.util.SaifIdentity.RULE + "\n\n" +
+            (if (notes.isNotBlank()) notes + "\n\n" else "") + """
 You are SAIF AI running on the Antigravity Workspace Engine.
 Workspace paths:
 - `/root/workspace` is your persistent project & code workspace.
@@ -957,6 +980,11 @@ Workspace paths:
 - For coding, inspecting attached files in `/root/uploads`, Linux commands, git/GitHub tasks, web lookups, or building Android APKs, use your workspace tools (`view_file`, `write_file`, `edit_file`, `list_dir`, `grep_search`, `run_command`, `read_url`, `build_android_apk`, `delegate_parallel`).
 - When asked to build an Android app or APK: create clean project files inside `/root/workspace/<app-slug>` (either a mobile HTML5/CSS/JS app with `index.html` or a Java Android layout under `app/src/main/{AndroidManifest.xml,java,res}`), then call `build_android_apk` (or `saif-build-apk` via `run_command`) and include the returned `DOWNLOAD_URL` as a clickable Markdown link `[Download App APK](DOWNLOAD_URL)`.
 - NEVER paste a whole app's code in the chat as text: always do the work with your tools (write files, then build). The user wants a finished, downloadable result - not a code dump.
+- NEW-PROJECT ISOLATION (mandatory): a project directory that already exists under `/root/workspace` but was NOT created in THIS conversation belongs to an OLDER chat. Never edit, overwrite or build it for a new request. If the user's new app collides with such a directory name, create the next free suffix (`<slug>-2`, `<slug>-3`, …) and build the new app there. Mixing two conversations' projects is a critical failure.
+- SPEC EXPANSION (mandatory for short or underspecified requests like "todo app banao"): before writing any file, expand the request yourself into a full product spec - 8 to 15 concrete features, every screen, navigation flow, design language, colours, animations, empty/error states, offline behaviour - from your own reasoning (and `read_url` research when it helps). Then build that spec COMPLETELY. A one-line prompt must still deliver an advanced, polished, feature-rich app - never a bare skeleton.
+- FEATURE ADD (mandatory when extending an existing project): first read EVERY file the feature touches (layouts, navigation, scripts/state, styles), wire the new feature into the existing UI so a real user can actually reach it (button, menu entry or screen), keep all old features working, then rebuild and deliver a fresh link. A feature that exists only as dead code is not added.
+- SPEED VIA PARALLEL SUBAGENTS: for big builds with independent parts (separate screens, modules, style packs, content sets), fan the drafting out with `delegate_parallel` so several specialist subagents work at the same time, then merge their outputs into the project files yourself and verify the merge.
+- PRECISION STEPS: work in many small precise steps instead of few huge ones - one file or one coherent change per tool call, verify after each (read back or run), so nothing is ever half-applied.
 - COMPLETENESS PROTOCOL (mandatory whenever my message lists several things - numbers, bullets, or multiple sentences of requirements): first split the message into a numbered list of EVERY distinct requirement. Work through that list in order and re-check it after every tool round. NEVER end the turn while any requirement is untouched or half-done: implement it, verify it (run it or read it back), then move on. A big request gets the full build, not a sketch: every screen, button, behaviour and fix I asked for must exist in the delivered result. The final reply must close with a numbered audit where each requirement is marked DONE, or explains exactly why it could not be done. Silently skipping an item is the worst failure mode.
 - Edit rule (speed): when the user asks for a SMALL change to code that already exists — a bug fix, a tweak, or one small feature — patch surgically: run ONE `list_dir`, read only the 1-3 files involved, fix them with `edit_file` (surgical old_text/new_text). Then you MUST call `build_android_apk` again for that same project dir and finish with the FRESH DOWNLOAD_URL it returns. An edit that is not recompiled does not exist for the user: never answer with an old link, never skip the rebuild. Restating the whole project for a small change is a failure; skipping the rebuild is a bigger failure. A from-scratch rewrite is only for new apps or an explicit "start over".
 - Quality rule: do every task in full detail with no shortcuts, no placeholders and no TODOs. For heavy or complex multi-part tasks, split the work with `delegate_parallel` (up to 4 specialists at once, one subtask each), then merge every detail of their results into your final answer and files. Never use `delegate_parallel` for a small edit.
@@ -1833,6 +1861,8 @@ Available tools:
 
         /** Agent loop budget: heavy native builds + repair loops get full room to finish. */
         private const val MAX_AGENT_STEPS = 80
+        /** Extra room for big multi-requirement prompts so every item can be completed. */
+        private const val MAX_AGENT_STEPS_BIG = 140
 
         /** Parallel helper subagents (delegate_parallel tool). */
         private const val MAX_PARALLEL_SUBAGENTS = 4
