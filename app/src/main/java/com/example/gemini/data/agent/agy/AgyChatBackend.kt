@@ -111,6 +111,9 @@ class AgyChatBackend(
     // request that ended without its numbered audit, gets continued automatically.
     private var agyResumeLeft = 0
     private var agyAuditLeft = 0
+    private var agyTurnTaskish = false
+    private var agyTurnBig = false
+    private var agyTurnStartIdx = 0
     @Volatile private var agyUserStop = false
 
     private val _availableModels = MutableStateFlow<List<AiModel>>(AiModel.DEFAULT_MODELS)
@@ -1297,6 +1300,8 @@ class AgyChatBackend(
         if (resetBudgets) {
             agyUserStop = false
             agyResumeLeft = 2
+            agyTurnTaskish = PowerDirectives.isTaskish(finalPrompt)
+            agyTurnStartIdx = _messages.value.size
             val listed = finalPrompt.lines().count { line ->
                 val t = line.trim()
                 t.isNotBlank() && (Regex("^([0-9]+[.)]|[-•*])\\s").containsMatchIn(t) || t.length > 60)
@@ -1306,6 +1311,7 @@ class AgyChatBackend(
                 finalPrompt.length > 400 || listed >= 3 -> 1
                 else -> 0
             }
+            agyTurnBig = agyAuditLeft > 0
             val isFirst = _messages.value.none { it.role == MessageRole.USER }
             val directives = PowerDirectives.blockFor(
                 text = finalPrompt,
@@ -2401,8 +2407,12 @@ class AgyChatBackend(
      */
     private fun maybeAutoContinueTurn() {
         if (agyUserStop) return
+        // Casual chat ("hello") must never trigger planning, audits or resumes.
+        if (!agyTurnTaskish) return
         val lastAssistant = _messages.value.lastOrNull { it.role == MessageRole.ASSISTANT } ?: return
-        val stopped = lastAssistant.toolCalls.any { it.status == "TERMINATED" }
+        val stopped = _messages.value.drop(agyTurnStartIdx)
+            .flatMap { it.toolCalls }
+            .any { it.status == "TERMINATED" }
         when {
             stopped && agyResumeLeft > 0 -> {
                 agyResumeLeft--
@@ -2413,7 +2423,7 @@ class AgyChatBackend(
                     resetBudgets = false
                 )
             }
-            agyAuditLeft > 0 && !lastAssistant.content.contains("DONE", ignoreCase = true) -> {
+            agyTurnBig && agyAuditLeft > 0 && !lastAssistant.content.contains("DONE", ignoreCase = true) -> {
                 agyAuditLeft--
                 sendMessageInternal(
                     "AUDIT BEFORE ANSWERING: re-read my original message and go through EVERY requirement in it " +

@@ -12,9 +12,24 @@ object PowerDirectives {
 
     private val LISTED_LINE = Regex("^([0-9]+[.)]|[-•*])\\s")
 
+    /** True when the message is an actual task (build/edit/list) - casual chat stays untouched. */
+    fun isTaskish(text: String): Boolean {
+        val t = text.trim()
+        if (t.isBlank()) return false
+        val listed = t.lines().count { line ->
+            val s2 = line.trim()
+            s2.isNotBlank() && (LISTED_LINE.containsMatchIn(s2) || s2.length > 60)
+        }
+        val buildish = Regex("(?i)(bana|banao|banawo|build|create|make|app|website|apk|game|design|dashboard)")
+            .containsMatchIn(t)
+        val editish = Regex("(?i)(change|fix|bug|glitch|add|update|edit|improve|thik|badal|jod|feature)")
+            .containsMatchIn(t)
+        return t.length > 400 || listed >= 3 || listed >= 1 || buildish || editish
+    }
+
     fun blockFor(text: String, freshSession: Boolean, oldDirs: List<String> = emptyList()): String {
         val t = text.trim()
-        if (t.isBlank()) return ""
+        if (t.isBlank() || !isTaskish(t)) return ""
         val listed = t.lines().count { line ->
             val s = line.trim()
             s.isNotBlank() && (LISTED_LINE.containsMatchIn(s) || s.length > 60)
