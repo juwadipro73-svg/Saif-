@@ -273,6 +273,13 @@ class AntigravityCustomApiAgentEngine(
         val editedProjectDirs = linkedSetOf<String>()
         var rebuiltThisTurn = false
         var autoBuildsLeft = MAX_AUTO_REBUILDS
+        // Big multi-requirement prompts get one forced self-audit pass before the turn may end,
+        // so "bada prompt -> halka kaam" cannot happen silently.
+        val listedItems = displayUserText.lines().count { line ->
+            val t = line.trim()
+            t.isNotBlank() && (Regex("^([0-9]+[.)]|[-•*])\\s").containsMatchIn(t) || t.length > 60)
+        }
+        var auditPassesLeft = if (displayUserText.length > 400 || listedItems >= 3) 1 else 0
 
         val maxAgentSteps = MAX_AGENT_STEPS
         while (stepCounter < maxAgentSteps) {
@@ -317,6 +324,24 @@ class AntigravityCustomApiAgentEngine(
                     onStreamingText(
                         stripToolMarkers(accumulatedNarrative.toString()).trim() +
                             "\n\n↻ A step stopped early - resuming until the work is finished…"
+                    )
+                    continue
+                }
+                if (auditPassesLeft > 0 && !stopRequested) {
+                    auditPassesLeft--
+                    conversationHistory.put(
+                        JSONObject().put("role", "user").put(
+                            "content",
+                            "AUDIT BEFORE ANSWERING: re-read my original message above and go through EVERY " +
+                                "requirement in it one by one - each numbered item, each bullet, each feature, each fix. " +
+                                "Anything not fully implemented and verified must be completed NOW, in this same turn. " +
+                                "Only when every single requirement is truly done, answer with a short numbered audit " +
+                                "list marking each requirement DONE."
+                        )
+                    )
+                    onStreamingText(
+                        stripToolMarkers(accumulatedNarrative.toString()).trim() +
+                            "\n\n🔍 Re-checking every requirement of your prompt…"
                     )
                     continue
                 }
@@ -932,6 +957,7 @@ Workspace paths:
 - For coding, inspecting attached files in `/root/uploads`, Linux commands, git/GitHub tasks, web lookups, or building Android APKs, use your workspace tools (`view_file`, `write_file`, `edit_file`, `list_dir`, `grep_search`, `run_command`, `read_url`, `build_android_apk`, `delegate_parallel`).
 - When asked to build an Android app or APK: create clean project files inside `/root/workspace/<app-slug>` (either a mobile HTML5/CSS/JS app with `index.html` or a Java Android layout under `app/src/main/{AndroidManifest.xml,java,res}`), then call `build_android_apk` (or `saif-build-apk` via `run_command`) and include the returned `DOWNLOAD_URL` as a clickable Markdown link `[Download App APK](DOWNLOAD_URL)`.
 - NEVER paste a whole app's code in the chat as text: always do the work with your tools (write files, then build). The user wants a finished, downloadable result - not a code dump.
+- COMPLETENESS PROTOCOL (mandatory whenever my message lists several things - numbers, bullets, or multiple sentences of requirements): first split the message into a numbered list of EVERY distinct requirement. Work through that list in order and re-check it after every tool round. NEVER end the turn while any requirement is untouched or half-done: implement it, verify it (run it or read it back), then move on. A big request gets the full build, not a sketch: every screen, button, behaviour and fix I asked for must exist in the delivered result. The final reply must close with a numbered audit where each requirement is marked DONE, or explains exactly why it could not be done. Silently skipping an item is the worst failure mode.
 - Edit rule (speed): when the user asks for a SMALL change to code that already exists — a bug fix, a tweak, or one small feature — patch surgically: run ONE `list_dir`, read only the 1-3 files involved, fix them with `edit_file` (surgical old_text/new_text). Then you MUST call `build_android_apk` again for that same project dir and finish with the FRESH DOWNLOAD_URL it returns. An edit that is not recompiled does not exist for the user: never answer with an old link, never skip the rebuild. Restating the whole project for a small change is a failure; skipping the rebuild is a bigger failure. A from-scratch rewrite is only for new apps or an explicit "start over".
 - Quality rule: do every task in full detail with no shortcuts, no placeholders and no TODOs. For heavy or complex multi-part tasks, split the work with `delegate_parallel` (up to 4 specialists at once, one subtask each), then merge every detail of their results into your final answer and files. Never use `delegate_parallel` for a small edit.
 - Format rule: deliver the download in exactly the format the user asked for (APK, ZIP, HTML, MP4, PDF...). If they asked for a ZIP, zip the project and publish it with `saif-apk-link`; if they asked for a single HTML/video/file, publish that file - then end with the `⬇️ **Download link:**` line.
