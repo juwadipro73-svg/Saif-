@@ -70,7 +70,8 @@ object PowerDirectives {
                     "prompt must still deliver an advanced, polished, feature-rich app - never a bare skeleton."
             )
         }
-        if (buildish) {
+        val fullBuild = buildish && (!editish || big)
+        if (fullBuild) {
             rules.add(
                 "${n++}. UI-IMAGE-FIRST PLANNING: while planning, FIRST generate a design image for EVERY UI screen " +
                     "(image-generation tool; save them under `design/` in the project) - then write the code to match " +
@@ -99,7 +100,7 @@ object PowerDirectives {
                     "review, and say in one line what you reviewed and fixed."
             )
         }
-        if (buildish) {
+        if (fullBuild) {
             rules.add(
                 "${n++}. TRIPLE DELIVERY: the final reply for a finished app must end with THREE fresh links from " +
                     "THIS build: 📦 **App ZIP:** (runnable package), ⬇️ **Download link:** [app.apk](URL), and " +
