@@ -24,6 +24,16 @@ class VideoSkillPolicyTest {
     }
 
     @Test
+    fun storyModeDetectedForCharacterNarratives() {
+        assertTrue(VideoSkillPolicy.isStoryRequest("Ek stickman ki kahani jo zero se successful businessman banta hai"))
+        assertTrue(VideoSkillPolicy.isStoryRequest("ek gareeb stickman ki success story banao"))
+        assertTrue(VideoSkillPolicy.isStoryRequest("Make an emotional story video about a village boy"))
+        assertTrue(VideoSkillPolicy.isStoryRequest("/video horror story 60 seconds"))
+        assertFalse(VideoSkillPolicy.isStoryRequest("Black holes kaise kaam karte hain? video banao"))
+        assertFalse(VideoSkillPolicy.isStoryRequest("AI technology par documentary banao"))
+    }
+
+    @Test
     fun casualChatDoesNotActivate() {
         assertFalse(VideoSkillPolicy.isVideoRequest("hello"))
         assertFalse(VideoSkillPolicy.isVideoRequest("fix the login button crash"))

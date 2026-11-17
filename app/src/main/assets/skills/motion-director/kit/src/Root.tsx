@@ -36,6 +36,11 @@ import { ToolCard, toolCardDuration } from "./templates/ToolCard";
 import { ScreenFrame, screenFrameDuration } from "./templates/ScreenFrame";
 import { PayFlow, payFlowDuration } from "./templates/PayFlow";
 import { WordCaption, wordCaptionDuration } from "./templates/WordCaption";
+import { Transitions, transitionsDuration } from "./templates/Transitions";
+import { KenBurns, kenBurnsDuration } from "./templates/KenBurns";
+import { Stickman } from "./templates/Stickman";
+import { StoryScene, storySceneDuration } from "./templates/StoryScene";
+import { HookOpen, hookOpenDuration } from "./templates/HookOpen";
 
 const W = 1920, H = 1080, FPS = 30;
 
@@ -455,6 +460,23 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="PayFlow" component={withStage(PayFlow)} fps={FPS} width={W} height={H}
         durationInFrames={payFlowDuration({} as any)} defaultProps={{}}
         calculateMetadata={({ props }) => ({ durationInFrames: payFlowDuration(props as any) })} />
+      <Composition id="Transitions" component={Transitions} fps={FPS} width={W} height={H}
+        durationInFrames={transitionsDuration({})} defaultProps={{ kind: "zoomThrough" as const }}
+        calculateMetadata={({ props }) => ({ durationInFrames: transitionsDuration(props as any) })} />
+      <Composition id="KenBurns" component={KenBurns} fps={FPS} width={W} height={H}
+        durationInFrames={kenBurnsDuration({ src: "logos/puter.png" } as any)}
+        defaultProps={{ src: "logos/puter.png", move: "pushIn" as const }}
+        calculateMetadata={({ props }) => ({ durationInFrames: kenBurnsDuration(props as any) })} />
+      <Composition id="Stickman" component={Stickman} fps={FPS} width={W} height={H} durationInFrames={150}
+        defaultProps={{ sheet: { id: "stickman_main", accessory: "none" as const }, action: "walk" as const, expression: "determined" as const }} />
+      <Composition id="StoryScene" component={StoryScene} fps={FPS} width={W} height={H}
+        durationInFrames={storySceneDuration({ characters: [] } as any)}
+        defaultProps={{ bg: "logos/puter.png", camera: "pushIn" as const, mood: "inspirational", characters: [ { sheet: { id: "stickman_main" }, action: "walk" as const, expression: "determined" as const, x: 42 } ], narration: "Ek waqt tha jab uske paas kuch bhi nahi tha." }}
+        calculateMetadata={({ props }) => ({ durationInFrames: storySceneDuration(props as any) })} />
+      <Composition id="HookOpen" component={HookOpen} fps={FPS} width={W} height={H}
+        durationInFrames={hookOpenDuration({ bg: "logos/puter.png", line: "x y" } as any)}
+        defaultProps={{ bg: "logos/puter.png", line: "Ye ek kahani hai zero se hero banne ki.", kind: "claim" as const, mood: "inspirational" }}
+        calculateMetadata={({ props }) => ({ durationInFrames: hookOpenDuration(props as any) })} />
       <Composition id="WordCaption" component={withStage(WordCaption, { overlay: true })} fps={FPS} width={W} height={H}
         durationInFrames={wordCaptionDuration({ text: "a b c d" } as any)}
         defaultProps={{ text: "Nothing to manage. Nothing to pay.", emphasis: ["Nothing"] }}

@@ -1310,7 +1310,10 @@ class AgyChatBackend(
             // Permanent Cinematic Motion Engine: the bundled SAIF video skills (Remotion +
             // motion-director kit) are folded into EVERY video request, including /video.
             if (com.example.skills.VideoSkillPolicy.isVideoRequest(gateText)) {
-                finalPrompt = finalPrompt + "\n\n" + com.example.skills.VideoSkillPolicy.policy(application)
+                finalPrompt = finalPrompt + "\n\n" + com.example.skills.VideoSkillPolicy.policy(
+                    context = application,
+                    storyMode = com.example.skills.VideoSkillPolicy.isStoryRequest(gateText)
+                )
             }
             val listed = gateText.lines().count { line ->
                 val t = line.trim()

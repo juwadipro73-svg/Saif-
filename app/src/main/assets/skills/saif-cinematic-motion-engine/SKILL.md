@@ -5,6 +5,87 @@ description: Creates research-backed, high-end motion-graphics videos with Remot
 
 # SAIF AI — Cinematic Motion Engine
 
+## ENGINE OVERHAUL v2 — MANDATORY QUALITY SYSTEM (read first, applies to every video)
+
+These rules fix the known quality failures (few scenes, one reused background, unused
+generated images, slow pacing, text-card domination, weak hooks, poor transitions, flat
+uncorrected colour). They are HARD requirements, not suggestions.
+
+### 0. Two modes — pick one per request
+- **ADVANCED MOTION GRAPHICS MODE** — informational/explainer/documentary/promo/data/educational
+  videos: kinetic typography, diagrams, stats, footage, generated imagery.
+- **CINEMATIC STORY MODE** — character-based narrative (stickman or illustrated characters):
+  use the `cinematic-story-mode` skill and the `Stickman`/`StoryScene`/`HookOpen` kit templates.
+  Trigger words: story, kahani, stickman, character, emotional/motivational/horror/comedy story.
+- If ambiguous (e.g. "motivational video banao"), ask ONE short clarification: motion graphics
+  ya story mode? The user can also choose manually.
+
+### 1. Intelligent scene planner (before any rendering)
+- Split the script into **visual beats of ~2–5 seconds** each; new composition whenever the
+  narrative changes. 60 s video → ~15–25 beats; 2 min → ~25–45 beats (when the script supports it).
+- Never pad with duplicate/meaningless shots; never hold one static layout >6 s without a
+  strong reason (deliberate slow-cinematic moment).
+- Write the beat sheet FIRST (scene id, duration, visual type, shot size, camera move,
+  transition in/out, audio) as `scene-plan.md` + `scene-manifest.json` in the project.
+
+### 2. Mandatory image-asset utilization
+- Before rendering, produce an **asset-generation plan**: for EVERY scene decide if it needs a
+  background / foreground object / character / product / location / illustration / infographic /
+  texture. Generate ORIGINAL images with the available image-generation tool for each scene that
+  needs one.
+- **One background for the whole video is forbidden.** Reusing the same image in consecutive
+  scenes is forbidden unless a deliberate continuity/camera technique requires it.
+- Each generation request must specify: scene ID, subject, composition, camera angle, lighting,
+  environment, visual style, aspect ratio, fg/bg placement, continuity requirements.
+- Inspect every generated image; reject wrong compositions, unwanted text, distorted subjects.
+- Save under `public/assets/{backgrounds,characters,environments,objects,illustrations,textures,overlays,sound-effects,music}/`
+  and write `public/assets/manifest.json` mapping scene → asset. **Generating images but not
+  using them in the final composition is NOT acceptable** — QC checks the manifest against usage.
+
+### 3. Cinematic motion + colour (the kit already ships these — USE them)
+- `KenBurns` (pushIn/pullOut/pan*/driftDiag/orbit, fgSrc for 2.5D parallax) — **every image must
+  move**; static images on screen are forbidden.
+- `ColorGrade` (tealOrange/warmSun/coolNight/noir/vivid/softDream/documentary) + `gradeForMood()` —
+  **every rendered video MUST colour-grade its imagery**; raw generated images are never
+  colour-correct and must not go to screen untouched. Pick the grade from the video mood so
+  palette, music and picture stay consistent.
+- `Transitions` (zoomThrough/whipPan/lightSweep/blurDip/maskReveal/wipe*/flashCut/filmBurn) +
+  `transitionForScene(i)` rotation — never the same transition twice in a row; prefer clean cuts
+  in rhythm sections; transitions must connect the visual MEANING of consecutive scenes.
+- `HookOpen` — the first 1–3 s: full-bleed strongest visual + fast push + word-slam hook line +
+  impact SFX. NEVER start with a boring title card or multi-second logo animation.
+- Kinetic typography (`KineticStatement`, `WordCaption`, `CaptionPop`), animated diagrams
+  (`BarChart`, `LineChart`, `Funnel`, `Timeline`, `StepFlow`), particles/glow via CSS, lower
+  thirds, match cuts — every effect must serve the story; no random decoration.
+
+### 4. Pacing and shot variety
+- Mix wide cinematic shots, medium shots, close-ups, detail shots, fast inserts, full-screen
+  imagery, typography scenes, moving-camera compositions.
+- Sync visual changes to narration keywords, music beats and SFX hits.
+
+### 5. Professional sound design (Antigravity sound generation)
+- Generate original SFX for transitions, text impacts, camera moves, object moves, character
+  actions, ambience, reveals, key story moments; generate/select background music per category+mood.
+- Mix: narration front and clear, music ducked under voice, smooth fades in/out, SFX synced to
+  frames, scene-specific ambience, clean ending. NOT a loud SFX on every animation.
+
+### 6. Research and fact-check (informational videos)
+- Research before scripting; prefer authoritative sources; cross-check facts, dates, statistics;
+  keep source URLs in `sources.md`. Fictional stories: no forced factual research.
+
+### 7. QC + automatic repair BEFORE final render
+Run this checklist and FIX failures, then preview again:
+1 scene count & durations within beat targets · 2 no repeated background across consecutive
+scenes · 3 no missing assets · 4 no unused generated assets (manifest vs composition) ·
+5 character consistency (same sheet everywhere) · 6 correct crops/focus · 7 text readable
+(contrast + safe margins) · 8 no overlaps/bad positions · 9 no broken animations · 10 varied
+transitions · 11 narration sync · 12 SFX present but not spammy · 13 audio levels balanced ·
+14 no empty/frozen frames · 15 total duration matches request · 16 **colour grade applied to
+every image/footage layer**.
+Capture preview frames from opening/middle/end/transitions (`scripts/capture.mjs`,
+`lint-frames.mjs`), INSPECT them, fix, re-preview. Successful compilation is NOT proof of a
+good video. Only a rendered, inspected, playable MP4 counts as done.
+
 You are the creative director, researcher, motion designer, Remotion engineer, sound designer, and quality-control lead for SAIF AI. Your goal is to deliver a polished, coherent, frame-accurate video — not a slideshow and not a collection of disconnected AI images.
 
 ## 1. Core operating rules

@@ -6,7 +6,11 @@
     "width": 1080,
     "height": 1920,
     "fps": 30,
-    "durationInFrames": 900
+    "durationInFrames": 900,
+    "mode": "motion-graphics",
+    "mood": "educational",
+    "grade": "documentary",
+    "beatsPerMinuteTarget": "15-25"
   },
   "scenes": [
     {
@@ -49,8 +53,10 @@
       ],
       "camera": {
         "framing": "close-up",
-        "movement": "slow push-in"
+        "movement": "slow push-in",
+        "template": "KenBurns pushIn"
       },
+      "grade": "documentary",
       "transitionIn": "opening reveal",
       "transitionOut": "match cut",
       "soundEffects": [
