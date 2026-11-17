@@ -221,6 +221,33 @@ private fun SkillsTabView(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        // Permanently bundled skill: visible proof it is installed and how it activates.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(GeminiBlue.copy(alpha = 0.08f))
+                .padding(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Default.Shield, contentDescription = null, tint = GeminiBlue, modifier = Modifier.size(18.dp))
+                Text(
+                    text = "Gravitas - Engineering Reliability Runtime",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+            }
+            Text(
+                text = "Built-in skill, permanently installed (source: udaysharmadev/Gravitas, MIT). " +
+                    "No command needed: SAIF detects whether your message is casual chat or real work - " +
+                    "the moment a build/edit/fix task is detected, Gravitas activates automatically: " +
+                    "read-before-edit, declared scope, evidence-backed completion, no silent skips.",
+                fontSize = 11.5.sp,
+                color = LocalContentColor.current.copy(alpha = 0.75f),
+                modifier = Modifier.padding(top = 6.dp)
+            )
+        }
+
         // Scope Filter Row
         Row(
             modifier = Modifier.fillMaxWidth(),

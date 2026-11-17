@@ -1300,21 +1300,26 @@ class AgyChatBackend(
         if (resetBudgets) {
             agyUserStop = false
             agyResumeLeft = 2
-            agyTurnTaskish = PowerDirectives.isTaskish(finalPrompt)
+            // The home chat sends a composed context blob ending with the real message.
+            // Gates must look at ONLY the user's own words, or "hello" inside a 2 KB blob
+            // would be treated as a big task (planning + phantom audits).
+            val gateText = finalPrompt.substringAfterLast("Current user message:\n", finalPrompt).trim()
+                .ifBlank { finalPrompt }
+            agyTurnTaskish = PowerDirectives.isTaskish(gateText)
             agyTurnStartIdx = _messages.value.size
-            val listed = finalPrompt.lines().count { line ->
+            val listed = gateText.lines().count { line ->
                 val t = line.trim()
                 t.isNotBlank() && (Regex("^([0-9]+[.)]|[-•*])\\s").containsMatchIn(t) || t.length > 60)
             }
             agyAuditLeft = when {
-                finalPrompt.length > 1500 -> 2
-                finalPrompt.length > 400 || listed >= 3 -> 1
+                gateText.length > 1500 -> 2
+                gateText.length > 400 || listed >= 3 -> 1
                 else -> 0
             }
             agyTurnBig = agyAuditLeft > 0
             val isFirst = _messages.value.none { it.role == MessageRole.USER }
             val directives = PowerDirectives.blockFor(
-                text = finalPrompt,
+                text = gateText,
                 freshSession = isFirst,
                 oldDirs = if (isFirst) oldWorkspaceDirs() else emptyList(),
                 skillPolicy = if (PowerDirectives.isTaskish(finalPrompt)) {
