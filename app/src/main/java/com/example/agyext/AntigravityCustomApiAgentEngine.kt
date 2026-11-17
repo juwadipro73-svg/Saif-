@@ -970,8 +970,10 @@ class AntigravityCustomApiAgentEngine(
 
     private fun buildSystemPrompt(useXmlToolMode: Boolean): String {
         val notes = dynamicSessionNotes
+        val gravitas = runCatching { com.example.util.GravitasSkill.block(appContext) }.getOrDefault("")
         val base = com.example.util.SaifIdentity.RULE + "\n\n" +
-            (if (notes.isNotBlank()) notes + "\n\n" else "") + """
+            (if (notes.isNotBlank()) notes + "\n\n" else "") +
+            (if (gravitas.isNotBlank()) gravitas + "\n\n" else "") + """
 You are SAIF AI running on the Antigravity Workspace Engine.
 Workspace paths:
 - `/root/workspace` is your persistent project & code workspace.

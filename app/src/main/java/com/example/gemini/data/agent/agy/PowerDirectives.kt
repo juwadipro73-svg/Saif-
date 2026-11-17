@@ -27,7 +27,12 @@ object PowerDirectives {
         return t.length > 400 || listed >= 3 || listed >= 1 || buildish || editish
     }
 
-    fun blockFor(text: String, freshSession: Boolean, oldDirs: List<String> = emptyList()): String {
+    fun blockFor(
+        text: String,
+        freshSession: Boolean,
+        oldDirs: List<String> = emptyList(),
+        skillPolicy: String = ""
+    ): String {
         val t = text.trim()
         if (t.isBlank() || !isTaskish(t)) return ""
         val listed = t.lines().count { line ->
@@ -82,6 +87,7 @@ object PowerDirectives {
             )
         }
         if (rules.isEmpty()) return ""
-        return "[SAIF POWER DIRECTIVES - follow exactly]\n" + rules.joinToString("\n")
+        val head = "[SAIF POWER DIRECTIVES - follow exactly]\n" + rules.joinToString("\n")
+        return if (skillPolicy.isNotBlank()) head + "\n\n" + skillPolicy else head
     }
 }

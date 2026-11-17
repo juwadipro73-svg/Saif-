@@ -1316,7 +1316,10 @@ class AgyChatBackend(
             val directives = PowerDirectives.blockFor(
                 text = finalPrompt,
                 freshSession = isFirst,
-                oldDirs = if (isFirst) oldWorkspaceDirs() else emptyList()
+                oldDirs = if (isFirst) oldWorkspaceDirs() else emptyList(),
+                skillPolicy = if (PowerDirectives.isTaskish(finalPrompt)) {
+                    com.example.util.GravitasSkill.block(application)
+                } else ""
             )
             if (directives.isNotBlank()) finalPrompt = finalPrompt + "\n\n" + directives
         }
