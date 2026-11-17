@@ -1307,6 +1307,11 @@ class AgyChatBackend(
                 .ifBlank { finalPrompt }
             agyTurnTaskish = PowerDirectives.isTaskish(gateText)
             agyTurnStartIdx = _messages.value.size
+            // Permanent Cinematic Motion Engine: the bundled SAIF video skills (Remotion +
+            // motion-director kit) are folded into EVERY video request, including /video.
+            if (com.example.skills.VideoSkillPolicy.isVideoRequest(gateText)) {
+                finalPrompt = finalPrompt + "\n\n" + com.example.skills.VideoSkillPolicy.policy(context)
+            }
             val listed = gateText.lines().count { line ->
                 val t = line.trim()
                 t.isNotBlank() && (Regex("^([0-9]+[.)]|[-•*])\\s").containsMatchIn(t) || t.length > 60)

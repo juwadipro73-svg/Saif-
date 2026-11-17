@@ -75,14 +75,18 @@ object PowerDirectives {
                 "${n++}. FEATURE/EDIT RULE: read EVERY file the change touches, wire the change into the real UI so " +
                     "a user can reach it, keep all existing features working, then REBUILD and finish with the FRESH " +
                     "download link the build returns. For a tiny glitch: one surgical patch + one rebuild - fast path, " +
-                    "no re-planning. Never answer with an old link or without rebuilding."
+                    "no re-planning. Never answer with an old link or without rebuilding. CONTINUE IN PLACE: the " +
+                    "project's existing code stays - edit its files directly, never delete, recreate or restart the " +
+                    "project directory for a fix; only the files the fix touches may change."
             )
         }
         if (freshSession && oldDirs.isNotEmpty()) {
             rules.add(
                 "${n++}. NEW-CHAT ISOLATION: directories already present from OLDER conversations: " +
                     oldDirs.joinToString(", ") +
-                    ". They are off-limits in this chat - never edit, overwrite or build them here. A new app goes " +
+                    ". They are off-limits in this chat - never edit, overwrite or build them here, and NEVER deliver, " +
+                    "link, copy or re-publish any file, APK or output produced by them: everything you hand over in " +
+                    "this chat must be generated fresh inside this chat. A new app goes " +
                     "into a fresh directory (next free `-2`, `-3` suffix if the name collides)."
             )
         }

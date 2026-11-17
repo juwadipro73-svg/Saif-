@@ -1,0 +1,73 @@
+{
+  "project": {
+    "title": "Example video title",
+    "category": "educational",
+    "language": "Hindi",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationInFrames": 900
+  },
+  "scenes": [
+    {
+      "id": "scene-01",
+      "title": "Opening hook",
+      "startFrame": 0,
+      "endFrame": 120,
+      "purpose": "Create curiosity and establish the central question.",
+      "visualDescription": "A cinematic close-up with a strong central focal point and layered depth.",
+      "narration": [
+        {
+          "startFrame": 0,
+          "endFrame": 90,
+          "text": "Example narration line."
+        }
+      ],
+      "onScreenText": [
+        {
+          "startFrame": 8,
+          "endFrame": 100,
+          "text": "THE BIG QUESTION",
+          "hierarchy": "headline"
+        }
+      ],
+      "assets": [
+        {
+          "path": "public/assets/scene-01-background.png",
+          "role": "background",
+          "source": "generated"
+        }
+      ],
+      "animation": [
+        {
+          "element": "headline",
+          "startFrame": 8,
+          "endFrame": 34,
+          "property": "opacity and y-position",
+          "easingIntent": "quick reveal with a soft settle"
+        }
+      ],
+      "camera": {
+        "framing": "close-up",
+        "movement": "slow push-in"
+      },
+      "transitionIn": "opening reveal",
+      "transitionOut": "match cut",
+      "soundEffects": [
+        {
+          "frame": 10,
+          "asset": "public/assets/sfx-soft-impact.wav",
+          "role": "headline emphasis"
+        }
+      ],
+      "ambience": [],
+      "music": {
+        "asset": "public/assets/music-bed.wav",
+        "startFrame": 0,
+        "endFrame": 900,
+        "notes": "Low under narration; fade at end."
+      },
+      "sources": []
+    }
+  ]
+}

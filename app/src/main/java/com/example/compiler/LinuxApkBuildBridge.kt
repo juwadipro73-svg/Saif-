@@ -521,7 +521,10 @@ PY
                 }
                 is BuildResult.Success -> {
                     val apkFile = result.apkFile
-                    val apkFileName = "$safeFolder.apk"
+                    // Every build gets a UNIQUE file name: the download token is derived from the
+                    // name, so a fresh link is guaranteed and an old link can never be re-served.
+                    val buildStamp = System.currentTimeMillis() / 1000L
+                    val apkFileName = "$safeFolder-b$buildStamp.apk"
                     val linuxBuildOut = File(hostSourceDir, "build").apply { mkdirs() }
                     val linuxApkCopy = File(linuxBuildOut, apkFileName)
                     runCatching { apkFile.copyTo(linuxApkCopy, overwrite = true) }

@@ -38,6 +38,16 @@ object BundledSkillsInstaller {
             markerFile = "SKILL.md"
         ),
         BundledSkill(
+            slug = "saif-cinematic-motion-engine",
+            version = "1.0.0",
+            markerFile = "SKILL.md"
+        ),
+        BundledSkill(
+            slug = "motion-director",
+            version = "1.0.0",
+            markerFile = "SKILL.md"
+        ),
+        BundledSkill(
             slug = "rea",
             version = "62-6938696",
             markerFile = "skills/reverse-engineer-anything/SKILL.md"
