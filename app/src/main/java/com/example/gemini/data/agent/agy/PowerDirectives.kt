@@ -70,6 +70,43 @@ object PowerDirectives {
                     "prompt must still deliver an advanced, polished, feature-rich app - never a bare skeleton."
             )
         }
+        if (buildish) {
+            rules.add(
+                "${n++}. UI-IMAGE-FIRST PLANNING: while planning, FIRST generate a design image for EVERY UI screen " +
+                    "(image-generation tool; save them under `design/` in the project) - then write the code to match " +
+                    "those images exactly: layout, colours, spacing, components. If image generation is unavailable, " +
+                    "write a detailed per-screen design spec first and match it exactly. Never design blindly."
+            )
+            rules.add(
+                "${n++}. RESEARCH-FIRST FEATURES: for each core feature, first research HOW that feature actually " +
+                    "works (working principle, best practice, real-world apps) with the research/web tools, then " +
+                    "implement the ADVANCED version of that principle - never a naive copy. Also add thoughtful " +
+                    "improvements of your own (validation, empty/error states, polish) so the result beats what a " +
+                    "weaker model would produce."
+            )
+        }
+        if (buildish || editish) {
+            rules.add(
+                "${n++}. REGRESSION GUARD: before delivering, list EVERY feature the app already has and verify each " +
+                    "one still works after your change - adding 1 new feature must never break the existing ones. " +
+                    "Read (do not rewrite) untouched working code; if anything regressed, fix it in THIS turn before " +
+                    "replying. A new feature delivered with broken old features is a failed turn."
+            )
+            rules.add(
+                "${n++}. SELF-REVIEW LOOP: after the build, act as a strict QA reviewer of your own app - exercise " +
+                    "every feature, judge the design and quality honestly. If any feature does not work or the " +
+                    "quality/design is weak, FIX it and rebuild. Deliver only the version that passes your own " +
+                    "review, and say in one line what you reviewed and fixed."
+            )
+        }
+        if (buildish) {
+            rules.add(
+                "${n++}. TRIPLE DELIVERY: the final reply for a finished app must end with THREE fresh links from " +
+                    "THIS build: 📦 **App ZIP:** (runnable package), ⬇️ **Download link:** [app.apk](URL), and " +
+                    "🧾 **Source code ZIP:** (source only, excluding build/, .gradle/, node_modules/). Publish each " +
+                    "with saif-apk-link; never reuse an old link."
+            )
+        }
         if (editish) {
             rules.add(
                 "${n++}. FEATURE/EDIT RULE: read EVERY file the change touches, wire the change into the real UI so " +

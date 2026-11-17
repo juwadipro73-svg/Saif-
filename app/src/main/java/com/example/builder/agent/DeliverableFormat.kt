@@ -118,8 +118,11 @@ enum class DeliverableFormat {
         /** Prompt block that tells the agent exactly which artifact to hand back. */
         fun instruction(format: DeliverableFormat): String = when (format) {
             APK ->
-                "FORMAT RULE (this turn): hand back an installable signed APK. Build it with the APK build tool and end " +
-                    "your answer with `⬇️ **Download link:** [<app>.apk](URL)`. Do not answer with a code dump or a ZIP."
+                "FORMAT RULE (this turn): hand back an installable signed APK PLUS the project archives. Build with the " +
+                    "APK build tool, zip the runnable package and the source (excluding build/, .gradle/, node_modules/), " +
+                    "publish all three with `saif-apk-link`, and end your answer with three fresh links: " +
+                    "`📦 **App ZIP:** [<app>.zip](URL)`, `⬇️ **Download link:** [<app>.apk](URL)`, " +
+                    "`🧾 **Source code ZIP:** [<app>-source.zip](URL)`. Do not answer with a code dump."
             ZIP ->
                 "FORMAT RULE (this turn): hand back the SOURCE as one .zip archive (zip the project folder, skipping " +
                     "build/, .gradle/, node_modules/), publish it with `saif-apk-link` and end your answer with " +
