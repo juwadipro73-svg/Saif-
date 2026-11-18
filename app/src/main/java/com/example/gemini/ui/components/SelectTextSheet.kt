@@ -54,7 +54,7 @@ import com.example.gemini.theme.ClaudeTerracotta
 fun SelectTextSheet(content: String, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var markdown by rememberSaveable { mutableStateOf(false) }
-    val blocks = remember(content) { parseMarkdownBlocks(content) }
+    val blocks = remember(content) { parseMarkdownBlocks(com.example.util.HugeMessageGuard.sanitize(content)) }
 
     Dialog(
         onDismissRequest = onDismiss,

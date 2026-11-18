@@ -257,7 +257,8 @@ fun MarkdownDocViewerModal(
 ) {
     val context = LocalContext.current
     val fileName = remember(filePath) { File(filePath).name }
-    val blocks = remember(content) { parseMarkdownBlocks(content) }
+    // Huge files (multi-hundred-KB sources) must not kill the viewer dialog.
+    val blocks = remember(content) { parseMarkdownBlocks(com.example.util.HugeMessageGuard.sanitize(content)) }
     val listState = rememberLazyListState()
 
     Dialog(
