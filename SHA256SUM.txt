@@ -1,0 +1,1 @@
+ed76d7f7a0b6305b554cb50bb760a9d08a342a182457fbfbced065b29787655c  app-standard-debug.apk
