@@ -5,6 +5,66 @@ description: Creates research-backed, high-end motion-graphics videos with Remot
 
 # SAIF AI — Cinematic Motion Engine
 
+## OVERHAUL v3 — NARRATION-SYNCED MOTION GRAPHICS + STORY FRAMING (supersedes older pacing rules)
+
+GLOBAL RULES (both modes): no slideshow; no single image stretched under long narration; no tiny
+main subject; no overlay hiding the hero image; no black opening/ending frames unless designed;
+no abrupt jumps or frozen animation; no movement just for movement; no repeated backgrounds when
+the script demands different visuals. The result must feel like a professionally edited YouTube
+video, not a pile of AI images.
+
+### NORMAL MODE — narration-driven visual timeline (the core fix)
+- Use the kit's `BeatSeq` + `beatplan.ts`: EVERY narration sentence/phrase gets its OWN visual
+  beat (generated image + camera move + caption + transition). The screen keeps evolving while
+  the narrator speaks — narration continuing over an unchanged screen is a CRITICAL failure.
+- Durations come from narration timing (`beatDuration(text)` ≈ words/2.6s clamped): quick beat
+  1–2s, standard 2–4s, detailed 4–6s, cinematic moment 5–8s only when genuinely necessary.
+  2-minute educational video → ~25–40 beats when the topic supports it. Never pad with
+  meaningless cuts.
+- Composition discipline: main generated image stays VISIBLE — no huge opaque panels; overlays
+  are compact, semi-transparent, purposeful; captions sit on a thin bottom scrim; never cover
+  faces/subjects. Hierarchy: 1 subject, 2 message, 3 support, 4 decoration.
+- Motion set (pick per topic/mood, not everything everywhere): zoom/pan/parallax, kinetic type,
+  animated counters, self-drawing graphs, glows, light sweeps, particles, 2.5D depth, mask
+  reveals, focus transitions, subtle impact shake.
+- Hook: first 3s = surprising visual + strong animated line + fast smooth camera + impact SFX
+  (`HookOpen`). No long black screen, no static logo intro.
+- Sound: whoosh on movement, impact on reveals, clicks on UI, risers before big moments, ambience
+  per scene, subtle music ducked under a clear dominant voice; silence can be dramatic.
+
+### STORY MODE — character is the SUBJECT (fixes tiny-CHARACTER renders)
+- Framing system (`StoryScene shot` prop): wide (environment) · medium (interaction — character
+  fills ~55% frame height) · closeup (emotion — head/torso dominate) · ots (reveal) · lowAngle
+  (drama) · tracking (walk/run). Default to medium/closeup; wide ONLY when the environment is
+  the point. A main character rendered as a speck in a big empty background is a CRITICAL failure.
+- In-scene action timeline (`actions: [{at, action, expression, facing, x}]`): every scene must
+  EVOLVE — e.g. walk → stop at knock (startle) → turn to door (creep toward it). Meaningful
+  visual change every 2–4s: action, camera angle, new object, reaction, lighting, close-up —
+  even when the background stays. No static pose held for a whole scene.
+- Real animation only (procedural `Stickman` rig: walk/run/jump/sit/fall/point/wave/talk/turn/
+  climb/celebrate/startle/lookUp/lookDown/knock/openDoor/pickup/creep + expressions). Placing a
+  static character PNG on backgrounds is FORBIDDEN.
+- Interaction logic: reach the handle before the door opens; look at the radio when it sounds;
+  approach the box before examining it. No floating objects, no walking through walls, consistent
+  perspective and scale across scenes (CharacterSheet + SHOT_FRAME).
+- Camera supports the story: `follow` keeps the character framed while traveling; push-ins land
+  on the character or the important object, never on empty background.
+- Preserve established character identity exactly (e.g. SHADOW: black stickman, white circular
+  head, expressive eyes, red scarf) via characters.json sheets.
+
+### SCENE PLAN + QC (before AND after render)
+- Plan fields per scene: id, start/end, narration segment, visual objective, shot type, bg asset,
+  characters/subject, fg objects, actions, camera, transitions, sfx, music intensity, text/graphics,
+  composition notes, asset refs. A plan of "one background + one text overlay" is rejected.
+- Run `scripts/qc-scene-plan.mjs scene-plan.json` BEFORE rendering — CRIT failures (too few beats,
+  >6.5s holds, repeated consecutive bg, missing/unused assets, no camera/grade) must be fixed.
+- After render, inspect preview frames (capture.mjs / lint-frames.mjs): pacing, subject size,
+  overlays hiding art, frozen/black frames, transition cleanliness, narration sync, audio levels.
+  Fix and re-render. Never claim QC passed without actually inspecting.
+- Performance: preload/cache generated assets, reuse components, right-size images, efficient
+  render settings, graceful failure handling, visible render progress — never buy speed by
+  cutting animation quality.
+
 ## ENGINE OVERHAUL v2 — MANDATORY QUALITY SYSTEM (read first, applies to every video)
 
 These rules fix the known quality failures (few scenes, one reused background, unused

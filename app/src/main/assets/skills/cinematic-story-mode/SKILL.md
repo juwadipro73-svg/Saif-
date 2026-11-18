@@ -35,6 +35,22 @@ character/environment assets. 8. Build animations. 9. Sync narration, dialogue, 
 - Multiple characters = separate ids/sheets. For generated-image characters, keep a written
   design description and pass it verbatim in every image request (continuity requirement).
 
+## 3b. Framing + in-scene evolution (v3 — fixes tiny characters and frozen scenes)
+- `StoryScene` ships a shot system: wide / medium / closeup / ots / lowAngle / tracking.
+  MEDIUM is the default (character ≈55% frame height); CLOSEUP for emotions and discoveries;
+  WIDE only when the environment itself is the story point. A main character rendered tiny in a
+  big empty background is a CRITICAL failure — reframe and re-render.
+- Every scene needs an in-scene action timeline: `actions: [{at, action, expression, facing, x}]`
+  so the character evolves (walk → stop → startle at the knock → turn → creep to the door).
+  A meaningful visual change every 2–4 seconds even on the same background: action, angle,
+  camera, new object, reaction, lighting. No static pose held through a scene.
+- Camera: use `follow` for travel; push-ins must land on the character or the key object.
+- Interaction logic is mandatory: reach the handle before the door opens, look at the radio when
+  it sounds, approach the box before examining it. No floating objects, no walking through walls.
+- New rig actions available: startle, lookUp, lookDown, knock, openDoor, pickup, creep (plus the
+  original set). Overlays stay compact and semi-transparent — never cover the character's head
+  or the key subject; captions sit on a thin bottom scrim.
+
 ## 4. Advanced stickman animation (no static images)
 Use the procedural rig — actions: stand, walk, run, jump, sit, fall, point, wave, talk, turn,
 climb, celebrate; expressions: neutral, happy, sad, angry, shocked, determined, thinking;

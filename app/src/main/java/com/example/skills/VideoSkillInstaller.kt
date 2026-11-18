@@ -39,17 +39,17 @@ object BundledSkillsInstaller {
         ),
         BundledSkill(
             slug = "saif-cinematic-motion-engine",
-            version = "2.0.0",
+            version = "3.0.0",
             markerFile = "SKILL.md"
         ),
         BundledSkill(
             slug = "motion-director",
-            version = "2.0.0",
+            version = "3.0.0",
             markerFile = "SKILL.md"
         ),
         BundledSkill(
             slug = "cinematic-story-mode",
-            version = "1.0.0",
+            version = "2.0.0",
             markerFile = "SKILL.md"
         ),
         BundledSkill(

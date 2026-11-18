@@ -11,7 +11,7 @@ import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
  * sheet, so the character never changes identity mid-story.
  */
 export type Expression = "neutral" | "happy" | "sad" | "angry" | "shocked" | "determined" | "thinking";
-export type StickAction = "stand" | "walk" | "run" | "jump" | "sit" | "fall" | "point" | "wave" | "talk" | "turn" | "climb" | "celebrate";
+export type StickAction = "stand" | "walk" | "run" | "jump" | "sit" | "fall" | "point" | "wave" | "talk" | "turn" | "climb" | "celebrate" | "startle" | "lookUp" | "lookDown" | "knock" | "openDoor" | "pickup" | "creep";
 
 export type CharacterSheet = {
   id: string;
@@ -48,7 +48,7 @@ export type StickmanProps = {
 const cyc = (frame: number, speed: number, phase = 0) => Math.sin((frame / 9) * speed + phase);
 
 /** Joint solver: returns angles (radians) for the current action + frame. */
-function pose(action: StickAction, frame: number, speed: number) {
+function pose(action: StickAction, frame: number, speed: number): { hipL: number; hipR: number; kneeL: number; kneeR: number; shL: number; shR: number; elL: number; elR: number; bob: number; lean: number; headTilt?: number } {
   const c = cyc(frame, speed);
   const c2 = cyc(frame, speed, Math.PI);
   switch (action) {
@@ -72,6 +72,30 @@ function pose(action: StickAction, frame: number, speed: number) {
       return { hipL: 0.2 * t, hipR: -0.2 * t, kneeL: 0.1 * t, kneeR: 0.1 * t, shL: 0.3, shR: -0.3, elL: 0.3, elR: 0.3, bob: 2 * t, lean: 0.1 * t };
     }
     case "climb": return { hipL: 0.9 * c, hipR: 0.9 * c2, kneeL: 0.8 * Math.max(0, c), kneeR: 0.8 * Math.max(0, c2), shL: -2.2 + 0.9 * c2, shR: -2.2 + 0.9 * c, elL: 0.7, elR: 0.7, bob: 3 * c - 30 * (frame / 60), lean: 0.15 };
+    case "startle": {
+      const t = Math.min(1, frame / 12);
+      const rec = Math.max(0, 1 - Math.abs(frame - 10) / 14);
+      return { hipL: -0.5 * t, hipR: -0.4 * t, kneeL: 0.7 * t, kneeR: 0.6 * t, shL: -2.4 * t, shR: -2.5 * t, elL: 0.7 * rec, elR: 0.7 * rec, bob: -14 * t + 6 * rec, lean: -0.18 * t };
+    }
+    case "lookUp":   return { hipL: 0.04, hipR: -0.04, kneeL: 0.02, kneeR: 0.02, shL: 0.2, shR: -0.2, elL: 0.15, elR: 0.15, bob: -3 - 1.5 * Math.sin(frame / 18), lean: -0.1, headTilt: -0.42 };
+    case "lookDown": return { hipL: 0.04, hipR: -0.04, kneeL: 0.02, kneeR: 0.02, shL: 0.2, shR: -0.2, elL: 0.15, elR: 0.15, bob: 2 + 1.2 * Math.sin(frame / 18), lean: 0.12, headTilt: 0.4 };
+    case "knock": {
+      const c = Math.max(0, Math.sin(frame / 4.5));
+      return { hipL: 0.06, hipR: -0.06, kneeL: 0.04, kneeR: 0.04, shL: 0.3, shR: -1.25 - 0.35 * c, elL: 0.3, elR: 0.9 * c, bob: 1.4 * Math.sin(frame / 16), lean: 0.05 };
+    }
+    case "openDoor": {
+      const t = Math.min(1, frame / 40);
+      return { hipL: 0.1 * t, hipR: -0.1 * t, kneeL: 0.05, kneeR: 0.05, shL: 0.3, shR: -1.4 + 0.5 * t, elL: 0.3, elR: 0.2 + 0.3 * t, bob: 2 * t, lean: 0.08 * t };
+    }
+    case "pickup": {
+      const t = Math.min(1, frame / 36);
+      const bend = Math.sin(t * Math.PI);
+      return { hipL: 0.35 * bend, hipR: 0.3 * bend, kneeL: 0.55 * bend, kneeR: 0.5 * bend, shL: 0.4 - 1.5 * bend, shR: 0.35 - 1.45 * bend, elL: 0.3 + 0.5 * bend, elR: 0.3 + 0.5 * bend, bob: 34 * bend, lean: 0.55 * bend };
+    }
+    case "creep": {
+      const c = cyc(frame, speed * 0.55);
+      return { hipL: 0.3 * c, hipR: 0.3 * -c, kneeL: 0.4 * Math.max(0, -c), kneeR: 0.4 * Math.max(0, c), shL: 0.55, shR: -0.55, elL: 0.75, elR: 0.75, bob: 9 + 1.4 * Math.abs(c), lean: 0.2 };
+    }
     case "celebrate": return { hipL: 0.3 * c, hipR: 0.3 * c2, kneeL: 0.4 * Math.abs(c), kneeR: 0.4 * Math.abs(c2), shL: -2.6 + 0.3 * c, shR: -2.6 + 0.3 * c2, elL: 0.35, elR: 0.35, bob: 8 * Math.abs(c) - 6, lean: 0 };
     default:      return { hipL: 0.04, hipR: -0.04, kneeL: 0.02, kneeR: 0.02, shL: 0.18 + 0.05 * Math.sin(frame / 20), shR: -0.18 - 0.05 * Math.sin(frame / 20), elL: 0.15, elR: 0.15, bob: 1.1 * Math.sin(frame / 22), lean: 0 };
   }
@@ -135,7 +159,7 @@ export const Stickman: React.FC<StickmanProps> = ({ sheet, action = "stand", exp
           <path d={`M 0 ${shY} L ${rArm1.x} ${rArm1.y} L ${rArm2.x} ${rArm2.y}`} stroke={ink} strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
           {/* head */}
           <circle cx={0} cy={-head * 0.55} r={head} fill={headFill} stroke={ink} strokeWidth={sw} />
-          <g transform={`translate(0, ${-head * 0.55})`}>
+          <g transform={`translate(0, ${-head * 0.55}) rotate(${((p.headTilt ?? 0) * 180) / Math.PI})`}>
             <Face r={head} expr={expression} frame={frame} talking={talking} color={ink} />
           </g>
           {/* accessories — part of the identity sheet, never improvised per scene */}

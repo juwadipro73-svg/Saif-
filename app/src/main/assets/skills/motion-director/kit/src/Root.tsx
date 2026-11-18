@@ -41,6 +41,7 @@ import { KenBurns, kenBurnsDuration } from "./templates/KenBurns";
 import { Stickman } from "./templates/Stickman";
 import { StoryScene, storySceneDuration } from "./templates/StoryScene";
 import { HookOpen, hookOpenDuration } from "./templates/HookOpen";
+import { BeatSeq, beatSeqDuration } from "./templates/BeatSeq";
 
 const W = 1920, H = 1080, FPS = 30;
 
@@ -471,8 +472,15 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{ sheet: { id: "stickman_main", accessory: "none" as const }, action: "walk" as const, expression: "determined" as const }} />
       <Composition id="StoryScene" component={StoryScene} fps={FPS} width={W} height={H}
         durationInFrames={storySceneDuration({ characters: [] } as any)}
-        defaultProps={{ bg: "logos/puter.png", camera: "pushIn" as const, mood: "inspirational", characters: [ { sheet: { id: "stickman_main" }, action: "walk" as const, expression: "determined" as const, x: 42 } ], narration: "Ek waqt tha jab uske paas kuch bhi nahi tha." }}
+        defaultProps={{ bg: "logos/puter.png", shot: "medium" as const, camera: "follow" as const, mood: "inspirational", characters: [ { sheet: { id: "stickman_main", accessory: "scarf" as const, accessoryColor: "#DC2626" }, x: 42, actions: [ { at: 0, action: "walk" as const, expression: "neutral" as const }, { at: 60, action: "startle" as const, expression: "shocked" as const }, { at: 78, action: "turn" as const, expression: "determined" as const, facing: -1 as const } ] } ], sfx: [ { at: 58, name: "knock", volume: 0.5 } ], narration: "Ek waqt tha jab uske paas kuch bhi nahi tha." }}
         calculateMetadata={({ props }) => ({ durationInFrames: storySceneDuration(props as any) })} />
+      <Composition id="BeatSeq" component={BeatSeq} fps={FPS} width={W} height={H}
+        durationInFrames={beatSeqDuration({ beats: [{ text: "a b" }] } as any)}
+        defaultProps={{ beats: [
+          { text: "You are uploading videos every day.", src: "logos/puter.png", camera: "pushIn" as const, emphasis: ["every day"] },
+          { text: "But your subscribers are not increasing.", src: "logos/puter.png", camera: "pullOut" as const, emphasis: ["not increasing"], sfx: "impact" }
+        ], mood: "documentary" }}
+        calculateMetadata={({ props }) => ({ durationInFrames: beatSeqDuration(props as any) })} />
       <Composition id="HookOpen" component={HookOpen} fps={FPS} width={W} height={H}
         durationInFrames={hookOpenDuration({ bg: "logos/puter.png", line: "x y" } as any)}
         defaultProps={{ bg: "logos/puter.png", line: "Ye ek kahani hai zero se hero banne ki.", kind: "claim" as const, mood: "inspirational" }}
