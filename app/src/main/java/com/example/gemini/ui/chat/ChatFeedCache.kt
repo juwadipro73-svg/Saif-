@@ -56,7 +56,10 @@ object ChatFeedCache {
                     msg.content
                 }
                 if (contentToParse.isNotEmpty() || msg.toolCalls.isNotEmpty()) {
-                    val blocks = parseMarkdownBlocks(contentToParse, msg.toolCalls)
+                    // Crash guard: huge answers (full code dumps at link time) are elided in the
+                    // MIDDLE only — head + tail (links!) always survive. See HugeMessageGuard.
+                    val safeContent = com.example.util.HugeMessageGuard.sanitize(contentToParse)
+                    val blocks = parseMarkdownBlocks(safeContent, msg.toolCalls)
                     for (i in blocks.indices) {
                         msgItems.add(ChatFeedItem.AssistantBlock(
                             messageId = msg.id,
@@ -92,7 +95,9 @@ object ChatFeedCache {
                     if (item is ChatFeedItem.AssistantBlock) {
                         when (val block = item.block) {
                             is MarkdownBlock.Code -> {
-                                CodeBlockCache.prewarm(block.code, block.language)
+                                if (!com.example.util.HugeMessageGuard.isTooHeavyToHighlight(block.code.length)) {
+                                    runCatching { CodeBlockCache.prewarm(block.code, block.language) }
+                                }
                             }
                             is MarkdownBlock.Paragraph -> {
                                 MarkdownTextCache.prewarm(block.text, isDark)
@@ -187,7 +192,8 @@ object ChatFeedCache {
                     msg.content
                 }
                 if (contentToParse.isNotEmpty() || msg.toolCalls.isNotEmpty()) {
-                    val blocks = parseMarkdownBlocks(contentToParse, msg.toolCalls)
+                    val safeContent = com.example.util.HugeMessageGuard.sanitize(contentToParse)
+                    val blocks = parseMarkdownBlocks(safeContent, msg.toolCalls)
                     for (i in blocks.indices) {
                         addItem(ChatFeedItem.AssistantBlock(
                             messageId = msg.id,

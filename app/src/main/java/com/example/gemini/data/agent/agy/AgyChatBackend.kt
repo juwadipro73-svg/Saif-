@@ -1917,7 +1917,13 @@ class AgyChatBackend(
             }
         }
         if (!isStreaming) {
-            com.example.gemini.ui.chat.ChatFeedCache.prewarm(_messages.value)
+            // Prewarm OFF the main path and fully guarded: a giant final answer must never
+            // be able to freeze/crash the UI thread exactly when the download link lands.
+            val snapshot = _messages.value
+            backendScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+                runCatching { com.example.gemini.ui.chat.ChatFeedCache.prewarm(snapshot) }
+                    .onFailure { android.util.Log.w("ChatFeedCache", "prewarm skipped: ${it.message}") }
+            }
         }
     }
 

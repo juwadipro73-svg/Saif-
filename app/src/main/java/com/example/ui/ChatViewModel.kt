@@ -756,7 +756,15 @@ class ChatViewModel(
                 } else {
                     finalDeliveredResult
                 }
-                repository.insertMessage(ChatMessageEntity(sessionId = sessionId, role = "model", content = deliveredWithLink))
+                // Persist safely: cap pathological payloads so a room write can never throw and
+                // lose the turn (old symptom: reopen showed STALE links/code because the final
+                // message never landed). Links live in the tail, which the guard preserves.
+                runCatching {
+                    repository.insertMessage(ChatMessageEntity(
+                        sessionId = sessionId, role = "model",
+                        content = com.example.util.HugeMessageGuard.sanitizeForStorage(deliveredWithLink)
+                    ))
+                }.onFailure { android.util.Log.w("ChatViewModel", "final-message persist failed: ${it.message}") }
                 // Keep the chatbox quota % live: a finished turn just consumed quota.
                 runCatching { engine.agyBackend.refreshQuotas(force = true) }
                 workCompleted = true

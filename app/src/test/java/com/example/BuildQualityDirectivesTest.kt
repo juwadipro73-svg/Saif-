@@ -33,6 +33,14 @@ class BuildQualityDirectivesTest {
     }
 
     @Test
+    fun gameRequestsGetFullGameEnginePower() {
+        val block = PowerDirectives.blockFor("ek 3d racing game banao", freshSession = false)
+        assertTrue(block.contains("GAME ENGINE POWER"))
+        assertTrue(block.contains("FULL POTENTIAL"))
+        assertTrue(block.contains("three.js"))
+    }
+
+    @Test
     fun casualChatStaysClean() {
         listOf("hello", "hi bro", "thanks!").forEach { msg ->
             assertTrue(PowerDirectives.blockFor(msg, freshSession = true).isEmpty())

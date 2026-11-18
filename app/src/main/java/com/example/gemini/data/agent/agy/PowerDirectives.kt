@@ -70,7 +70,28 @@ object PowerDirectives {
                     "prompt must still deliver an advanced, polished, feature-rich app - never a bare skeleton."
             )
         }
+        val gameish = Regex("(?i)(game|khel|3d|2d platformer|rpg|shooter|arcade|puzzle game|racing|minecraft|unity jaisa)")
+            .containsMatchIn(t)
         val fullBuild = buildish && (!editish || big)
+        if (buildish) {
+            rules.add(
+                "${n++}. FULL POTENTIAL - NO TOY OUTPUT: use your complete capability. Build REAL depth: many " +
+                    "complete screens/classes, genuine working logic, polished professional UI, proper assets. File " +
+                    "size is NOT a limit - a serious app routinely means tens of KB to hundreds of KB of code and " +
+                    "many files; never shrink the work into one tiny placeholder file. Use the terminal: run, test " +
+                    "and iterate on your own output before delivering, and fix every error you find yourself."
+            )
+        }
+        if (gameish) {
+            rules.add(
+                "${n++}. GAME ENGINE POWER: build an actual playable game, not a demo stub - real game loop, input " +
+                    "handling, collision/physics, scoring, levels/states, win-lose conditions, sound, menus and save " +
+                    "progress. For a 3D game use REAL 3D: WebGL/three.js with genuine models (fetch real GLTF/OBJ " +
+                    "assets e.g. from poly.pizza / Kenney CC0 libraries), lighting, materials, camera movement and " +
+                    "shadows - never flat colored boxes pretending to be 3D. Large asset bundles are welcome; keep " +
+                    "frame rate smooth and test gameplay in the terminal/browser before sending the link."
+            )
+        }
         if (fullBuild) {
             rules.add(
                 "${n++}. UI-IMAGE-FIRST PLANNING: while planning, FIRST generate a design image for EVERY UI screen " +

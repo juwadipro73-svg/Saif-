@@ -488,7 +488,7 @@ fun MarkdownContent(
     val t0 = System.nanoTime()
     val blocks = remember(content, toolCalls) {
         val bStart = System.nanoTime()
-        val parsed = parseMarkdownBlocks(content, toolCalls)
+        val parsed = parseMarkdownBlocks(com.example.util.HugeMessageGuard.sanitize(content), toolCalls)
         val bDt = (System.nanoTime() - bStart) / 1_000_000.0
         Log.d("PERF_TRACE", "  🔨 [Markdown Parse] len=${content.length}, blocks=${parsed.size}, took=${"%.2f".format(bDt)}ms")
         parsed
